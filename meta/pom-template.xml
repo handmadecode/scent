@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<project>
+  <name>Scent</name>
+  <description>A library for collecting Java source code metrics</description>
+  <url>https://github.com/handmadecode/scent</url>
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>Peter Franzen</name>
+      <email>peter@myire.org</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:https://github.com/handmadecode/scent.git</connection>
+    <developerConnection>scm:git:https://github.com/handmadecode/scent.git</developerConnection>
+    <url>https://github.com/handmadecode/scent</url>
+  </scm>
+</project>

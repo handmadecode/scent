@@ -1,0 +1,7 @@
+{
+    "shortName": "Scent",
+    "longName": "Scent",
+    "group": "org.myire",
+    "description": "A library for collecting Java source code metrics" ,
+    "mainPackage" : "org/myire/scent/"
+}

@@ -1,0 +1,67 @@
+/*
+ * Gradle script for the Scent project
+ */
+
+apply plugin: 'java'
+apply plugin: 'org.myire.quill.all'
+
+
+buildscript
+{
+  // Maven central is used as main repository.
+  repositories
+  {
+    mavenCentral()
+  }
+
+  // This script uses the Quill plugins.
+  dependencies 
+  {
+    classpath 'org.myire:quill:1.0'
+  }
+}
+
+
+// Load project meta data and version from the files in the meta data directory, and set the
+// group and version from the loaded values.
+projectMetaData.from('meta/project-meta.json').applyGroupToProject()
+semanticVersion.from('meta/version.json').applyLongVersionToProject()
+
+
+// Load dependencies of the external file.
+apply from: 'dependencies.gradle'
+
+
+// Use Maven central to retrieve dependencies.
+repositories.mavenCentral()
+
+
+// Configure all Jar tasks to add a build info section to the manifest.
+tasks.withType(Jar)
+{
+    manifest.addBuildInfoSection()
+}
+
+
+// Configure the main jar to include static meta data from file and to add a classpath attribute and
+// a package section to the manifest. 
+jar.manifest
+{
+    from file('meta/manifest.mf')
+    addClassPathAttribute sourceSets.main
+    addPackageSection()
+}
+
+
+// Make the compile dependencies known to Cobertura
+coberturaTest.auxClassPath = sourceSets.main.compileClasspath
+
+
+// Configure project specific exclusion/suppressions/filter files for the static analysis tasks.
+findbugs.excludeFilter = file('gradle/findbugs_excludes.xml')
+checkstyle.configProperties.put('suppressions.file', file('gradle/checkstyle_suppressions.xml'))
+pmdMain.filter.file = 'gradle/pmd_filter.xml'
+
+
+// Disable code quality analysis of the test sources.
+[findbugs, checkstyle, pmd, jdepend]*.disableTestChecks()
