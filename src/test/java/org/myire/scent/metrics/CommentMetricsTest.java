@@ -7,6 +7,8 @@ package org.myire.scent.metrics;
 
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.JavadocComment;
@@ -20,6 +22,20 @@ import com.github.javaparser.ast.comments.LineComment;
  */
 public class CommentMetricsTest
 {
+    /**
+     * {@code isEmpty()} should return true for a newly created {@code CommentMetrics}.
+     */
+    @Test
+    public void newInstanceIsEmpty()
+    {
+        // When
+        CommentMetrics aMetrics = new CommentMetrics();
+
+        // Then
+        assertTrue(aMetrics.isEmpty());
+    }
+
+
     /**
      * A newly created {@code CommentMetrics} should have zero comments.
      */
@@ -152,6 +168,23 @@ public class CommentMetricsTest
 
 
     /**
+     * Adding a {@code LineComment} should make {@code isEmpty()} return false.
+     */
+    @Test
+    public void addingLineCommentMakesInstanceNonEmpty()
+    {
+        // Given
+        CommentMetrics aMetrics = new CommentMetrics();
+
+        // When
+        aMetrics.add(new LineComment(1, 0, 2, 2, "//"));
+
+        // Then
+        assertFalse(aMetrics.isEmpty());
+    }
+
+
+    /**
      * Adding a {@code BlockComment} should increase the count of block comments.
      */
     @Test
@@ -179,6 +212,23 @@ public class CommentMetricsTest
 
 
     /**
+     * Adding a {@code BlockComment} should make {@code isEmpty()} return false.
+     */
+    @Test
+    public void addingBlockCommentMakesInstanceNonEmpty()
+    {
+        // Given
+        CommentMetrics aMetrics = new CommentMetrics();
+
+        // When
+        aMetrics.add(new BlockComment(1, 0, 1, 2, "/**/"));
+
+        // Then
+        assertFalse(aMetrics.isEmpty());
+    }
+
+
+    /**
      * Adding a {@code JavaDocComment} should increase the count of JavDoc comments.
      */
     @Test
@@ -202,6 +252,23 @@ public class CommentMetricsTest
         // Then
         assertEquals(aJavaDocCommentCount + 2, aMetrics.getNumJavaDocComments());
         assertEquals(aJavaDocLineCount + 9, aMetrics.getNumJavaDocLines());
+    }
+
+
+    /**
+     * Adding a {@code JavadocComment} should make {@code isEmpty()} return false.
+     */
+    @Test
+    public void addingJavadocCommentMakesInstanceNonEmpty()
+    {
+        // Given
+        CommentMetrics aMetrics = new CommentMetrics();
+
+        // When
+        aMetrics.add(new JavadocComment(12, 0, 19, 100, "/***/"));
+
+        // Then
+        assertFalse(aMetrics.isEmpty());
     }
 
 

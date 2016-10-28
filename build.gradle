@@ -8,7 +8,7 @@ apply plugin: 'org.myire.quill.all'
 
 buildscript
 {
-  // Maven central is used as main repository.
+  // Use Maven central for plugins.
   repositories
   {
     mavenCentral()
@@ -17,7 +17,7 @@ buildscript
   // This script uses the Quill plugins.
   dependencies 
   {
-    classpath 'org.myire:quill:1.0'
+    classpath 'org.myire:quill:1.1'
   }
 }
 
@@ -28,7 +28,7 @@ projectMetaData.from('meta/project-meta.json').applyGroupToProject()
 semanticVersion.from('meta/version.json').applyLongVersionToProject()
 
 
-// Load dependencies of the external file.
+// Load dependencies from the external file.
 apply from: 'dependencies.gradle'
 
 
@@ -43,14 +43,18 @@ tasks.withType(Jar)
 }
 
 
-// Configure the main jar to include static meta data from file and to add a classpath attribute and
-// a package section to the manifest. 
+// Configure the main jar to include static meta data from file, to add a classpath attribute, and
+// to add a package section to the manifest.
 jar.manifest
 {
     from file('meta/manifest.mf')
     addClassPathAttribute sourceSets.main
     addPackageSection()
 }
+
+
+// Add static data from the pom template and remove test dependencies when the pom file is created.
+createPom.from(file('meta/pom-template.xml')).withoutScope('test')
 
 
 // Make the compile dependencies known to Cobertura
