@@ -3,7 +3,7 @@
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.myire.scent;
+package org.myire.scent.file;
 
 import java.io.IOException;
 import java.io.InputStream;

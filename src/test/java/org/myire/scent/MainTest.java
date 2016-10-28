@@ -24,6 +24,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
+import org.myire.scent.file.FileTestBase;
+
 
 /**
  * Unit tests for the {@code Main} class.

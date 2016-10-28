@@ -66,12 +66,12 @@ public final class Main
      */
     static private void collectMetrics(@Nonnull JavaMetricsCollector pCollector, @Nonnull String... pArgs)
     {
-        CollectingFileVisitor aVisitor = new CollectingFileVisitor(pCollector, OUT, ERR);
+        PrintingCollector aCollector = new PrintingCollector(pCollector, OUT, ERR);
         for (String aArg : pArgs)
         {
             try
             {
-                Files.walkFileTree(Paths.get(aArg), aVisitor);
+                Files.walkFileTree(Paths.get(aArg), aCollector);
             }
             catch (IOException e)
             {
@@ -79,7 +79,7 @@ public final class Main
             }
         }
 
-        OUT.println("Collected metrics from " + aVisitor.getNumFiles() + " files");
+        OUT.println("Collected metrics from " + aCollector.getNumFiles() + " files");
     }
 
 
