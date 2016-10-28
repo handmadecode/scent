@@ -34,6 +34,19 @@ public class CommentMetrics
 
 
     /**
+     * Is this instance empty?
+     *
+     * @return  True if all comment counts are zero, false if at least one of them is non-zero.
+     */
+    public boolean isEmpty()
+    {
+        return fNumLineComments == 0 &&
+               fNumBlockComments == 0 &&
+               fNumJavaDocComments == 0;
+    }
+
+
+    /**
      * Get the number of line comments collected from the {@code LineComment} instances added to
      * this instance.
      *
