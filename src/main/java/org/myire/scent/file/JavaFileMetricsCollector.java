@@ -19,6 +19,7 @@ import java.text.ParseException;
 import static java.util.Objects.requireNonNull;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import org.myire.scent.collect.JavaMetricsCollector;
@@ -70,7 +71,7 @@ public class JavaFileMetricsCollector extends SimpleFileVisitor<Path>
 
 
     @Override
-    public FileVisitResult visitFile(@Nonnull Path pFile, @Nonnull BasicFileAttributes pAttributes)
+    public FileVisitResult visitFile(@Nonnull Path pFile, @Nullable BasicFileAttributes pAttributes)
             throws IOException
     {
         if (!isJavaFile(pFile))

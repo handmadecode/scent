@@ -15,6 +15,7 @@ import static java.util.Objects.requireNonNull;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import org.myire.scent.collect.JavaMetricsCollector;
@@ -82,7 +83,7 @@ class PrintingCollector extends JavaFileMetricsCollector
 
 
     @Override
-    public FileVisitResult preVisitDirectory(@Nonnull Path pDirectory, @Nonnull BasicFileAttributes pAttributes)
+    public FileVisitResult preVisitDirectory(@Nonnull Path pDirectory, @Nullable BasicFileAttributes pAttributes)
     {
         fOutStream.println("Processing " + pDirectory);
         return FileVisitResult.CONTINUE;
@@ -90,7 +91,7 @@ class PrintingCollector extends JavaFileMetricsCollector
 
 
     @Override
-    public FileVisitResult visitFile(@Nonnull Path pFile, @Nonnull BasicFileAttributes pAttributes)
+    public FileVisitResult visitFile(@Nonnull Path pFile, @Nullable BasicFileAttributes pAttributes)
     {
         try
         {
