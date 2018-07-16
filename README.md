@@ -29,9 +29,14 @@ level 1.8.
 
 ## Release Notes
 
+### version 1.0
+
+* Comments ending on the same line as a method are assigned to the method, not to the enclosing
+type.
+
 ### version 0.9
 
-Initial release.
+* Initial release.
 
 
 ## General Usage
