@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -153,7 +153,8 @@ final class Collectors
     /**
      * Collect the orphan comments from a node's parent that logically belong to the node, not to
      * the parent. An orphan comment in the parent that immediately precedes the node's comment
-     * belongs to the node rather than to the parent.
+     * belongs to the node rather than to the parent. The same goes for an orphan comment that
+     * begins on the same line as the node ends on.
      *<p>
      * The collected comments will be removed from the parent to prevent them from being collected
      * twice when the parent's comments are collected in a call to
@@ -166,34 +167,50 @@ final class Collectors
      */
     static void collectParentOrphanComments(@Nonnull Node pNode, @Nonnull CommentMetrics pMetrics)
     {
-        Comment aComment = pNode.getComment();
         Node aParent = pNode.getParentNode();
-        if (aComment != null && aParent != null)
-        {
-            // Examine the parent's orphan comments and collect those that immediately precede the
-            // node's comment. The list of orphans is sorted in ascending line number order, which
-            // means it should be examined from the last to the first element.
-            int aBeginLine = aComment.getBeginLine();
-            List<Comment> aOrphans = aParent.getOrphanComments();
-            Collections.sort(aOrphans, CommentComparator.SINGLETON);
-            ListIterator<Comment> aIterator = aOrphans.listIterator(aOrphans.size());
-            while (aIterator.hasPrevious())
-            {
-                Comment aOrphan = aIterator.previous();
-                int aEndLine = aOrphan.getEndLine();
-                if (aEndLine == aBeginLine || aEndLine == aBeginLine - 1)
-                {
-                    // The orphan comment ends at the same line or the line immediately before the
-                    // line where the node's comment starts, remove it from the parent and collect
-                    // its metrics.
-                    aIterator.remove();
-                    aOrphan.accept(CommentVisitor.SINGLETON, pMetrics);
+        if (aParent == null)
+            // If the node hasn't got a parent there are no orphan comments to collect.
+            return;
 
-                    // Logically the node's comment now includes the collected orphan comment,
-                    // adjust the begin line accordingly.
-                    aBeginLine = aOrphan.getBeginLine();
-                }
-            }
+        // Get the begin and end line of the node for which comment metrics are collected.
+        int aBeginLine = pNode.getBeginLine();
+        int aEndLine = pNode.getEndLine();
+
+        // Adjust the begin line to include any comment on the node.
+        Comment aComment = pNode.getComment();
+        if (aComment != null)
+            aBeginLine = aComment.getBeginLine();
+
+        // Sort the parent's orphan comments on their position in the enclosing compilation unit.
+        List<Comment> aOrphans = aParent.getOrphanComments();
+        Collections.sort(aOrphans, CommentComparator.SINGLETON);
+
+        // Examine the parent's orphan comments starting from the bottom of the enclosing
+        // compilation unit.
+        ListIterator<Comment> aIterator = aOrphans.listIterator(aOrphans.size());
+        while (aIterator.hasPrevious())
+        {
+            Comment aOrphan = aIterator.previous();
+            if (aOrphan.getEndLine() < aBeginLine - 1)
+                // When an orphan comment that ends on a line not immediately preceding the node
+                // being examined there are no more orphans adjacent to that node.
+                break;
+
+            if (aOrphan.getBeginLine() > aEndLine)
+                // This orphan comments begins after the node being examined, continue with the
+                // previous orphan, which is located above the current.
+                continue;
+
+            // The orphan comment either ends on the same line or the line immediately preceding the
+            // node, or begins on the same line as the node ends. In either case the orphan
+            // logically belongs to the node rather than to its parent; remove the comment from the
+            // parent and collect its metrics.
+            aIterator.remove();
+            aOrphan.accept(CommentVisitor.SINGLETON, pMetrics);
+
+            if (aOrphan.getEndLine() <= aBeginLine)
+                // If the orphan precedes the node the latter now logically begins with the orphan.
+                aBeginLine = aOrphan.getBeginLine();
         }
     }
 

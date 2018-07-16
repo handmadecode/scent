@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -15,8 +15,8 @@ import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.comments.LineComment;
-
 import com.github.javaparser.ast.expr.NameExpr;
+
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
@@ -42,7 +42,7 @@ public class CommentCollectTest
     public void mainCommentIsMovedIfTargetHasNoMainComment()
     {
         // Given
-        Comment aComment = new BlockComment();
+        Comment aComment = createBlockComment(2);
         Node aSource = createPlainNode(aComment);
         Node aTarget = createPlainNode(null);
 
@@ -63,9 +63,9 @@ public class CommentCollectTest
     public void mainCommentIsNotMovedIfTargetHasMainComment()
     {
         // Given
-        Comment aComment = new BlockComment();
+        Comment aComment = createBlockComment(2);
         Node aSource = createPlainNode(aComment);
-        Node aTarget = createPlainNode(new BlockComment());
+        Node aTarget = createPlainNode(createBlockComment(5));
 
         // When
         Collectors.moveNodeComments(aSource, aTarget);
@@ -84,8 +84,8 @@ public class CommentCollectTest
     public void orphanCommentsAreMoved()
     {
         // Given
-        Comment aComment1 = new BlockComment();
-        Comment aComment2 = new LineComment();
+        Comment aComment1 = createBlockComment(28);
+        Comment aComment2 = createLineComment();
         Comment aComment3 = new JavadocComment();
         Node aSource = createNodeWithOrphans(aComment1, aComment2);
         Node aTarget = createNodeWithOrphans(aComment3);
@@ -417,10 +417,10 @@ public class CommentCollectTest
         // Given
         // aComment2 immediately precedes the node's main comment
         // aComment1 immediately precedes aComment2
-        LineComment aComment1 = new LineComment(1, 1, 1, 2, "");
-        LineComment aComment2 = new LineComment(2, 1, 2, 2, "");
+        LineComment aComment1 = createLineComment(1, 1, 1, 2);
+        LineComment aComment2 = createLineComment(2, 1, 2, 2);
         Node aParent = createNodeWithOrphans(aComment1, aComment2);
-        LineComment aComment3 = new LineComment(3, 1, 3, 2, "");
+        LineComment aComment3 = createLineComment(3, 1, 3, 2);
         Node aNode = createPlainNode(aComment3);
         CommentMetrics aMetrics = new CommentMetrics();
         aNode.setParentNode(aParent);
@@ -445,11 +445,11 @@ public class CommentCollectTest
         // The parent orphans have the layout
         /* Comment1 */ /* Comment2 */ /* Comment3
            spans two lines */
-        BlockComment aComment1 = new BlockComment(1, 1, 1, 14, " Comment1 ");
-        BlockComment aComment2 = new BlockComment(1, 16, 1, 29, " Comment2 ");
-        BlockComment aComment3 = new BlockComment(1, 31, 2, 21, " Comment3\n   spans two lines ");
+        BlockComment aComment1 = createBlockComment(2, 1, 2, 14, " Comment1 ");
+        BlockComment aComment2 = createBlockComment(2, 16, 2, 29, " Comment2 ");
+        BlockComment aComment3 = createBlockComment(2, 31, 3, 21, " Comment3\n   spans two lines ");
         Node aParent = createNodeWithOrphans(aComment1, aComment2, aComment3);
-        LineComment aNodeComment = new LineComment(3, 1, 3, 2, "");
+        LineComment aNodeComment = createLineComment(4, 2, 4, 5);
         Node aNode = createPlainNode(aNodeComment);
         CommentMetrics aMetrics = new CommentMetrics();
         aNode.setParentNode(aParent);
@@ -465,19 +465,44 @@ public class CommentCollectTest
 
 
     /**
-     * {@code collectParentOrphanComments()} should not collect parent orphans that that don't
-     * precede the node's main comment.
+     * {@code collectParentOrphanComments()} should collect a parent orphan comment that is located
+     * on the same line as the node's main comment.
+     */
+    @Test
+    public void parentOrphanOnSameLineAsNodeCommentAreCollected()
+    {
+        // Given
+        BlockComment aOrphan = createBlockComment(10, 3, 10, 17, "");
+        Node aParent = createNodeWithOrphans(aOrphan);
+        LineComment aNodeComment = createLineComment(10, 20, 10, 31);
+        Node aNode = createPlainNode(aNodeComment);
+        CommentMetrics aMetrics = new CommentMetrics();
+        aNode.setParentNode(aParent);
+
+        // When
+        Collectors.collectParentOrphanComments(aNode, aMetrics);
+
+        // Then
+        assertEquals(1, aMetrics.getNumBlockComments());
+        assertEquals(1, aMetrics.getNumBlockCommentLines());
+        assertTrue(aParent.getOrphanComments().isEmpty());
+    }
+
+
+    /**
+     * {@code collectParentOrphanComments()} should not collect parent orphans that don't precede
+     * the node's main comment.
      */
     @Test
     public void parentOrphansThatDoNotPrecedeMainCommentAreNotCollected()
     {
         // Given
         // only aComment3 immediately precedes the node's comment
-        LineComment aComment1 = new LineComment(1, 1, 1, 2, "");
-        LineComment aComment3 = new LineComment(3, 1, 3, 2, "");
-        LineComment aComment17 = new LineComment(17, 1, 17, 2, "");
+        LineComment aComment1 = createLineComment(1, 1, 1, 2);
+        LineComment aComment3 = createLineComment(3, 7, 3, 10);
+        LineComment aComment17 = createLineComment(17, 11, 17, 26);
         Node aParent = createNodeWithOrphans(aComment1, aComment3, aComment17);
-        LineComment aNodeComment = new LineComment(4, 1, 4, 2, "");
+        LineComment aNodeComment = createLineComment(4, 1, 4, 2);
         Node aNode = createPlainNode(aNodeComment);
         CommentMetrics aMetrics = new CommentMetrics();
         aNode.setParentNode(aParent);
@@ -520,7 +545,23 @@ public class CommentCollectTest
      */
     static private LineComment createLineComment()
     {
-        return new LineComment(1, 1, 1, 2, "");
+        return createLineComment(1, 1, 1, 2);
+    }
+
+
+    /**
+     * Create a {@code LineComment}.
+     *
+     * @param pBeginLine    The comment's begin line.
+     * @param pBeginColumn  The comment's begin column.
+     * @param pEndLine      The comment's end line.
+     * @param pEndColumn    The comment's end column.
+     *
+     * @return  A new {@code LineComment}.
+     */
+    static private LineComment createLineComment(int pBeginLine, int pBeginColumn, int pEndLine, int pEndColumn)
+    {
+        return new LineComment(pBeginLine, pBeginColumn, pEndLine, pEndColumn, "");
     }
 
 
@@ -533,7 +574,29 @@ public class CommentCollectTest
      */
     static private BlockComment createBlockComment(int pNumLines)
     {
-        return new BlockComment(1, 1, pNumLines, 4, "");
+        return createBlockComment(1, 1, pNumLines, 4, "");
+    }
+
+
+    /**
+     * Create a {@code BlockComment}.
+     *
+     * @param pBeginLine    The comment's begin line.
+     * @param pBeginColumn  The comment's begin column.
+     * @param pEndLine      The comment's end line.
+     * @param pEndColumn    The comment's end column.
+     * @param pText         The comment's textual content.
+     *
+     * @return  A new {@code BlockComment}.
+     */
+    static private BlockComment createBlockComment(
+            int pBeginLine,
+            int pBeginColumn,
+            int pEndLine,
+            int pEndColumn,
+            String pText)
+    {
+        return new BlockComment(pBeginLine, pBeginColumn, pEndLine, pEndColumn, pText);
     }
 
 
@@ -560,7 +623,16 @@ public class CommentCollectTest
     static private Node createPlainNode(Comment pComment)
     {
         Node aNode = new PackageDeclaration(new NameExpr("pkg"));
-        aNode.setComment(pComment);
+        if (pComment != null)
+        {
+            aNode.setComment(pComment);
+            int aNodeLine = pComment.getEndLine() + 1;
+            aNode.setBeginLine(aNodeLine);
+            aNode.setBeginColumn(pComment.getBeginColumn());
+            aNode.setEndLine(aNodeLine);
+            aNode.setBeginLine(pComment.getEndColumn());
+        }
+
         return aNode;
     }
 

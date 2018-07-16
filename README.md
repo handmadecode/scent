@@ -29,9 +29,14 @@ level 1.8.
 
 ## Release Notes
 
+### version 1.0
+
+* Comments ending on the same line as a method are assigned to the method, not to the enclosing
+type.
+
 ### version 0.9
 
-Initial release.
+* Initial release.
 
 
 ## General Usage
@@ -554,13 +559,16 @@ two tools have different views on what a statement is.
 ### Compilation Units and Types
 
 JavaNCSS reports the number of compilation units as "classes" in a package. Types are reported as
-"objects", but only top-level types in the compilation units are reported. Inner types are reported
-as "classes" within an object. Local classes in methods are also reported in that property, but
-anonymous classes are not.
+"objects", but only top-level types in the compilation units are reported.
+
+Inner types are reported as "classes" within an object. Local classes in methods are also reported
+in that property, but anonymous classes are not.
+
+JavaNCSS ignores annotations, Scent counts them as types.
 
 If the number of objects and classes in objects reported by JavaNCSS differ from the number of types
-reported by Scent, the reason is most likely that Scent counts anonymous classes as types and that
-JavaNCSS does not.
+reported by Scent, the reason is most likely that Scent counts anonymous classes and annotations as
+types and that JavaNCSS does not.
 
 ### Methods
 
