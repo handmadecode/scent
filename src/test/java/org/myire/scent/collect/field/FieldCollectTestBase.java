@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -183,8 +183,8 @@ abstract public class FieldCollectTestBase
     {
         // Given
         String[] aSourceLines = {
-                createTypeDeclarationStart() + "// Comment about the field",
-                createFieldDeclaration(createFieldName()),
+                createTypeDeclarationStart(),
+                createFieldDeclaration(createFieldName()) + "// Comment about the field",
                 "}"
         };
 
@@ -221,6 +221,41 @@ abstract public class FieldCollectTestBase
         CommentMetrics aComments = getFirstField(aMetrics).getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(1, aComments.getNumJavaDocLines());
+    }
+
+
+    /**
+     * A field having a block comment, a line comment, and a JavaDoc comment should have all those
+     * comments collected in the {@code CommentMetrics} of the field's {@code FieldMetrics}.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void multipleCommentsForFieldAreCollected() throws ParseException
+    {
+        // Given
+        String[] aSourceLines = {
+                createTypeDeclarationStart(),
+                "// Field line comment",
+                "/**",
+                " * Field javadoc.",
+                " */",
+                "/* Field block comment spanning",
+                "   two lines. */",
+                createFieldDeclaration(createFieldName()),
+                "}"
+        };
+
+        // When
+        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+
+        // Then
+        CommentMetrics aComments = getFirstField(aMetrics).getComments();
+        assertEquals(1, aComments.getNumJavaDocComments());
+        assertEquals(3, aComments.getNumJavaDocLines());
+        assertEquals(1, aComments.getNumLineComments());
+        assertEquals(1, aComments.getNumBlockComments());
+        assertEquals(2, aComments.getNumBlockCommentLines());
     }
 
 

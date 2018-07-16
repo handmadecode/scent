@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -10,7 +10,6 @@ import java.text.ParseException;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
-import static org.myire.scent.collect.CollectTestUtil.getFirstField;
 import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.FieldMetrics;
 import org.myire.scent.metrics.MethodMetrics;
@@ -18,6 +17,7 @@ import org.myire.scent.metrics.PackageMetrics;
 import org.myire.scent.metrics.TypeMetrics;
 
 import static org.myire.scent.collect.CollectTestUtil.collect;
+import static org.myire.scent.collect.CollectTestUtil.getFirstField;
 import static org.myire.scent.collect.CollectTestUtil.getFirstLocalType;
 import static org.myire.scent.collect.CollectTestUtil.getFirstMethod;
 
@@ -257,16 +257,43 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         // Given
         String[] aSourceLines = {
                 createTypeDeclarationStart(),
-                createMethodDeclarationStart(createMethodName()),
-                "// Comment 1",
+                createMethodDeclarationStart(createMethodName()) + "// Comment on the same line as opening brace",
+                "// Comment for variable declarations",
                 "int f, g;",
-                "// Comment 2",
+                "// This comment",
                 "// has two lines",
                 "f=1;",
-                "// Comment 3",
+                "// This comment does not belong to a statement",
                 "",
-                "// The above comment does not belong to a statement",
+                "// Comment for assignment statement",
                 "g=2;",
+                "} // Comment after method's closing brace",
+                "}"
+        };
+
+        // When
+        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+
+        // Then
+        CommentMetrics aComments = getFirstMethod(aMetrics).getComments();
+        assertEquals(7, aComments.getNumLineComments());
+    }
+
+
+    /**
+     * A line comment on the same line as the method's signature should be collected in the method's
+     * {@code CommentMetrics}.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void lineCommentOnSameLineAsMethodSignatureIsCollected() throws ParseException
+    {
+        // Given
+        String[] aSourceLines = {
+                createTypeDeclarationStart(),
+                createMethodSignature(createMethodName()) + "// Comment on the same line as signature",
+                "{",
                 "}",
                 "}"
         };
@@ -276,7 +303,7 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
 
         // Then
         CommentMetrics aComments = getFirstMethod(aMetrics).getComments();
-        assertEquals(5, aComments.getNumLineComments());
+        assertEquals(1, aComments.getNumLineComments());
     }
 
 
@@ -319,19 +346,39 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
 
 
     /**
+     * Create the signature of the method being tested by this class.
+     *
+     * @param pName The name of the method on the form it is expected to be collected.
+     *
+     * @return  A method signature with the specified name.
+     */
+    protected String createMethodSignature(String pName)
+    {
+        return pName;
+    }
+
+
+    /**
      * Create start of a declaration of the method being tested by this class. The start of the
      * method declaration ends at the point where the first statement should  be placed.
      *
-     * @param pName The name of the method.
+     * @param pName The name of the method on the form it is expected to be collected.
      *
      * @return  The start of a method declaration with the specified name.
      */
     protected String createMethodDeclarationStart(String pName)
     {
-        return pName + '{';
+        return createMethodSignature(pName) + '{';
     }
 
 
+    /**
+     * Create a complete, empty declaration of the method being tested by this class.
+     *
+     * @param pName The name of the method on the form it is expected to be collected.
+     *
+     * @return  An empty method declaration.
+     */
     @Override
     protected String createMethodDeclaration(String pName)
     {

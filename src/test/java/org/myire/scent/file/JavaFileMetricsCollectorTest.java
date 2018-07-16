@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -25,7 +25,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
-import org.mockito.internal.matchers.Null;
 import org.myire.scent.collect.JavaMetricsCollector;
 
 
@@ -93,7 +92,7 @@ public class JavaFileMetricsCollectorTest extends FileTestBase
      * count.
      */
     @Test
-    public void visitFileIncrementsFileCountForExistingJavaFile() throws IOException, ParseException
+    public void visitFileIncrementsFileCountForExistingJavaFile() throws IOException
     {
         // Given
         String aFileName = "FullInterface.java";
@@ -130,7 +129,7 @@ public class JavaFileMetricsCollectorTest extends FileTestBase
      * the file count.
      */
     @Test
-    public void visitFileDoesNotIncrementFileCountForNonExistingJavaFile() throws IOException, ParseException
+    public void visitFileDoesNotIncrementFileCountForNonExistingJavaFile() throws IOException
     {
         // Given
         Path aPath = Paths.get("DoesNotExist.java");
@@ -180,7 +179,7 @@ public class JavaFileMetricsCollectorTest extends FileTestBase
      * the file count.
      */
     @Test
-    public void visitFileDoesNotIncrementFileCountForNonJavaFile() throws IOException, ParseException
+    public void visitFileDoesNotIncrementFileCountForNonJavaFile() throws IOException
     {
         // Given
         fTestFile = Files.createFile(Paths.get("NotAJavaFile.txt"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -360,6 +360,39 @@ abstract public class TypeCollectTestBase
         CommentMetrics aComments = getFirstType(aMetrics).getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(3, aComments.getNumJavaDocLines());
+    }
+
+
+    /**
+     * A type having a block comment, a line comment, and a JavaDoc comment should have all those
+     * comments collected in the {@code CommentMetrics} of the type's {@code TypeMetrics}.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void multipleCommentsForTypeAreCollected() throws ParseException
+    {
+        // Given
+        String[] aSourceLines = {
+                "/**",
+                " * JavaDoc.",
+                " */",
+                "// Line comment below JavaDoc",
+                "/* Block comment spanning",
+                "   two lines. */",
+                createEmptyTypeDeclaration("X")
+        };
+
+        // When
+        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+
+        // Then
+        CommentMetrics aComments = getFirstType(aMetrics).getComments();
+        assertEquals(1, aComments.getNumJavaDocComments());
+        assertEquals(3, aComments.getNumJavaDocLines());
+        assertEquals(1, aComments.getNumLineComments());
+        assertEquals(1, aComments.getNumBlockComments());
+        assertEquals(2, aComments.getNumBlockCommentLines());
     }
 
 

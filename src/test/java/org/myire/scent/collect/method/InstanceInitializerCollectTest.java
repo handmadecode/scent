@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -30,16 +30,9 @@ public class InstanceInitializerCollectTest extends MethodWithBodyCollectTestBas
 
 
     @Override
-    protected String createMethodDeclarationStart(String pName)
+    protected String createMethodSignature(String pName)
     {
-        return "{";
-    }
-
-
-    @Override
-    protected String createMethodDeclaration(String pName)
-    {
-        return "{}";
+        return "";
     }
 
 

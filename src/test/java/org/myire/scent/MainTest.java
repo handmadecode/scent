@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -43,7 +43,7 @@ public class MainTest extends FileTestBase
      * Replace the stream class variables in {@code Main} with mocks.
      */
     @Before
-    public void mockSystemStreams() throws InterruptedException
+    public void mockSystemStreams()
     {
         replacePrintStream("OUT", fMockedSystemOut);
         replacePrintStream("ERR", fMockedSystemErr);
@@ -130,7 +130,7 @@ public class MainTest extends FileTestBase
      * ignored and an error to be printed to {@code System.err}.
      */
     @Test
-    public void nonExistingJavaFileIsIgnored() throws IOException
+    public void nonExistingJavaFileIsIgnored()
     {
         // Given
         String aFileName = "DoesNotExist.java";
