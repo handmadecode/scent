@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -56,7 +56,7 @@ class TypeMetricsCollector
     TypeMetricsCollector(@Nonnull ClassOrInterfaceDeclaration pType)
     {
         fTypeNode = pType;
-        fTypeName = pType.getName();
+        fTypeName = pType.getName().getIdentifier();
         fTypeKind = pType.isInterface() ? TypeMetrics.Kind.INTERFACE : TypeMetrics.Kind.CLASS;
     }
 
@@ -71,7 +71,7 @@ class TypeMetricsCollector
     TypeMetricsCollector(@Nonnull EnumDeclaration pEnum)
     {
         fTypeNode = pEnum;
-        fTypeName = pEnum.getName();
+        fTypeName = pEnum.getName().getIdentifier();
         fTypeKind = TypeMetrics.Kind.ENUM;
     }
 
@@ -86,7 +86,7 @@ class TypeMetricsCollector
     TypeMetricsCollector(@Nonnull EnumConstantDeclaration pEnumConstant)
     {
         fTypeNode = pEnumConstant;
-        fTypeName = pEnumConstant.getName();
+        fTypeName = pEnumConstant.getName().getIdentifier();
         fTypeKind = TypeMetrics.Kind.ENUM_CONSTANT;
     }
 
@@ -101,7 +101,7 @@ class TypeMetricsCollector
     TypeMetricsCollector(@Nonnull AnnotationDeclaration pAnnotation)
     {
         fTypeNode = pAnnotation;
-        fTypeName = pAnnotation.getName();
+        fTypeName = pAnnotation.getName().getIdentifier();
         fTypeKind = TypeMetrics.Kind.ANNOTATION;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -8,6 +8,7 @@ package org.myire.scent.metrics;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
 
+import com.github.javaparser.Range;
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.JavadocComment;
@@ -26,6 +27,11 @@ import com.github.javaparser.ast.comments.LineComment;
 @NotThreadSafe
 public class CommentMetrics
 {
+    // Range with a line count of zero, to be used in calculations for comments that don't have a
+    // range (which is a questionable property of a comment).
+    static private final Range ZERO_LINE_RANGE = Range.range(0, 0, -1, -1);
+
+
     private int fNumLineComments;
     private int fNumBlockComments;
     private int fNumBlockCommentLines;
@@ -175,6 +181,7 @@ public class CommentMetrics
      */
     static private int getLineCount(@Nonnull Comment pComment)
     {
-        return pComment.getEndLine() - pComment.getBeginLine() + 1;
+        Range aRange = pComment.getRange().orElse(ZERO_LINE_RANGE);
+        return aRange.end.line - aRange.begin.line + 1;
     }
 }

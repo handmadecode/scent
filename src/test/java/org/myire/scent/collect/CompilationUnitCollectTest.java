@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -69,9 +69,9 @@ public class CompilationUnitCollectTest
         JavaMetricsCollector aParser = new JavaMetricsCollector();
 
         // When
-        collect(aName1, "class What {}", aParser);
-        collect(aName2, "class Who {}", aParser);
-        collect(aName3, "class Why {}", aParser);
+        aParser.collect(aName1, "class What {}");
+        aParser.collect(aName2, "class Who {}");
+        aParser.collect(aName3, "class Why {}");
 
         // Then
         PackageMetrics aPackage = getFirstPackage(aParser.getCollectedMetrics());

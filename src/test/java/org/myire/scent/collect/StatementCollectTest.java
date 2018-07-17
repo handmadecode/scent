@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -396,6 +396,32 @@ public class StatementCollectTest
 
         // Then
         assertEquals(2, aStatements.getNumStatements());
+    }
+
+
+    /**
+     * A {@code try-with} statement where the resource is declared outside the try clause should be
+     * collected in the method's {@code StatementMetrics}. This construct is legal starting with
+     * Java 9.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void tryWithStatementWithExternalResourceIsCollected() throws ParseException
+    {
+        // Given
+        String[] aSourceLines = {
+                VOID_METHOD_PARAM_PREFIX,
+                "try (pParam) {",
+                "}",
+                ANY_METHOD_SUFFIX
+        };
+
+        // When
+        StatementMetrics aStatements = collectStatementMetrics(aSourceLines);
+
+        // Then
+        assertEquals(1, aStatements.getNumStatements());
     }
 
 

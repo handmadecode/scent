@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -13,7 +13,6 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
-import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
@@ -77,9 +76,7 @@ class CompilationUnitMetricsCollector
 
         // Collect all comments from the package declaration and associate them with the compilation
         // unit, since package declarations don't have their own metrics.
-        PackageDeclaration aPackage = fCompilationUnitNode.getPackage();
-        if (aPackage != null)
-            collectNodeComments(aPackage, aMetrics.getComments());
+        fCompilationUnitNode.getPackageDeclaration().ifPresent(p -> collectNodeComments(p, aMetrics.getComments()));
 
         // Collect all comments from the import declarations and associate them with the compilation
         // unit, since import declarations don't have their own metrics.

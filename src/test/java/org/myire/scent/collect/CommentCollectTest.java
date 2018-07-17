@@ -7,24 +7,27 @@ package org.myire.scent.collect;
 
 import java.util.Arrays;
 
-import com.github.javaparser.ast.DocumentableNode;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.PackageDeclaration;
-import com.github.javaparser.ast.body.EmptyMemberDeclaration;
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.comments.LineComment;
-import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.Name;
+import static com.github.javaparser.Range.range;
 
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import org.myire.scent.metrics.CommentMetrics;
+
+import static org.myire.scent.util.JavaParserTests.createBlockComment;
+import static org.myire.scent.util.JavaParserTests.createJavadocComment;
+import static org.myire.scent.util.JavaParserTests.createLineComment;
 
 
 /**
@@ -43,15 +46,15 @@ public class CommentCollectTest
     {
         // Given
         Comment aComment = createBlockComment(2);
-        Node aSource = createPlainNode(aComment);
-        Node aTarget = createPlainNode(null);
+        Node aSource = createNodeWithComment(aComment);
+        Node aTarget = createNodeWithoutComment();
 
         // When
         Collectors.moveNodeComments(aSource, aTarget);
 
         // Then
-        assertNull(aSource.getComment());
-        assertSame(aComment, aTarget.getComment());
+        assertFalse(aSource.getComment().isPresent());
+        assertSame(aComment, aTarget.getComment().get());
     }
 
 
@@ -63,16 +66,16 @@ public class CommentCollectTest
     public void mainCommentIsNotMovedIfTargetHasMainComment()
     {
         // Given
-        Comment aComment = createBlockComment(2);
-        Node aSource = createPlainNode(aComment);
-        Node aTarget = createPlainNode(createBlockComment(5));
+        Comment aComment = createBlockComment(7);
+        Node aSource = createNodeWithComment(aComment);
+        Node aTarget = createNodeWithComment(createBlockComment(5));
 
         // When
         Collectors.moveNodeComments(aSource, aTarget);
 
         // Then
-        assertSame(aComment, aSource.getComment());
-        assertNotSame(aComment, aTarget.getComment());
+        assertSame(aComment, aSource.getComment().get());
+        assertNotSame(aComment, aTarget.getComment().get());
     }
 
 
@@ -100,95 +103,13 @@ public class CommentCollectTest
 
 
     /**
-     * Calling {@code moveNodeComments()} should move the JavaDoc comment from the source node to
-     * the target node if the target doesn't have a JavaDoc comment.
-     */
-    @Test
-    public void javaDocCommentIsMovedIfTargetHasNoJavaDocComment()
-    {
-        // Given
-        JavadocComment aComment = new JavadocComment();
-        DocumentableNode aSource = createDocumentableNode(aComment);
-        DocumentableNode aTarget = createDocumentableNode(null);
-
-        // When
-        Collectors.moveNodeComments((Node) aSource, (Node) aTarget);
-
-        // Then
-        assertNull(aSource.getJavaDoc());
-        assertSame(aComment, aTarget.getJavaDoc());
-    }
-
-
-    /**
-     * Calling {@code moveNodeComments()} should not move the JavaDoc comment from the source node
-     * to the target node if the target already has a JavaDoc comment.
-     */
-    @Test
-    public void javaDocCommentIsNotMovedIfTargetHasJavaDocComment()
-    {
-        // Given
-        JavadocComment aComment = new JavadocComment();
-        DocumentableNode aSource = createDocumentableNode(aComment);
-        DocumentableNode aTarget = createDocumentableNode(new JavadocComment());
-
-        // When
-        Collectors.moveNodeComments((Node) aSource, (Node) aTarget);
-
-        // Then
-        assertSame(aComment, aSource.getJavaDoc());
-        assertNotSame(aComment, aTarget.getJavaDoc());
-    }
-
-
-    /**
-     * Calling {@code moveNodeComments()} should not attempt to move the JavaDoc comment from the
-     * source node to the target node if the source isn't a {@code DocumentableNode}.
-     */
-    @Test
-    public void javaDocCommentIsNotMovedIfSourceIsNotDocumentable()
-    {
-        // Given
-        JavadocComment aComment = new JavadocComment();
-        Node aSource = createPlainNode(aComment);
-        DocumentableNode aTarget = createDocumentableNode(null);
-
-        // When
-        Collectors.moveNodeComments(aSource, (Node) aTarget);
-
-        // Then
-        assertNull(aTarget.getJavaDoc());
-    }
-
-
-    /**
-     * Calling {@code moveNodeComments()} should not move the JavaDoc comment from the source node
-     * to the target node if the target isn't a {@code DocumentableNode}.
-     */
-    @Test
-    public void javaDocCommentIsNotMovedIfTargetIsNotDocumentable()
-    {
-        // Given
-        JavadocComment aComment = new JavadocComment();
-        DocumentableNode aSource = createDocumentableNode(aComment);
-        Node aTarget = createPlainNode(null);
-
-        // When
-        Collectors.moveNodeComments((Node) aSource, aTarget);
-
-        // Then
-        assertSame(aComment, aSource.getJavaDoc());
-    }
-
-
-    /**
      * {@code collectNodeComment()} should collect metrics for a node's main comment.
      */
     @Test
     public void nodeCommentIsCollected()
     {
         // Given
-        Node aNode = createPlainNode(createLineComment());
+        Node aNode = createNodeWithComment(createLineComment());
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
@@ -196,7 +117,7 @@ public class CommentCollectTest
 
         // Then
         assertEquals(1, aMetrics.getNumLineComments());
-        assertNull(aNode.getComment());
+        assertFalse(aNode.getComment().isPresent());
     }
 
 
@@ -208,7 +129,7 @@ public class CommentCollectTest
     public void missingNodeCommentIsNotCollected()
     {
         // Given
-        Node aNode = createPlainNode(null);
+        Node aNode = createNodeWithoutComment();
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
@@ -230,7 +151,8 @@ public class CommentCollectTest
     public void mainCommentIsCollected()
     {
         // Given
-        Node aNode = createPlainNode(createBlockComment(2));
+        int aNumBlockCommentLines = 2;
+        Node aNode = createNodeWithComment(createBlockComment(aNumBlockCommentLines));
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
@@ -238,8 +160,8 @@ public class CommentCollectTest
 
         // Then
         assertEquals(1, aMetrics.getNumBlockComments());
-        assertEquals(2, aMetrics.getNumBlockCommentLines());
-        assertNull(aNode.getComment());
+        assertEquals(aNumBlockCommentLines, aMetrics.getNumBlockCommentLines());
+        assertFalse(aNode.getComment().isPresent());
     }
 
 
@@ -250,7 +172,11 @@ public class CommentCollectTest
     public void orphanCommentsAreCollected()
     {
         // Given
-        Node aNode = createNodeWithOrphans(createBlockComment(2), createLineComment());
+        int aNumBlockCommentLines = 4711;
+        int aNumJavaDocLines = 17;
+        Node aNode = createNodeWithOrphans(
+                createBlockComment(aNumBlockCommentLines),
+                createJavadocComment(aNumJavaDocLines));
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
@@ -258,8 +184,9 @@ public class CommentCollectTest
 
         // Then
         assertEquals(1, aMetrics.getNumBlockComments());
-        assertEquals(2, aMetrics.getNumBlockCommentLines());
-        assertEquals(1, aMetrics.getNumLineComments());
+        assertEquals(aNumBlockCommentLines, aMetrics.getNumBlockCommentLines());
+        assertEquals(1, aMetrics.getNumJavaDocComments());
+        assertEquals(aNumJavaDocLines, aMetrics.getNumJavaDocLines());
         assertTrue(aNode.getOrphanComments().isEmpty());
     }
 
@@ -271,16 +198,17 @@ public class CommentCollectTest
     public void javaDocCommentIsCollected()
     {
         // Given
-        DocumentableNode aNode = createDocumentableNode(createJavaDocComment(3));
+        int aNumJavaDocLines = 3;
+        Node aNode = createNodeWithComment(createJavadocComment(aNumJavaDocLines));
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
-        Collectors.collectNodeComments((Node) aNode, aMetrics);
+        Collectors.collectNodeComments(aNode, aMetrics);
 
         // Then
         assertEquals(1, aMetrics.getNumJavaDocComments());
-        assertEquals(3, aMetrics.getNumJavaDocLines());
-        assertNull(aNode.getJavaDoc());
+        assertEquals(aNumJavaDocLines, aMetrics.getNumJavaDocLines());
+        assertFalse(aNode.getComment().isPresent());
     }
 
 
@@ -291,7 +219,7 @@ public class CommentCollectTest
     public void nothingIsCollectedForNodeWithoutComments()
     {
         // Given
-        Node aNode = createPlainNode(null);
+        Node aNode = createNodeWithoutComment();
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
@@ -313,13 +241,16 @@ public class CommentCollectTest
     public void childCommentsAreCollected()
     {
         // Given
-        Node aGrandChild = (Node) createDocumentableNode(createJavaDocComment(4));
-        Node aChild = createPlainNode(createLineComment());
-        aChild.getOrphanComments().add(createBlockComment(17));
-        aChild.getChildrenNodes().add(aGrandChild);
-        Node aNode = createPlainNode(null);
-        aNode.getChildrenNodes().add(aChild);
         CommentMetrics aMetrics = new CommentMetrics();
+        int aNumBlockCommentLines = 17;
+        int aNumJavaDocLines = 4;
+        Node aGrandChild = createNodeWithComment(createJavadocComment(aNumJavaDocLines));
+        Node aChild = createNodeWithComment(createLineComment());
+        aChild.addOrphanComment(createBlockComment(aNumBlockCommentLines));
+        Node aNode = createNodeWithoutComment();
+
+        aGrandChild.setParentNode(aChild);
+        aChild.setParentNode(aNode);
 
         // When
         Collectors.collectChildComments(aNode, aMetrics);
@@ -327,11 +258,12 @@ public class CommentCollectTest
         // Then
         assertEquals(1, aMetrics.getNumLineComments());
         assertEquals(1, aMetrics.getNumBlockComments());
-        assertEquals(17, aMetrics.getNumBlockCommentLines());
+        assertEquals(aNumBlockCommentLines, aMetrics.getNumBlockCommentLines());
         assertEquals(1, aMetrics.getNumJavaDocComments());
-        assertEquals(4, aMetrics.getNumJavaDocLines());
-        assertNull(((DocumentableNode) aGrandChild).getJavaDoc());
-        assertNull(aChild.getComment());
+        assertEquals(aNumJavaDocLines, aMetrics.getNumJavaDocLines());
+
+        assertFalse(aGrandChild.getComment().isPresent());
+        assertFalse(aChild.getComment().isPresent());
         assertTrue(aChild.getOrphanComments().isEmpty());
     }
 
@@ -343,7 +275,7 @@ public class CommentCollectTest
     public void noChildCommentsAreCollectedForNodeWithoutChildren()
     {
         // Given
-        Node aNode = createPlainNode(null);
+        Node aNode = createNodeWithoutComment();
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
@@ -366,9 +298,10 @@ public class CommentCollectTest
     public void noChildCommentsAreCollectedForNodeWithChildrenWithoutComments()
     {
         // Given
-        Node aNode = createPlainNode(null);
-        aNode.getChildrenNodes().add(createPlainNode(null));
         CommentMetrics aMetrics = new CommentMetrics();
+        Node aNode = createNodeWithoutComment();
+        Node aChild = createNodeWithoutComment();
+        aChild.setParentNode(aNode);
 
         // When
         Collectors.collectChildComments(aNode, aMetrics);
@@ -389,10 +322,11 @@ public class CommentCollectTest
     public void nodeCommentIsNotCollectAsChildComment()
     {
         // Given
-        LineComment aComment = createLineComment();
-        Node aNode = createPlainNode(aComment);
-        aNode.getChildrenNodes().add(createPlainNode(null));
         CommentMetrics aMetrics = new CommentMetrics();
+        LineComment aComment = createLineComment();
+        Node aNode = createNodeWithComment(aComment);
+        Node aChild = createNodeWithoutComment();
+        aChild.setParentNode(aNode);
 
         // When
         Collectors.collectChildComments(aNode, aMetrics);
@@ -403,7 +337,7 @@ public class CommentCollectTest
         assertEquals(0, aMetrics.getNumBlockCommentLines());
         assertEquals(0, aMetrics.getNumJavaDocComments());
         assertEquals(0, aMetrics.getNumJavaDocLines());
-        assertSame(aComment, aNode.getComment());
+        assertSame(aComment, aNode.getComment().get());
     }
 
 
@@ -421,22 +355,22 @@ public class CommentCollectTest
         LineComment aComment2 = createLineComment(2, 1, 2, 2);
         Node aParent = createNodeWithOrphans(aComment1, aComment2);
         LineComment aComment3 = createLineComment(3, 1, 3, 2);
-        Node aNode = createPlainNode(aComment3);
-        CommentMetrics aMetrics = new CommentMetrics();
+        Node aNode = createNodeWithComment(aComment3);
         aNode.setParentNode(aParent);
+        CommentMetrics aMetrics = new CommentMetrics();
 
         // When
         Collectors.collectParentOrphanComments(aNode, aMetrics);
 
-        // Then
+        // Then (the orphans  but not the main comment should have been collected)
         assertEquals(2, aMetrics.getNumLineComments());
         assertTrue(aParent.getOrphanComments().isEmpty());
     }
 
 
     /**
-     * {@code collectParentOrphanComments()} should collect multiple parent orphans that immediately
-     * precede the node's main comment on the same line.
+     * {@code collectParentOrphanComments()} should collect multiple parent orphans on the same line
+     * if they immediately precede the node's main comment.
      */
     @Test
     public void parentOrphansOnSameLineAreCollected()
@@ -450,7 +384,7 @@ public class CommentCollectTest
         BlockComment aComment3 = createBlockComment(2, 31, 3, 21, " Comment3\n   spans two lines ");
         Node aParent = createNodeWithOrphans(aComment1, aComment2, aComment3);
         LineComment aNodeComment = createLineComment(4, 2, 4, 5);
-        Node aNode = createPlainNode(aNodeComment);
+        Node aNode = createNodeWithComment(aNodeComment);
         CommentMetrics aMetrics = new CommentMetrics();
         aNode.setParentNode(aParent);
 
@@ -475,9 +409,9 @@ public class CommentCollectTest
         BlockComment aOrphan = createBlockComment(10, 3, 10, 17, "");
         Node aParent = createNodeWithOrphans(aOrphan);
         LineComment aNodeComment = createLineComment(10, 20, 10, 31);
-        Node aNode = createPlainNode(aNodeComment);
-        CommentMetrics aMetrics = new CommentMetrics();
+        Node aNode = createNodeWithComment(aNodeComment);
         aNode.setParentNode(aParent);
+        CommentMetrics aMetrics = new CommentMetrics();
 
         // When
         Collectors.collectParentOrphanComments(aNode, aMetrics);
@@ -485,6 +419,38 @@ public class CommentCollectTest
         // Then
         assertEquals(1, aMetrics.getNumBlockComments());
         assertEquals(1, aMetrics.getNumBlockCommentLines());
+        assertTrue(aParent.getOrphanComments().isEmpty());
+    }
+
+
+    /**
+     * {@code collectParentOrphanComments()} should collect parent orphan comments that have
+     * overlapping ranges. This is a contrived scenario but such an AST is nevertheless possible to
+     * construct.
+     */
+    @Test
+    public void overlappingParentOrphansAreCollected()
+    {
+        // Given
+        BlockComment aOrphan1 = createBlockComment(10, 3, 10, 15);
+        LineComment aOrphan2 = createLineComment(10, 3, 10, 8);
+        JavadocComment aOrphan3 = createJavadocComment(10, 20, 10, 31);
+        JavadocComment aOrphan4 = createJavadocComment(10, 20, 10, 31);
+        LineComment aOrphan5 = createLineComment(10, 20, 10, 52);
+        Node aParent = createNodeWithOrphans(aOrphan1, aOrphan2, aOrphan3, aOrphan4, aOrphan5);
+        Node aNode = createNodeWithComment(createLineComment(11, 1, 11, 12));
+        aNode.setParentNode(aParent);
+        CommentMetrics aMetrics = new CommentMetrics();
+
+        // When
+        Collectors.collectParentOrphanComments(aNode, aMetrics);
+
+        // Then
+        assertEquals(2, aMetrics.getNumLineComments());
+        assertEquals(1, aMetrics.getNumBlockComments());
+        assertEquals(1, aMetrics.getNumBlockCommentLines());
+        assertEquals(2, aMetrics.getNumJavaDocComments());
+        assertEquals(2, aMetrics.getNumJavaDocLines());
         assertTrue(aParent.getOrphanComments().isEmpty());
     }
 
@@ -503,9 +469,9 @@ public class CommentCollectTest
         LineComment aComment17 = createLineComment(17, 11, 17, 26);
         Node aParent = createNodeWithOrphans(aComment1, aComment3, aComment17);
         LineComment aNodeComment = createLineComment(4, 1, 4, 2);
-        Node aNode = createPlainNode(aNodeComment);
-        CommentMetrics aMetrics = new CommentMetrics();
+        Node aNode = createNodeWithComment(aNodeComment);
         aNode.setParentNode(aParent);
+        CommentMetrics aMetrics = new CommentMetrics();
 
         // When
         Collectors.collectParentOrphanComments(aNode, aMetrics);
@@ -517,13 +483,39 @@ public class CommentCollectTest
 
 
     /**
+     * {@code collectParentOrphanComments()} should not collect parent orphans that don't have a
+     * range and thus cannot be determined to be adjacent to the child node.
+     */
+    @Test
+    public void parentOrphansWithoutRangeAreNotCollected()
+    {
+        // Given (only aComment2 has a range)
+        LineComment aComment1 = new LineComment("");
+        LineComment aComment2 = createLineComment(3, 1, 3, 2);
+        LineComment aComment3 = new LineComment("");
+        Node aParent = createNodeWithOrphans(aComment1, aComment2, aComment3);
+        LineComment aNodeComment = createLineComment(4, 1, 4, 2);
+        Node aNode = createNodeWithComment(aNodeComment);
+        aNode.setParentNode(aParent);
+        CommentMetrics aMetrics = new CommentMetrics();
+
+        // When
+        Collectors.collectParentOrphanComments(aNode, aMetrics);
+
+        // Then
+        assertEquals(1, aMetrics.getNumLineComments());
+        assertTrue(aParent.getOrphanComments().containsAll(Arrays.asList(aComment1, aComment3)));
+    }
+
+
+    /**
      * {@code collectParentOrphanComments()} should not attempt to collect parent orphans for a node
      * that doesn't have a parent.
      */
     @Test
     public void parentOrphansAreNotCollectedForNodeWithoutParent()
     {
-        Node aNode = createPlainNode(createBlockComment(2));
+        Node aNode = createNodeWithComment(createBlockComment(2));
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
@@ -539,99 +531,56 @@ public class CommentCollectTest
 
 
     /**
-     * Create a {@code LineComment}.
-     *
-     * @return  A new {@code LineComment}.
+     * {@code collectParentOrphanComments()} should not attempt to collect parent orphans for a node
+     * that doesn't have a range since it cannot be determined which comments are adjacent to it.
      */
-    static private LineComment createLineComment()
+    @Test
+    public void parentOrphansAreNotCollectedForNodeWithoutRange()
     {
-        return createLineComment(1, 1, 1, 2);
+        // Given
+        Node aNode = createNodeWithComment(createBlockComment(2));
+        aNode.setParentNode(createNodeWithoutComment());
+        aNode.setRange(null);
+        CommentMetrics aMetrics = new CommentMetrics();
+
+        // When
+        Collectors.collectParentOrphanComments(aNode, aMetrics);
+
+        // Then
+        assertEquals(0, aMetrics.getNumLineComments());
+        assertEquals(0, aMetrics.getNumBlockComments());
+        assertEquals(0, aMetrics.getNumBlockCommentLines());
+        assertEquals(0, aMetrics.getNumJavaDocComments());
+        assertEquals(0, aMetrics.getNumJavaDocLines());
     }
 
 
     /**
-     * Create a {@code LineComment}.
-     *
-     * @param pBeginLine    The comment's begin line.
-     * @param pBeginColumn  The comment's begin column.
-     * @param pEndLine      The comment's end line.
-     * @param pEndColumn    The comment's end column.
-     *
-     * @return  A new {@code LineComment}.
-     */
-    static private LineComment createLineComment(int pBeginLine, int pBeginColumn, int pEndLine, int pEndColumn)
-    {
-        return new LineComment(pBeginLine, pBeginColumn, pEndLine, pEndColumn, "");
-    }
-
-
-    /**
-     * Create a {@code BlockComment}.
-     *
-     * @param pNumLines The number of lines the block comment should span.
-     *
-     * @return  A new {@code BlockComment}.
-     */
-    static private BlockComment createBlockComment(int pNumLines)
-    {
-        return createBlockComment(1, 1, pNumLines, 4, "");
-    }
-
-
-    /**
-     * Create a {@code BlockComment}.
-     *
-     * @param pBeginLine    The comment's begin line.
-     * @param pBeginColumn  The comment's begin column.
-     * @param pEndLine      The comment's end line.
-     * @param pEndColumn    The comment's end column.
-     * @param pText         The comment's textual content.
-     *
-     * @return  A new {@code BlockComment}.
-     */
-    static private BlockComment createBlockComment(
-            int pBeginLine,
-            int pBeginColumn,
-            int pEndLine,
-            int pEndColumn,
-            String pText)
-    {
-        return new BlockComment(pBeginLine, pBeginColumn, pEndLine, pEndColumn, pText);
-    }
-
-
-    /**
-     * Create a {@code JavadocComment}.
-     *
-     * @param pNumLines The number of lines the JavaDoc comment should span.
-     *
-     * @return  A new {@code JavadocComment}.
-     */
-    static private JavadocComment createJavaDocComment(int pNumLines)
-    {
-        return new JavadocComment(1, 1, pNumLines, 6, "");
-    }
-
-
-    /**
-     * Create a {@code Node} instance that does not implements {@code DocumentableNode}.
-     *
-     * @param pComment  The node's initial main comment.
+     * Create a {@code Node} without a comment.
      *
      * @return  A new {@code Node}.
      */
-    static private Node createPlainNode(Comment pComment)
+    static private Node createNodeWithoutComment()
     {
-        Node aNode = new PackageDeclaration(new NameExpr("pkg"));
-        if (pComment != null)
-        {
-            aNode.setComment(pComment);
-            int aNodeLine = pComment.getEndLine() + 1;
-            aNode.setBeginLine(aNodeLine);
-            aNode.setBeginColumn(pComment.getBeginColumn());
-            aNode.setEndLine(aNodeLine);
-            aNode.setBeginLine(pComment.getEndColumn());
-        }
+        return new PackageDeclaration(new Name("pkg"));
+    }
+
+
+    /**
+     * Create a {@code Node} instance that has a comment.
+     *
+     * @param pComment  The node's comment.
+     *
+     * @return  A new {@code Node}.
+     */
+    static private Node createNodeWithComment(Comment pComment)
+    {
+        Node aNode = createNodeWithoutComment();
+        aNode.setComment(pComment);
+
+        pComment.getRange().ifPresent(
+                r -> aNode.setRange(range(r.end.line + 1, r.begin.column, r.end.line + 1, r.end.column))
+        );
 
         return aNode;
     }
@@ -646,23 +595,10 @@ public class CommentCollectTest
      */
     static private Node createNodeWithOrphans(Comment... pOrphans)
     {
-        Node aNode = new PackageDeclaration(new NameExpr("pkg"));
-        aNode.getOrphanComments().addAll(Arrays.asList(pOrphans));
-        return aNode;
-    }
+        Node aNode = createNodeWithoutComment();
+        for (Comment aOrphan : pOrphans)
+            aNode.addOrphanComment(aOrphan);
 
-
-    /**
-     * Create a {@code Node} instance that implements {@code DocumentableNode}.
-     *
-     * @param pComment  The node's initial JavaDoc comment.
-     *
-     * @return  A new {@code DocumentableNode}.
-     */
-    static private DocumentableNode createDocumentableNode(JavadocComment pComment)
-    {
-        DocumentableNode aNode = new EmptyMemberDeclaration(1, 1, 1, 1);
-        aNode.setJavaDoc(pComment);
         return aNode;
     }
 }

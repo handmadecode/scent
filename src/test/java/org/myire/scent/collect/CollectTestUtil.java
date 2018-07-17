@@ -1,14 +1,12 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
 package org.myire.scent.collect;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 
@@ -91,24 +89,8 @@ final public class CollectTestUtil
     static public Iterable<PackageMetrics> collect(String pName, String pSource) throws ParseException
     {
         JavaMetricsCollector aCollector = new JavaMetricsCollector();
-        collect(pName, pSource, aCollector);
+        aCollector.collect(pName, pSource);
         return aCollector.getCollectedMetrics();
-    }
-
-
-    /**
-     * Parse a string containing Java source using a specific {@code JavaMetricsCollector} instance.
-     *
-     * @param pName         The name to give the {@code CompilationUnitMetrics}.
-     * @param pSource       The Java source to collect metrics from.
-     * @param pCollector    The instance to collect metrics with.
-     *
-     * @throws ParseException   if the specified source code is lexically or syntactically invalid.
-     */
-    static public void collect(String pName, String pSource, JavaMetricsCollector pCollector) throws ParseException
-    {
-        Charset aCharset = StandardCharsets.UTF_8;
-        pCollector.collect(pName, new ByteArrayInputStream(pSource.getBytes(aCharset)), aCharset);
     }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -13,6 +13,10 @@ import static org.junit.Assert.assertTrue;
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.comments.LineComment;
+
+import static org.myire.scent.util.JavaParserTests.createBlockComment;
+import static org.myire.scent.util.JavaParserTests.createJavadocComment;
+import static org.myire.scent.util.JavaParserTests.createLineComment;
 
 
 /**
@@ -154,13 +158,13 @@ public class CommentMetricsTest
         int aLineCommentCount = aMetrics.getNumLineComments();
 
         // When
-        aMetrics.add(new LineComment(1, 0, 1, 2, "//"));
+        aMetrics.add(createLineComment(1, 0, 1, 2));
 
         // Then
         assertEquals(aLineCommentCount + 1, aMetrics.getNumLineComments());
 
         // When (a line comment that spans two lines)
-        aMetrics.add(new LineComment(1, 0, 2, 2, "//"));
+        aMetrics.add(createLineComment(1, 0, 2, 2));
 
         // Then
         assertEquals(aLineCommentCount + 3, aMetrics.getNumLineComments());
@@ -177,7 +181,7 @@ public class CommentMetricsTest
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
-        aMetrics.add(new LineComment(1, 0, 2, 2, "//"));
+        aMetrics.add(createLineComment(1, 0, 2, 2));
 
         // Then
         assertFalse(aMetrics.isEmpty());
@@ -196,14 +200,14 @@ public class CommentMetricsTest
         int aBlockCommentLineCount = aMetrics.getNumBlockCommentLines();
 
         // When (a block comment with only one line)
-        aMetrics.add(new BlockComment(1, 0, 1, 2, "/**/"));
+        aMetrics.add(createBlockComment(1, 0, 1, 2));
 
         // Then
         assertEquals(aBlockCommentCount + 1, aMetrics.getNumBlockComments());
         assertEquals(aBlockCommentLineCount + 1, aMetrics.getNumBlockCommentLines());
 
         // When (a block comment that spans four lines)
-        aMetrics.add(new BlockComment(1, 0, 4, 2, "/**/"));
+        aMetrics.add(createBlockComment(1, 0, 4, 2));
 
         // Then
         assertEquals(aBlockCommentCount + 2, aMetrics.getNumBlockComments());
@@ -221,7 +225,7 @@ public class CommentMetricsTest
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
-        aMetrics.add(new BlockComment(1, 0, 1, 2, "/**/"));
+        aMetrics.add(createBlockComment(1, 0, 1, 2));
 
         // Then
         assertFalse(aMetrics.isEmpty());
@@ -240,14 +244,14 @@ public class CommentMetricsTest
         int aJavaDocLineCount = aMetrics.getNumJavaDocLines();
 
         // When (a JavaDoc comment with only one line)
-        aMetrics.add(new JavadocComment(7, 0, 7, 2, "/***/"));
+        aMetrics.add(createJavadocComment(7, 0, 7, 2));
 
         // Then
         assertEquals(aJavaDocCommentCount + 1, aMetrics.getNumJavaDocComments());
         assertEquals(aJavaDocLineCount + 1, aMetrics.getNumJavaDocLines());
 
         // When (a JavaDoc comment that spans eight lines)
-        aMetrics.add(new JavadocComment(12, 0, 19, 100, "/***/"));
+        aMetrics.add(createJavadocComment(12, 0, 19, 100));
 
         // Then
         assertEquals(aJavaDocCommentCount + 2, aMetrics.getNumJavaDocComments());
@@ -265,10 +269,28 @@ public class CommentMetricsTest
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
-        aMetrics.add(new JavadocComment(12, 0, 19, 100, "/***/"));
+        aMetrics.add(createJavadocComment(12, 0, 19, 100));
 
         // Then
         assertFalse(aMetrics.isEmpty());
+    }
+
+
+    /**
+     * Adding a a comment without a range should not increase the line count.
+     */
+    @Test
+    public void addingCommentWithoutRangeDoesNotIncreaseLineCount()
+    {
+        // Given
+        CommentMetrics aMetrics = new CommentMetrics();
+
+        // When
+        aMetrics.add(new BlockComment("/* */"));
+
+        // Then
+        assertEquals(1, aMetrics.getNumBlockComments());
+        assertEquals(0, aMetrics.getNumBlockCommentLines());
     }
 
 
@@ -289,23 +311,23 @@ public class CommentMetricsTest
 
             // Add n line comments with 1 line.
             for (int i = 0; i< fNumLineComments; i++)
-                aMetrics.add(new LineComment(i+1, 0, i+1, 1, "//"));
+                aMetrics.add(createLineComment(i+1, 0, i+1, 1));
 
             // Add n-1 block comments with 1 line.
-            for (int i = 0; i< fNumBlockComments -1; i++)
-                aMetrics.add(new BlockComment(i+1, 0, i+1, 3, "/**/"));
+            for (int i = 0; i< fNumBlockComments - 1; i++)
+                aMetrics.add(createBlockComment(i+1, 0, i+1, 3));
 
             // Add one block comment with the remaining lines.
             int aNumLines = fNumBlockCommentLines - fNumBlockComments;
-            aMetrics.add(new BlockComment(1, 0, 1 + aNumLines, 3, "/**/"));
+            aMetrics.add(createBlockComment(1, 0, 1 + aNumLines, 3));
 
             // Add n-1 JavaDoc comments with 1 line.
-            for (int i = 0; i< fNumJavaDocComments -1; i++)
-                aMetrics.add(new JavadocComment(i+1, 0, i+1, 4, "/***/"));
+            for (int i = 0; i< fNumJavaDocComments - 1; i++)
+                aMetrics.add(createJavadocComment(i+1, 0, i+1, 4));
 
             // Add one JavaDoc comment with the remaining lines.
             aNumLines = fNumJavaDocLines - fNumJavaDocComments;
-            aMetrics.add(new JavadocComment(1, 0, 1 + aNumLines, 4, "/***/"));
+            aMetrics.add(createJavadocComment(1, 0, 1 + aNumLines, 4));
 
             return aMetrics;
         }

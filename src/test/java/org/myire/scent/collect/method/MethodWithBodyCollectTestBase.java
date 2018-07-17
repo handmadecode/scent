@@ -308,6 +308,34 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
 
 
     /**
+     * A block comment on the same line as the method's signature should be collected in the
+     * method's {@code CommentMetrics}.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void blockCommentOnSameLineAsMethodSignatureIsCollected() throws ParseException
+    {
+        // Given
+        String[] aSourceLines = {
+                createTypeDeclarationStart(),
+                createMethodSignature(createMethodName()) + "/* Comment on the same line as signature */",
+                "{",
+                "}",
+                "}"
+        };
+
+        // When
+        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+
+        // Then
+        CommentMetrics aComments = getFirstMethod(aMetrics).getComments();
+        assertEquals(1, aComments.getNumBlockComments());
+        assertEquals(1, aComments.getNumBlockCommentLines());
+    }
+
+
+    /**
      * All block comments inside a method should be collected in the method's
      * {@code CommentMetrics}.
      *

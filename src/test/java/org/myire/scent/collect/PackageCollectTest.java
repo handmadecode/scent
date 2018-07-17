@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -62,9 +62,9 @@ public class PackageCollectTest
         JavaMetricsCollector aParser = new JavaMetricsCollector();
 
         // When
-        collect("1", aSrc, aParser);
-        collect("2", aSrc, aParser);
-        collect("3", aSrc, aParser);
+        aParser.collect("1", aSrc);
+        aParser.collect("2", aSrc);
+        aParser.collect("3", aSrc);
 
         // Then
         Iterator<PackageMetrics> aIterator = aParser.getCollectedMetrics().iterator();
@@ -89,9 +89,9 @@ public class PackageCollectTest
         JavaMetricsCollector aParser = new JavaMetricsCollector();
 
         // When
-        collect("1", "package " + aPackage1 + ";", aParser);
-        collect("2", "package " + aPackage2 + ";", aParser);
-        collect("3", "package " + aPackage3 + ";", aParser);
+        aParser.collect("1", "package " + aPackage1 + ";");
+        aParser.collect("2", "package " + aPackage2 + ";");
+        aParser.collect("3", "package " + aPackage3 + ";");
         Iterable<PackageMetrics> aMetrics = aParser.getCollectedMetrics();
 
         // Then

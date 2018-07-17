@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -11,12 +11,9 @@ import java.text.ParseException;
 
 import org.junit.Test;
 import static org.junit.Assert.assertFalse;
-
 import static org.mockito.Mockito.mock;
 
 import org.myire.scent.metrics.PackageMetrics;
-
-import static org.myire.scent.collect.CollectTestUtil.collect;
 
 
 /**
@@ -74,18 +71,52 @@ public class JavaMetricsCollectorTest
     @Test(expected=ParseException.class)
     public void collectThrowsForInvalidSourceCode() throws ParseException
     {
-        collect("int x = 2;");
+        new JavaMetricsCollector().collect("src", "int x = 2;");
+    }
+
+
+    /**
+     * A {@code JavaMetricsCollector} for language level 8 should throw a {@code ParseException}
+     * in  {@code collect(String)} when passed a syntactically invalid source code for the Java 8
+     * language level.
+     *
+     * @throws ParseException   always.
+     */
+    @Test(expected=ParseException.class)
+    public void collectThrowsForInvalidJava8Construct() throws ParseException
+    {
+        // Given
+        String aSrc = "interface X { private void m() {} }";
+
+        // When
+        new JavaMetricsCollector(JavaMetricsCollector.LanguageLevel.JAVA_8).collect("src", aSrc);
+    }
+
+
+    /**
+     * A {@code JavaMetricsCollector} for language level 9 should throw a {@code ParseException}
+     * in  {@code collect(String)} when passed a syntactically invalid source code for the Java 9
+     * language level.
+     *
+     * @throws ParseException   always.
+     */
+    @Test(expected=ParseException.class)
+    public void collectThrowsForInvalidJava9Construct() throws ParseException
+    {
+        // Given
+        String aSrc = "class X {int _;}";
+
+        // When
+        new JavaMetricsCollector(JavaMetricsCollector.LanguageLevel.JAVA_9).collect("src", aSrc);
     }
 
 
     /**
      * The method {@code getCollectedMetrics} should return an empty {@code Iterable} if no source
      * has been parsed.
-     *
-     * @throws ParseException   if the test fails unexpectedly.
      */
     @Test
-    public void collectMetricsReturnsEmptyMetricsWhenParseHasNotBeenCalled() throws ParseException
+    public void collectMetricsReturnsEmptyMetricsWhenParseHasNotBeenCalled()
     {
         // When
         Iterable<PackageMetrics> aMetrics = new JavaMetricsCollector().getCollectedMetrics();

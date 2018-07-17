@@ -10,7 +10,7 @@ import java.util.Collection;
 import static java.util.Objects.requireNonNull;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.NotThreadSafe;
 
 
 /**
@@ -19,7 +19,7 @@ import javax.annotation.concurrent.Immutable;
  *
  * @author <a href="mailto:peter@myire.org">Peter Franzen</a>
  */
-@Immutable
+@NotThreadSafe
 public class TypeMetrics extends CodeElementMetrics
 {
     private final Kind fKind;
