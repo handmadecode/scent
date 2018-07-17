@@ -164,6 +164,29 @@ public class InterfaceCollectTest extends TypeCollectTestBase
 
 
     /**
+     * A private instance method in an interface (introduced in Java 9) should be collected as a
+     * {@code MethodMetrics} with the correct name and kind.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void privateInstanceMethodHasTheCorrectKind() throws ParseException
+    {
+        // Given
+        String aName = "void privateMethod()";
+        String aSrc = createTypeDeclarationWithMembers("private " + aName + "{System.exit();}");
+
+        // When
+        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+
+        // Then
+        MethodMetrics aMethodMetrics = getFirstMethod(aMetrics);
+        assertEquals(aName, aMethodMetrics.getName());
+        assertEquals(MethodMetrics.Kind.INSTANCE_METHOD, aMethodMetrics.getKind());
+    }
+
+
+    /**
      * An interface with all kinds of members should have the corresponding code element metrics
      * collected.
      *
@@ -235,6 +258,14 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         aComments = aMethod.getComments();
         assertEquals(4, aComments.getNumBlockComments());
         assertEquals(4, aComments.getNumBlockCommentLines());
+
+        // Assert private interface method
+        aMethod = aMethods.next();
+        assertEquals("long privateMethod()", aMethod.getName());
+        assertEquals(MethodMetrics.Kind.INSTANCE_METHOD, aMethod.getKind());
+        assertEquals(1, aMethod.getStatements().getNumStatements());
+        aComments = aMethod.getComments();
+        assertEquals(1, aComments.getNumLineComments());
 
         // Assert inner interface
         Iterator<TypeMetrics> aInnerTypes = aInterface.getInnerTypes().iterator();
