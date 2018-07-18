@@ -14,9 +14,9 @@ import org.myire.scent.metrics.FieldMetrics;
 import org.myire.scent.metrics.MethodMetrics;
 import org.myire.scent.metrics.PackageMetrics;
 
-import static org.myire.scent.collect.CollectTestUtil.collect;
-import static org.myire.scent.collect.CollectTestUtil.getFirstField;
-import static org.myire.scent.collect.CollectTestUtil.getFirstMethod;
+import static org.myire.scent.util.CollectTestUtil.collect;
+import static org.myire.scent.util.CollectTestUtil.getFirstField;
+import static org.myire.scent.util.CollectTestUtil.getFirstMethod;
 
 
 /**

@@ -16,10 +16,10 @@ import org.myire.scent.metrics.MethodMetrics;
 import org.myire.scent.metrics.PackageMetrics;
 import org.myire.scent.metrics.TypeMetrics;
 
-import static org.myire.scent.collect.CollectTestUtil.collect;
-import static org.myire.scent.collect.CollectTestUtil.getFirstField;
-import static org.myire.scent.collect.CollectTestUtil.getFirstLocalType;
-import static org.myire.scent.collect.CollectTestUtil.getFirstMethod;
+import static org.myire.scent.util.CollectTestUtil.collect;
+import static org.myire.scent.util.CollectTestUtil.getFirstField;
+import static org.myire.scent.util.CollectTestUtil.getFirstLocalType;
+import static org.myire.scent.util.CollectTestUtil.getFirstMethod;
 
 
 /**

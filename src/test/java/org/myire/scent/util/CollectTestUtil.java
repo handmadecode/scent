@@ -3,13 +3,14 @@
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.myire.scent.collect;
+package org.myire.scent.util;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 
+import org.myire.scent.collect.JavaMetricsCollector;
 import org.myire.scent.metrics.CompilationUnitMetrics;
 import org.myire.scent.metrics.FieldMetrics;
 import org.myire.scent.metrics.MethodMetrics;

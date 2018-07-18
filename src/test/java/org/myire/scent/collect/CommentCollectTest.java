@@ -25,9 +25,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.myire.scent.metrics.CommentMetrics;
 
-import static org.myire.scent.util.JavaParserTests.createBlockComment;
-import static org.myire.scent.util.JavaParserTests.createJavadocComment;
-import static org.myire.scent.util.JavaParserTests.createLineComment;
+import static org.myire.scent.util.CommentTestUtil.createBlockComment;
+import static org.myire.scent.util.CommentTestUtil.createJavadocComment;
+import static org.myire.scent.util.CommentTestUtil.createLineComment;
 
 
 /**

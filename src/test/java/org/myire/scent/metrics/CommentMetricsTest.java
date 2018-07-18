@@ -14,9 +14,9 @@ import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.comments.LineComment;
 
-import static org.myire.scent.util.JavaParserTests.createBlockComment;
-import static org.myire.scent.util.JavaParserTests.createJavadocComment;
-import static org.myire.scent.util.JavaParserTests.createLineComment;
+import static org.myire.scent.util.CommentTestUtil.createBlockComment;
+import static org.myire.scent.util.CommentTestUtil.createJavadocComment;
+import static org.myire.scent.util.CommentTestUtil.createLineComment;
 
 
 /**

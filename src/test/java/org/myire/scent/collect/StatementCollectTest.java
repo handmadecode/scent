@@ -13,9 +13,9 @@ import static org.junit.Assert.assertEquals;
 import org.myire.scent.metrics.PackageMetrics;
 import org.myire.scent.metrics.StatementMetrics;
 
-import static org.myire.scent.collect.CollectTestUtil.collect;
-import static org.myire.scent.collect.CollectTestUtil.collectFromResource;
-import static org.myire.scent.collect.CollectTestUtil.getFirstMethod;
+import static org.myire.scent.util.CollectTestUtil.collect;
+import static org.myire.scent.util.CollectTestUtil.collectFromResource;
+import static org.myire.scent.util.CollectTestUtil.getFirstMethod;
 
 
 /**

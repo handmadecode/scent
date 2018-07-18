@@ -15,8 +15,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.myire.scent.metrics.PackageMetrics;
 
-import static org.myire.scent.collect.CollectTestUtil.collect;
-import static org.myire.scent.collect.CollectTestUtil.getFirstPackage;
+import static org.myire.scent.util.CollectTestUtil.collect;
+import static org.myire.scent.util.CollectTestUtil.getFirstPackage;
 
 
 /**

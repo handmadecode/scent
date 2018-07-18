@@ -12,16 +12,16 @@ import static com.github.javaparser.Range.range;
 
 
 /**
- * Utility methods related to tests involving JavaParser.
+ * Utility methods for unit tests related to comments.
  *
  * @author <a href="mailto:peter@myire.org">Peter Franzen</a>
  */
-public final class JavaParserTests
+public final class CommentTestUtil
 {
     /**
      * Private constructor to disallow instantiations of utility method class.
      */
-    private JavaParserTests()
+    private CommentTestUtil()
     {
         // Empty default ctor, defined to override access scope.
     }
