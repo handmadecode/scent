@@ -528,6 +528,30 @@ public class StatementCollectTest
 
 
     /**
+     * A type inferred local variable declaration with initialization should be collected in the
+     * method's {@code StatementMetrics}.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void typeInferredVariableDeclarationWithInitializationIsCollected() throws ParseException
+    {
+        // Given
+        String[] aSourceLines = {
+            VOID_METHOD_PARAM_PREFIX,
+            "var x = 1;",
+            ANY_METHOD_SUFFIX
+        };
+
+        // When
+        StatementMetrics aStatements = collectStatementMetrics(aSourceLines);
+
+        // Then
+        assertEquals(1, aStatements.getNumStatements());
+    }
+
+
+    /**
      * An annotation with all kinds of members should have the corresponding code element metrics
      * collected.
      *
@@ -544,7 +568,7 @@ public class StatementCollectTest
 
         // Then
         StatementMetrics aStatements = getFirstMethod(aMetrics).getStatements();
-        assertEquals(38, aStatements.getNumStatements());
+        assertEquals(39, aStatements.getNumStatements());
     }
 
 

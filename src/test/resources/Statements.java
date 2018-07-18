@@ -73,8 +73,10 @@ public class Statements
             os.write(is.read());                                // 1 statement
         }
 
+        var s = "inferred";                                     // 1 statement
+
         return 17;                                              // 1 statement
     }
 
-                                                                // Total 38 statements
+                                                                // Total 39 statements
 }
