@@ -184,6 +184,23 @@ public class ClassCollectTest extends ClassAndEnumCollectTestBase
         assertEquals(1, aAnonymousMethod.getStatements().getNumStatements());
         assertEquals(1, aAnonymousMethod.getComments().getNumLineComments());
 
+        // Assert abstract method
+        aMethod = aMethods.next();
+        assertEquals("String abstractMethod()", aMethod.getName());
+        assertEquals(MethodMetrics.Kind.ABSTRACT_METHOD, aMethod.getKind());
+        assertEquals(0, aMethod.getStatements().getNumStatements());
+        aComments = aMethod.getComments();
+        assertEquals(1, aComments.getNumLineComments());
+
+        // Assert native method
+        aMethod = aMethods.next();
+        assertEquals("double nativeMethod(int)", aMethod.getName());
+        assertEquals(MethodMetrics.Kind.NATIVE_METHOD, aMethod.getKind());
+        assertEquals(0, aMethod.getStatements().getNumStatements());
+        aComments = aMethod.getComments();
+        assertEquals(1, aComments.getNumBlockComments());
+        assertEquals(1, aComments.getNumBlockCommentLines());
+
         // Assert inner interface
         Iterator<TypeMetrics> aInnerTypes = aClass.getInnerTypes().iterator();
         TypeMetrics aInnerType = aInnerTypes.next();

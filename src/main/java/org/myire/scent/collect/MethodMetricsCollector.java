@@ -162,6 +162,8 @@ class MethodMetricsCollector
             return MethodMetrics.Kind.STATIC_METHOD;
         else if (pMethod.getModifiers().contains(Modifier.ABSTRACT))
             return MethodMetrics.Kind.ABSTRACT_METHOD;
+        else if (pMethod.getModifiers().contains(Modifier.NATIVE))
+            return MethodMetrics.Kind.NATIVE_METHOD;
         else if (Collectors.isInterface(pMethod.getParentNode().orElse(null)) && !pMethod.getBody().isPresent())
             // Only interface methods without a body are abstract.
             return MethodMetrics.Kind.ABSTRACT_METHOD;
