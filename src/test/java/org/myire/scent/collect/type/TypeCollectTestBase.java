@@ -213,6 +213,34 @@ abstract public class TypeCollectTestBase
 
 
     /**
+     * A type declared together with a module declaration should be collected.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void typeInSameCompilationUnitAsModuleDeclarationIsCollected() throws ParseException
+    {
+        // Given
+        String aTypeName = "TheType";
+        String[] aSourceLines = {
+            "module org.acme.util {",
+            "  requires java.sql;",
+            "  exports org.acme.util;",
+            "}",
+            createEmptyTypeDeclaration(aTypeName)
+        };
+
+        // When
+        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+
+        // Then
+        CompilationUnitMetrics aUnit = getFirstCompilationUnit(aMetrics);
+        assertEquals(1, aUnit.getNumTypes());
+        assertEquals(aTypeName, getFirstType(aUnit).getName());
+    }
+
+
+    /**
      * A block comment for a type should be collected in the {@code CommentMetrics} of the type's
      * {@code TypeMetrics}.
      *

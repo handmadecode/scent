@@ -171,6 +171,10 @@ public class JavaMetricsCollector
      */
     private void collectMetrics(@Nonnull CompilationUnit pCompilationUnit, @Nonnull String pName)
     {
+        if (pCompilationUnit.getModule().isPresent() && pCompilationUnit.getTypes().isEmpty())
+            // Don't collect compilation units containing only a module declaration.
+            return;
+
         CompilationUnitMetricsCollector aCollector = new CompilationUnitMetricsCollector(pCompilationUnit, pName);
         PackageMetrics aPackageMetrics = getPackageMetrics(pCompilationUnit.getPackageDeclaration().orElse(null));
         aPackageMetrics.add(aCollector.collect());

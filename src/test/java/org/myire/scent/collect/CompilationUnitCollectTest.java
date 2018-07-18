@@ -85,6 +85,30 @@ public class CompilationUnitCollectTest
 
 
     /**
+     * A compilation unit containing only a module declaration should not be collected.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void moduleDeclarationIsNotCollected() throws ParseException
+    {
+        // Given
+        String[] aSourceLines = {
+            "module org.acme.util {",
+            "  requires java.sql;",
+            "  exports org.acme.util;",
+            "}"
+        };
+
+        // When
+        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+
+        // Then
+        assertFalse(aMetrics.iterator().hasNext());
+    }
+
+
+    /**
      * A compilation unit header in the form of a block comment should be collected as a
      * {@code CommentMetrics} within the compilation unit's {@code CompilationUnitMetrics}.
      *
