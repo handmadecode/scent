@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -24,10 +24,6 @@ import org.myire.scent.metrics.PackageMetrics;
  */
 public final class Main
 {
-    static private final PrintStream OUT = System.out;
-    static private final PrintStream ERR = System.err;
-
-
     /**
      * Private constructor to disallow instantiations of utility method class.
      */
@@ -66,7 +62,7 @@ public final class Main
      */
     static private void collectMetrics(@Nonnull JavaMetricsCollector pCollector, @Nonnull String... pArgs)
     {
-        PrintingCollector aCollector = new PrintingCollector(pCollector, OUT, ERR);
+        PrintingCollector aCollector = new PrintingCollector(pCollector, getOutStream(), getErrStream());
         for (String aArg : pArgs)
         {
             try
@@ -75,11 +71,11 @@ public final class Main
             }
             catch (IOException e)
             {
-                ERR.println("Error when collecting metrics from " + aArg + ": "+ e.getMessage());
+                getErrStream().println("Error when collecting metrics from " + aArg + ": "+ e.getMessage());
             }
         }
 
-        OUT.println("Collected metrics from " + aCollector.getNumFiles() + " files");
+        getOutStream().println("Collected metrics from " + aCollector.getNumFiles() + " files");
     }
 
 
@@ -92,14 +88,39 @@ public final class Main
      */
     static private void printMetrics(@Nonnull Iterable<PackageMetrics> pMetrics)
     {
-        MetricsPrinter aPrinter = new MetricsPrinter(OUT);
+        PrintStream aOutStream = getOutStream();
+        MetricsPrinter aPrinter = new MetricsPrinter(aOutStream);
 
-        OUT.println();
-        OUT.println("Summary:");
+        aOutStream.println();
+        aOutStream.println("Summary:");
         aPrinter.print(AggregatedMetrics.of(pMetrics));
 
-        OUT.println();
-        OUT.println("Details:");
+        aOutStream.println();
+        aOutStream.println("Details:");
         aPrinter.print(pMetrics);
+    }
+
+
+    /**
+     * Get the {@code PrintStream} to print informational messages to.
+     *
+     * @return  The output stream, never null.
+     */
+    @Nonnull
+    static private PrintStream getOutStream()
+    {
+        return System.out;
+    }
+
+
+    /**
+     * Get the {@code PrintStream} to print warning and error messages to.
+     *
+     * @return  The error stream, never null.
+     */
+    @Nonnull
+    static private PrintStream getErrStream()
+    {
+        return System.err;
     }
 }

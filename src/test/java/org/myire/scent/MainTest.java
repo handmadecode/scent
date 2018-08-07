@@ -7,12 +7,11 @@ package org.myire.scent;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.assertTrue;
@@ -36,17 +35,32 @@ public class MainTest extends FileTestBase
 {
     private final PrintStream fMockedSystemOut = mock(PrintStream.class);
     private final PrintStream fMockedSystemErr = mock(PrintStream.class);
+    private PrintStream fOriginalSystemOut;
+    private PrintStream fOriginalSystemErr;
     private Path fTestDirectory;
 
 
     /**
-     * Replace the stream class variables in {@code Main} with mocks.
+     * Replace the system streams with mocks.
      */
     @Before
     public void mockSystemStreams()
     {
-        replacePrintStream("OUT", fMockedSystemOut);
-        replacePrintStream("ERR", fMockedSystemErr);
+        fOriginalSystemOut = System.out;
+        fOriginalSystemErr = System.err;
+        System.setOut(fMockedSystemOut);
+        System.setErr(fMockedSystemErr);
+    }
+
+
+    /**
+     * Restore the system streams to the values that were replaced in {@code mockSystemStreams()}.
+     */
+    @After
+    public void restoreSystemStreams()
+    {
+        System.setOut(fOriginalSystemOut);
+        System.setErr(fOriginalSystemErr);
     }
 
 
@@ -167,24 +181,5 @@ public class MainTest extends FileTestBase
         assertTrue(aPrintlnArg.getValue().contains("0"));
         verify(fMockedSystemErr).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getValue().contains(aFileName));
-    }
-
-
-    static private void replacePrintStream(String pName, PrintStream pStream)
-    {
-        try
-        {
-            Field aStreamField = Main.class.getDeclaredField(pName);
-            aStreamField.setAccessible(true);
-            Field aModifiersField = Field.class.getDeclaredField("modifiers");
-            aModifiersField.setAccessible(true);
-            aModifiersField.setInt(aStreamField, aStreamField.getModifiers() & ~Modifier.FINAL);
-
-            aStreamField.set(null, pStream);
-        }
-        catch (ReflectiveOperationException e)
-        {
-            e.printStackTrace();
-        }
     }
 }
