@@ -206,6 +206,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         CommentMetrics aComments = aCompilationUnit.getComments();
         assertEquals(1, aComments.getNumBlockComments());
         assertEquals(5, aComments.getNumBlockCommentLines());
+        assertEquals(132, aComments.getBlockCommentsLength());
 
         // Assert interface name and kind, and comments
         TypeMetrics aInterface = getFirstType(aCompilationUnit);
@@ -224,7 +225,9 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         assertEquals("staticField2", aField.getName());
         assertEquals(FieldMetrics.Kind.STATIC_FIELD, aField.getKind());
         assertEquals(1, aField.getStatements().getNumStatements());
-        assertEquals(1, aField.getComments().getNumLineComments());
+        aComments = aField.getComments();
+        assertEquals(1, aComments.getNumLineComments());
+        assertEquals(45, aComments.getLineCommentsLength());
 
         // Assert annotation element without default value
         aField = aFields.next();
@@ -234,6 +237,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         aComments = aField.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(6, aComments.getNumJavaDocLines());
+        assertEquals(68, aComments.getJavaDocCommentsLength());
 
         // Assert annotation element with default value
         aField = aFields.next();
@@ -243,6 +247,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         aComments = aField.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(5, aComments.getNumJavaDocLines());
+        assertEquals(54, aComments.getJavaDocCommentsLength());
 
         // Assert inner interface
         Iterator<TypeMetrics> aInnerTypes = aInterface.getInnerTypes().iterator();
@@ -277,18 +282,21 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         aComments = aInnerType.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(4, aComments.getNumJavaDocLines());
+        assertEquals(37, aComments.getJavaDocCommentsLength());
         aFields = aInnerType.getFields().iterator();
         aField = aFields.next();
         assertEquals("ENUM_CONSTANT_1", aField.getName());
         assertEquals(FieldMetrics.Kind.ENUM_CONSTANT, aField.getKind());
         aComments = aField.getComments();
         assertEquals(1, aComments.getNumLineComments());
+        assertEquals(37, aComments.getLineCommentsLength());
         aField = aFields.next();
         assertEquals("ENUM_CONSTANT_2", aField.getName());
         assertEquals(FieldMetrics.Kind.ENUM_CONSTANT, aField.getKind());
         aComments = aField.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(1, aComments.getNumJavaDocLines());
+        assertEquals(26, aComments.getJavaDocCommentsLength());
 
         // Assert inner annotation
         aInnerType = aInnerTypes.next();
@@ -297,6 +305,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         aComments = aInnerType.getComments();
         assertEquals(1, aComments.getNumBlockComments());
         assertEquals(3, aComments.getNumBlockCommentLines());
+        assertEquals(39, aComments.getBlockCommentsLength());
         aField = getFirstField(aInnerType);
         assertEquals("flag", aField.getName());
         assertEquals(FieldMetrics.Kind.ANNOTATION_TYPE_ELEMENT, aField.getKind());

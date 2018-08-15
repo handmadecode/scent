@@ -239,7 +239,7 @@ public class AggregatedMetricsTest
         // Given
         CommentMetrics aComments =
                 new CommentMetricsTest.Builder()
-                .withNumLineComments(2)
+                .withLineComments(2)
                 .withBlockComments(4, 10)
                 .withJavaDocComments(1, 7)
                 .build();
@@ -275,7 +275,7 @@ public class AggregatedMetricsTest
         // Given
         CommentMetrics aComments =
                 new CommentMetricsTest.Builder()
-                .withNumLineComments(2)
+                .withLineComments(2)
                 .withBlockComments(4, 10)
                 .withJavaDocComments(1, 7)
                 .build();
@@ -311,7 +311,7 @@ public class AggregatedMetricsTest
         AggregatedMetrics aAggregation = new AggregatedMetrics();
         CommentMetrics aComments =
                 new CommentMetricsTest.Builder()
-                .withNumLineComments(2)
+                .withLineComments(2)
                 .withBlockComments(4, 10)
                 .withJavaDocComments(1, 7)
                 .build();
@@ -348,7 +348,7 @@ public class AggregatedMetricsTest
         StatementMetrics aStatements = StatementMetricsTest.createStatementMetrics(1);
         CommentMetrics aComments =
                 new CommentMetricsTest.Builder()
-                .withNumLineComments(12)
+                .withLineComments(12)
                 .withBlockComments(5, 28)
                 .withJavaDocComments(1, 16)
                 .build();
@@ -383,7 +383,7 @@ public class AggregatedMetricsTest
         StatementMetrics aStatements = StatementMetricsTest.createStatementMetrics(1);
         CommentMetrics aComments =
                 new CommentMetricsTest.Builder()
-                .withNumLineComments(12)
+                .withLineComments(12)
                 .withBlockComments(5, 28)
                 .withJavaDocComments(1, 16)
                 .build();
@@ -419,7 +419,7 @@ public class AggregatedMetricsTest
         StatementMetrics aStatements = StatementMetricsTest.createStatementMetrics(1);
         CommentMetrics aComments =
                 new CommentMetricsTest.Builder()
-                .withNumLineComments(12)
+                .withLineComments(12)
                 .withBlockComments(5, 28)
                 .withJavaDocComments(1, 16)
                 .build();
@@ -568,7 +568,7 @@ public class AggregatedMetricsTest
         AggregatedMetrics aAggregation = new AggregatedMetrics();
         CommentMetrics aComments =
                 new CommentMetricsTest.Builder()
-                .withNumLineComments(14)
+                .withLineComments(14)
                 .withBlockComments(22, 75)
                 .withJavaDocComments(12, 900)
                 .build();

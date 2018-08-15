@@ -165,12 +165,15 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
         CommentMetrics aComments = aCompilationUnit.getComments();
         assertEquals(2, aComments.getNumBlockComments());
         assertEquals(2, aComments.getNumBlockCommentLines());
+        assertEquals(54, aComments.getBlockCommentsLength());
 
         // Assert enum name and kind, and comment
         TypeMetrics aClass = getFirstType(aCompilationUnit);
         assertEquals(aEnumName, aClass.getName());
         assertEquals(TypeMetrics.Kind.ENUM, aClass.getKind());
-        assertEquals(1, aClass.getComments().getNumLineComments());
+        aComments = aClass.getComments();
+        assertEquals(1, aComments.getNumLineComments());
+        assertEquals(32, aComments.getLineCommentsLength());
 
         // Assert enum constant without body
         Iterator<FieldMetrics> aFields = aClass.getFields().iterator();
@@ -180,6 +183,7 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
         aComments = aField.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(1, aComments.getNumJavaDocLines());
+        assertEquals(23, aComments.getJavaDocCommentsLength());
 
         // Assert enum constant with body
         Iterator<TypeMetrics> aInnerTypes = aClass.getInnerTypes().iterator();
@@ -189,6 +193,7 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
         aComments = aInnerType.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(3, aComments.getNumJavaDocLines());
+        assertEquals(56, aComments.getJavaDocCommentsLength());
         MethodMetrics aMethod = getFirstMethod(aInnerType);
         assertEquals("int instanceMethod()", aMethod.getName());
         assertEquals(MethodMetrics.Kind.INSTANCE_METHOD, aMethod.getKind());
@@ -198,7 +203,9 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
         assertEquals("staticField", aField.getName());
         assertEquals(FieldMetrics.Kind.STATIC_FIELD, aField.getKind());
         assertEquals(0, aField.getStatements().getNumStatements());
-        assertEquals(1, aField.getComments().getNumLineComments());
+        aComments = aField.getComments();
+        assertEquals(1, aComments.getNumLineComments());
+        assertEquals(38, aComments.getLineCommentsLength());
 
         // Assert instance field
         aField = aFields.next();
@@ -208,6 +215,7 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
         aComments = aField.getComments();
         assertEquals(1, aComments.getNumBlockComments());
         assertEquals(1, aComments.getNumBlockCommentLines());
+        assertEquals(42, aComments.getBlockCommentsLength());
 
         // Assert class initializer
         Iterator<MethodMetrics> aMethods = aClass.getMethods().iterator();
@@ -227,7 +235,9 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
         assertEquals(aEnumName + "()", aMethod.getName());
         assertEquals(MethodMetrics.Kind.CONSTRUCTOR, aMethod.getKind());
         assertEquals(1, aMethod.getStatements().getNumStatements());
-        assertEquals(1, aMethod.getComments().getNumLineComments());
+        aComments = aMethod.getComments();
+        assertEquals(1, aComments.getNumLineComments());
+        assertEquals(39, aComments.getLineCommentsLength());
 
         // Assert instance method
         aMethod = aMethods.next();
@@ -237,6 +247,7 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
         aComments = aMethod.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(8, aComments.getNumJavaDocLines());
+        assertEquals(64, aComments.getJavaDocCommentsLength());
 
         // Assert class method
         aMethod = aMethods.next();
@@ -246,6 +257,7 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
         aComments = aMethod.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(2, aComments.getNumJavaDocLines());
+        assertEquals(47, aComments.getJavaDocCommentsLength());
 
         // Assert inner interface
         aInnerType = aInnerTypes.next();
@@ -254,6 +266,7 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
         aComments = aInnerType.getComments();
         assertEquals(1, aComments.getNumBlockComments());
         assertEquals(3, aComments.getNumBlockCommentLines());
+        assertEquals(49, aComments.getBlockCommentsLength());
         aMethod = getFirstMethod(aInnerType);
         assertEquals("int get()", aMethod.getName());
         assertEquals(MethodMetrics.Kind.ABSTRACT_METHOD, aMethod.getKind());
@@ -262,7 +275,9 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
         aInnerType = aInnerTypes.next();
         assertEquals("InnerClass", aInnerType.getName());
         assertEquals(TypeMetrics.Kind.CLASS, aInnerType.getKind());
-        assertEquals(2, aInnerType.getComments().getNumLineComments());
+        aComments = aInnerType.getComments();
+        assertEquals(2, aComments.getNumLineComments());
+        assertEquals(43, aComments.getLineCommentsLength());
         aField = getFirstField(aInnerType);
         assertEquals("innerField", aField.getName());
         assertEquals(FieldMetrics.Kind.INSTANCE_FIELD, aField.getKind());
@@ -283,18 +298,21 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
         aComments = aInnerType.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(7, aComments.getNumJavaDocLines());
+        assertEquals(52, aComments.getJavaDocCommentsLength());
         aFields = aInnerType.getFields().iterator();
         aField = aFields.next();
         assertEquals("INNER_CONSTANT_1", aField.getName());
         assertEquals(FieldMetrics.Kind.ENUM_CONSTANT, aField.getKind());
         aComments = aField.getComments();
         assertEquals(1, aComments.getNumLineComments());
+        assertEquals(37, aComments.getLineCommentsLength());
         aField = aFields.next();
         assertEquals("INNER_CONSTANT_2", aField.getName());
         assertEquals(FieldMetrics.Kind.ENUM_CONSTANT, aField.getKind());
         aComments = aField.getComments();
         assertEquals(1, aComments.getNumBlockComments());
         assertEquals(1, aComments.getNumBlockCommentLines());
+        assertEquals(32, aComments.getBlockCommentsLength());
 
         // Assert inner annotation
         aInnerType = aInnerTypes.next();

@@ -100,6 +100,10 @@ class FullClass
     }
 
 
+    /*
+     **** Block comment for inner class  *****
+     **** with lots of extra asterisks   *****
+     */
     static class InnerClass implements InnerInterface
     {
         int innerField;

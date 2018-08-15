@@ -51,10 +51,13 @@ public class CommentMetricsTest
 
         // Then
         assertEquals(0, aMetrics.getNumLineComments());
+        assertEquals(0, aMetrics.getLineCommentsLength());
         assertEquals(0, aMetrics.getNumBlockComments());
         assertEquals(0, aMetrics.getNumBlockCommentLines());
+        assertEquals(0, aMetrics.getBlockCommentsLength());
         assertEquals(0, aMetrics.getNumJavaDocComments());
         assertEquals(0, aMetrics.getNumJavaDocLines());
+        assertEquals(0, aMetrics.getJavaDocCommentsLength());
     }
 
 
@@ -124,15 +127,15 @@ public class CommentMetricsTest
         // Given
         CommentMetrics aMetrics =
                 new Builder()
-                .withNumLineComments(2)
-                .withBlockComments(4, 6)
-                .withJavaDocComments(8, 10)
+                .withLineComments(2, 17)
+                .withBlockComments(4, 6, 12)
+                .withJavaDocComments(8, 10, 29)
                 .build();
         CommentMetrics aMetricsToAdd =
                 new Builder()
-                .withNumLineComments(1)
-                .withBlockComments(2, 3)
-                .withJavaDocComments(4, 5)
+                .withLineComments(1, 5)
+                .withBlockComments(2, 3, 21)
+                .withJavaDocComments(4, 5, 19)
                 .build();
 
         // When
@@ -140,10 +143,13 @@ public class CommentMetricsTest
 
         // Then
         assertEquals(3, aMetrics.getNumLineComments());
+        assertEquals(22, aMetrics.getLineCommentsLength());
         assertEquals(6, aMetrics.getNumBlockComments());
         assertEquals(9, aMetrics.getNumBlockCommentLines());
+        assertEquals(33, aMetrics.getBlockCommentsLength());
         assertEquals(12, aMetrics.getNumJavaDocComments());
         assertEquals(15, aMetrics.getNumJavaDocLines());
+        assertEquals(48, aMetrics.getJavaDocCommentsLength());
     }
 
 
@@ -156,18 +162,23 @@ public class CommentMetricsTest
         // Given
         CommentMetrics aMetrics = new CommentMetrics();
         int aLineCommentCount = aMetrics.getNumLineComments();
+        int aLineCommentLength = aMetrics.getLineCommentsLength();
 
         // When
-        aMetrics.add(createLineComment(1, 0, 1, 2));
+        int aLength1 = 26;
+        aMetrics.add(createLineComment(1, 0, 1, 2, aLength1));
 
         // Then
         assertEquals(aLineCommentCount + 1, aMetrics.getNumLineComments());
+        assertEquals(aLineCommentLength + aLength1, aMetrics.getLineCommentsLength());
 
         // When (a line comment that spans two lines)
-        aMetrics.add(createLineComment(1, 0, 2, 2));
+        int aLength2 = 14;
+        aMetrics.add(createLineComment(1, 0, 2, 2, aLength2));
 
         // Then
         assertEquals(aLineCommentCount + 3, aMetrics.getNumLineComments());
+        assertEquals(aLineCommentLength + aLength1 + aLength2, aMetrics.getLineCommentsLength());
     }
 
 
@@ -181,7 +192,7 @@ public class CommentMetricsTest
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
-        aMetrics.add(createLineComment(1, 0, 2, 2));
+        aMetrics.add(createLineComment());
 
         // Then
         assertFalse(aMetrics.isEmpty());
@@ -198,20 +209,27 @@ public class CommentMetricsTest
         CommentMetrics aMetrics = new CommentMetrics();
         int aBlockCommentCount = aMetrics.getNumBlockComments();
         int aBlockCommentLineCount = aMetrics.getNumBlockCommentLines();
+        int aBlockCommentLength = aMetrics.getBlockCommentsLength();
 
         // When (a block comment with only one line)
-        aMetrics.add(createBlockComment(1, 0, 1, 2));
+        int aLines1 = 1;
+        int aLength1 = 28;
+        aMetrics.add(createBlockComment(1, 0, aLines1, 2, aLength1));
 
         // Then
         assertEquals(aBlockCommentCount + 1, aMetrics.getNumBlockComments());
-        assertEquals(aBlockCommentLineCount + 1, aMetrics.getNumBlockCommentLines());
+        assertEquals(aBlockCommentLineCount + aLines1, aMetrics.getNumBlockCommentLines());
+        assertEquals(aBlockCommentLength + aLength1, aMetrics.getBlockCommentsLength());
 
         // When (a block comment that spans four lines)
-        aMetrics.add(createBlockComment(1, 0, 4, 2));
+        int aLines2 = 4;
+        int aLength2 = 102;
+        aMetrics.add(createBlockComment(1, 0, aLines2, 2, aLength2));
 
         // Then
         assertEquals(aBlockCommentCount + 2, aMetrics.getNumBlockComments());
-        assertEquals(aBlockCommentLineCount + 5, aMetrics.getNumBlockCommentLines());
+        assertEquals(aBlockCommentLineCount + aLines1 + aLines2, aMetrics.getNumBlockCommentLines());
+        assertEquals(aBlockCommentLength + aLength1 + aLength2, aMetrics.getBlockCommentsLength());
     }
 
 
@@ -225,7 +243,7 @@ public class CommentMetricsTest
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
-        aMetrics.add(createBlockComment(1, 0, 1, 2));
+        aMetrics.add(createBlockComment(1));
 
         // Then
         assertFalse(aMetrics.isEmpty());
@@ -242,20 +260,27 @@ public class CommentMetricsTest
         CommentMetrics aMetrics = new CommentMetrics();
         int aJavaDocCommentCount = aMetrics.getNumJavaDocComments();
         int aJavaDocLineCount = aMetrics.getNumJavaDocLines();
+        int aJavaDocCommentLength = aMetrics.getJavaDocCommentsLength();
 
         // When (a JavaDoc comment with only one line)
-        aMetrics.add(createJavadocComment(7, 0, 7, 2));
+        int aLines1 = 1;
+        int aLength1 = 6;
+        aMetrics.add(createJavadocComment(1, 0, aLines1, 2, aLength1));
 
         // Then
         assertEquals(aJavaDocCommentCount + 1, aMetrics.getNumJavaDocComments());
-        assertEquals(aJavaDocLineCount + 1, aMetrics.getNumJavaDocLines());
+        assertEquals(aJavaDocLineCount + aLines1, aMetrics.getNumJavaDocLines());
+        assertEquals(aJavaDocCommentLength + aLength1, aMetrics.getJavaDocCommentsLength());
 
         // When (a JavaDoc comment that spans eight lines)
-        aMetrics.add(createJavadocComment(12, 0, 19, 100));
+        int aLines2 = 8;
+        int aLength2 = 72;
+        aMetrics.add(createJavadocComment(1, 0, aLines2, 100, aLength2));
 
         // Then
         assertEquals(aJavaDocCommentCount + 2, aMetrics.getNumJavaDocComments());
-        assertEquals(aJavaDocLineCount + 9, aMetrics.getNumJavaDocLines());
+        assertEquals(aJavaDocLineCount + aLines1 + aLines2, aMetrics.getNumJavaDocLines());
+        assertEquals(aJavaDocCommentLength + aLength1 + aLength2, aMetrics.getJavaDocCommentsLength());
     }
 
 
@@ -269,7 +294,7 @@ public class CommentMetricsTest
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
-        aMetrics.add(createJavadocComment(12, 0, 19, 100));
+        aMetrics.add(createJavadocComment(12));
 
         // Then
         assertFalse(aMetrics.isEmpty());
@@ -286,11 +311,151 @@ public class CommentMetricsTest
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
-        aMetrics.add(new BlockComment("/* */"));
+        aMetrics.add(new BlockComment(""));
 
         // Then
         assertEquals(1, aMetrics.getNumBlockComments());
         assertEquals(0, aMetrics.getNumBlockCommentLines());
+    }
+
+
+    /**
+     * Leading and trailing whitespace in a line comment's content should not add to the length of
+     * the line comments in the metrics.
+     */
+    @Test
+    public void leadingAndTrailingWhitespaceDoesNotAddToLineCommentsLength()
+    {
+        // Given
+        CommentMetrics aMetrics = new CommentMetrics();
+        String aContent = "content";
+        String aContentWithWhitespace = "\t" + aContent + "  ";
+
+        // When
+        aMetrics.add(createLineComment(1, 1, 1, aContentWithWhitespace.length(), aContentWithWhitespace));
+
+        // Then
+        assertEquals(aContent.length(), aMetrics.getLineCommentsLength());
+    }
+
+
+    /**
+     * Leading and trailing whitespace in a block comment's content should not add to the length of
+     * the block comments in the metrics.
+     */
+    @Test
+    public void leadingAndTrailingWhitespaceDoesNotAddToBlockCommentsLength()
+    {
+        // Given
+        CommentMetrics aMetrics = new CommentMetrics();
+        String aContent = "content";
+        String aContentWithWhitespace = "\t \t" + aContent + "    ";
+
+        // When
+        aMetrics.add(createBlockComment(1, 1, 1, aContentWithWhitespace.length(), aContentWithWhitespace));
+
+        // Then
+        assertEquals(aContent.length(), aMetrics.getBlockCommentsLength());
+    }
+
+
+    /**
+     * Leading and trailing whitespace in a JavaDoc comment's content should not add to the length
+     * of the JavaDoc comments in the metrics.
+     */
+    @Test
+    public void leadingAndTrailingWhitespaceDoesNotAddToJavaDocCommentsLength()
+    {
+        // Given
+        CommentMetrics aMetrics = new CommentMetrics();
+        String aContent = "content";
+        String aContentWithWhitespace = " " + aContent + "  \t  ";
+
+        // When
+        aMetrics.add(createJavadocComment(1, 1, 1, aContentWithWhitespace.length(), aContentWithWhitespace));
+
+        // Then
+        assertEquals(aContent.length(), aMetrics.getJavaDocCommentsLength());
+    }
+
+
+    /**
+     * Line breaks in a block comment's content should not add to the length of the block comments
+     * in the metrics.
+     */
+    @Test
+    public void lineBreaksDoNotAddToBlockCommentsLength()
+    {
+        // Given
+        CommentMetrics aMetrics = new CommentMetrics();
+        String aContent = "content";
+        String aContentWithLineBreaks = "\r" + aContent + "\r\n" + aContent + "\n" + aContent + "\r\n ";
+
+        // When
+        aMetrics.add(createBlockComment(1, 1, 4, aContentWithLineBreaks.length(), aContentWithLineBreaks));
+
+        // Then
+        assertEquals(aContent.length() * 3, aMetrics.getBlockCommentsLength());
+    }
+
+
+    /**
+     * Line breaks in a JavaDoc comment's content should not add to the length of the JavaDoc
+     * comments in the metrics.
+     */
+    @Test
+    public void lineBreaksDoNotAddToJavaDocCommentsLength()
+    {
+        // Given
+        CommentMetrics aMetrics = new CommentMetrics();
+        String aContent = "content";
+        String aContentWithLineBreaks = "\r" + aContent + "\r\n" + aContent;
+
+        // When
+        aMetrics.add(createJavadocComment(1, 1, 3, aContentWithLineBreaks.length(), aContentWithLineBreaks));
+
+        // Then
+        assertEquals(aContent.length() * 2, aMetrics.getJavaDocCommentsLength());
+    }
+
+
+    /**
+     * Leading and trailing asterisks in a block comment's content should not add to the length of
+     * the block comments in the metrics.
+     */
+    @Test
+    public void leadingAndTrailingAsterisksDoNotAddToBlockCommentsLength()
+    {
+        // Given
+        CommentMetrics aMetrics = new CommentMetrics();
+        String aContent = "content";
+        String aContentWithAsterisks = "\r*" + aContent + "*\r\n *" + aContent + " * ";
+
+        // When
+        aMetrics.add(createBlockComment(1, 1, 3, aContentWithAsterisks.length(), aContentWithAsterisks));
+
+        // Then
+        assertEquals(aContent.length() * 2, aMetrics.getBlockCommentsLength());
+    }
+
+
+    /**
+     * Leading and trailing asterisks in a JavaDoc comment's content should not add to the length of
+     * the JavaDoc comments in the metrics.
+     */
+    @Test
+    public void leadingAndTrailingAsterisksDoNotAddToJavaDocCommentsLength()
+    {
+        // Given
+        CommentMetrics aMetrics = new CommentMetrics();
+        String aContent = "content";
+        String aContentWithAsterisks = "\r*" + aContent + "*\r\n *" + aContent + " * \n**" + aContent;
+
+        // When
+        aMetrics.add(createJavadocComment(1, 1, 3, aContentWithAsterisks.length(), aContentWithAsterisks));
+
+        // Then
+        assertEquals(aContent.length() * 3, aMetrics.getJavaDocCommentsLength());
     }
 
 
@@ -300,55 +465,87 @@ public class CommentMetricsTest
     static class Builder
     {
         int fNumLineComments;
+        int fLineCommentsLength;
         int fNumBlockComments;
         int fNumBlockCommentLines;
+        int fBlockCommentsLength;
         int fNumJavaDocComments;
         int fNumJavaDocLines;
+        int fJavaDocCommentsLength;
 
         CommentMetrics build()
         {
             CommentMetrics aMetrics = new CommentMetrics();
 
-            // Add n line comments with 1 line.
-            for (int i = 0; i< fNumLineComments; i++)
+            // Add n-1 line comments with 1 line.
+            for (int i = 0; i < fNumLineComments - 1; i++)
                 aMetrics.add(createLineComment(i+1, 0, i+1, 1));
 
+            // Add one line comment with 1 line and the entire line comment length.
+            aMetrics.add(
+                createLineComment(
+                    fNumLineComments,
+                    0,
+                    fNumLineComments,
+                    fLineCommentsLength,
+                    fLineCommentsLength));
+
             // Add n-1 block comments with 1 line.
-            for (int i = 0; i< fNumBlockComments - 1; i++)
+            for (int i = 0; i < fNumBlockComments - 1; i++)
                 aMetrics.add(createBlockComment(i+1, 0, i+1, 3));
 
-            // Add one block comment with the remaining lines.
+            // Add one block comment with the remaining lines and the entire block comment length.
             int aNumLines = fNumBlockCommentLines - fNumBlockComments;
-            aMetrics.add(createBlockComment(1, 0, 1 + aNumLines, 3));
+            aMetrics.add(createBlockComment(1, 0, 1 + aNumLines, 3, fBlockCommentsLength));
 
             // Add n-1 JavaDoc comments with 1 line.
-            for (int i = 0; i< fNumJavaDocComments - 1; i++)
+            for (int i = 0; i < fNumJavaDocComments - 1; i++)
                 aMetrics.add(createJavadocComment(i+1, 0, i+1, 4));
 
-            // Add one JavaDoc comment with the remaining lines.
+            // Add one JavaDoc comment with the remaining lines and the entire JavaDoc comment
+            // length.
             aNumLines = fNumJavaDocLines - fNumJavaDocComments;
-            aMetrics.add(createJavadocComment(1, 0, 1 + aNumLines, 4));
+            aMetrics.add(createJavadocComment(1, 0, 1 + aNumLines, 4, fJavaDocCommentsLength));
 
             return aMetrics;
         }
 
-        Builder withNumLineComments(int pNumLineComments)
+
+        Builder withLineComments(int pNumComments)
         {
-            fNumLineComments = pNumLineComments;
+            return withLineComments(pNumComments, 0);
+        }
+
+        Builder withLineComments(int pNumComments, int pLength)
+        {
+            fNumLineComments = pNumComments;
+            fLineCommentsLength = pLength;
             return this;
         }
 
         Builder withBlockComments(int pNumComments, int pNumLines)
         {
+            return withBlockComments(pNumComments, pNumLines, 0);
+        }
+
+        Builder withBlockComments(int pNumComments, int pNumLines, int pLength)
+        {
             fNumBlockComments = pNumComments;
             fNumBlockCommentLines = pNumLines;
+            fBlockCommentsLength = pLength;
             return this;
         }
 
         Builder withJavaDocComments(int pNumComments, int pNumLines)
         {
+            return withJavaDocComments(pNumComments, pNumLines, 0);
+        }
+
+        Builder withJavaDocComments(int pNumComments, int pNumLines, int pLength)
+        {
             fNumJavaDocComments = pNumComments;
             fNumJavaDocLines = pNumLines;
+            fJavaDocCommentsLength = pLength;
             return this;
         }
     }

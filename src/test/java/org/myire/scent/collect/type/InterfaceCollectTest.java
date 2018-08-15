@@ -210,6 +210,7 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         assertEquals(aResourceName, aCompilationUnit.getName());
         CommentMetrics aComments = aCompilationUnit.getComments();
         assertEquals(1, aComments.getNumLineComments());
+        assertEquals(23, aComments.getLineCommentsLength());
 
         // Assert interface name and kind, and comments
         TypeMetrics aInterface = getFirstType(aCompilationUnit);
@@ -218,6 +219,7 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         aComments = aInterface.getComments();
         assertEquals(2, aComments.getNumBlockComments());
         assertEquals(2, aComments.getNumBlockCommentLines());
+        assertEquals(58, aComments.getBlockCommentsLength());
 
         // Assert explicitly static field
         Iterator<FieldMetrics> aFields = aInterface.getFields().iterator();
@@ -225,14 +227,18 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         assertEquals("staticField1", aField.getName());
         assertEquals(FieldMetrics.Kind.STATIC_FIELD, aField.getKind());
         assertEquals(1, aField.getStatements().getNumStatements());
-        assertEquals(1, aField.getComments().getNumLineComments());
+        aComments = aField.getComments();
+        assertEquals(1, aComments.getNumLineComments());
+        assertEquals(38, aComments.getLineCommentsLength());
 
         // Assert implicitly static field
         aField = aFields.next();
         assertEquals("staticField2", aField.getName());
         assertEquals(FieldMetrics.Kind.STATIC_FIELD, aField.getKind());
         assertEquals(1, aField.getStatements().getNumStatements());
-        assertEquals(3, aField.getComments().getNumLineComments());
+        aComments = aField.getComments();
+        assertEquals(3, aComments.getNumLineComments());
+        assertEquals(55, aComments.getLineCommentsLength());
 
         // Assert interface method
         Iterator<MethodMetrics> aMethods = aInterface.getMethods().iterator();
@@ -242,13 +248,16 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         aComments = aMethod.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(5, aComments.getNumJavaDocLines());
+        assertEquals(55, aComments.getJavaDocCommentsLength());
 
         // Assert default method
         aMethod = aMethods.next();
         assertEquals("int defaultMethod()", aMethod.getName());
         assertEquals(MethodMetrics.Kind.DEFAULT_METHOD, aMethod.getKind());
         assertEquals(1, aMethod.getStatements().getNumStatements());
-        assertEquals(2, aMethod.getComments().getNumLineComments());
+        aComments = aMethod.getComments();
+        assertEquals(2, aComments.getNumLineComments());
+        assertEquals(40, aComments.getLineCommentsLength());
 
         // Assert class method
         aMethod = aMethods.next();
@@ -258,6 +267,7 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         aComments = aMethod.getComments();
         assertEquals(4, aComments.getNumBlockComments());
         assertEquals(4, aComments.getNumBlockCommentLines());
+        assertEquals(104, aComments.getBlockCommentsLength());
 
         // Assert private interface method
         aMethod = aMethods.next();
@@ -266,6 +276,7 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         assertEquals(1, aMethod.getStatements().getNumStatements());
         aComments = aMethod.getComments();
         assertEquals(1, aComments.getNumLineComments());
+        assertEquals(62, aComments.getLineCommentsLength());
 
         // Assert inner interface
         Iterator<TypeMetrics> aInnerTypes = aInterface.getInnerTypes().iterator();
@@ -275,6 +286,7 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         aComments = aInnerType.getComments();
         assertEquals(1, aComments.getNumBlockComments());
         assertEquals(3, aComments.getNumBlockCommentLines());
+        assertEquals(49, aComments.getBlockCommentsLength());
         aMethod = getFirstMethod(aInnerType);
         assertEquals("int get()", aMethod.getName());
         assertEquals(MethodMetrics.Kind.ABSTRACT_METHOD, aMethod.getKind());
@@ -286,6 +298,7 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         aComments = aInnerType.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(5, aComments.getNumJavaDocLines());
+        assertEquals(38 , aComments.getJavaDocCommentsLength());
         aField = getFirstField(aInnerType);
         assertEquals("innerField", aField.getName());
         assertEquals(FieldMetrics.Kind.INSTANCE_FIELD, aField.getKind());
@@ -308,14 +321,13 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         aField = aFields.next();
         assertEquals("ENUM_CONSTANT_1", aField.getName());
         assertEquals(FieldMetrics.Kind.ENUM_CONSTANT, aField.getKind());
-        aComments = aField.getComments();
-        assertEquals(1, aComments.getNumLineComments());
         aField = aFields.next();
         assertEquals("ENUM_CONSTANT_2", aField.getName());
         assertEquals(FieldMetrics.Kind.ENUM_CONSTANT, aField.getKind());
         aComments = aField.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(1, aComments.getNumJavaDocLines());
+        assertEquals(26, aComments.getJavaDocCommentsLength());
 
         // Assert inner annotation
         aInnerType = aInnerTypes.next();
@@ -324,6 +336,9 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         aField = getFirstField(aInnerType);
         assertEquals("name", aField.getName());
         assertEquals(FieldMetrics.Kind.ANNOTATION_TYPE_ELEMENT, aField.getKind());
+        aComments = aField.getComments();
+        assertEquals(1, aComments.getNumLineComments());
+        assertEquals(40, aComments.getLineCommentsLength());
     }
 
 

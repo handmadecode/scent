@@ -79,7 +79,6 @@ interface FullInterface
 
 
     static enum InnerEnum {
-        // Single line comment for enum constant
         ENUM_CONSTANT_1,
         /** JavaDoc for enum constant. */
         ENUM_CONSTANT_2
@@ -88,6 +87,7 @@ interface FullInterface
 
     @interface InnerAnnotation
     {
+        // Single line comment for annotation field
         String name() default "X";
     }
 }

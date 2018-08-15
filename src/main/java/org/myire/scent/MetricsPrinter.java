@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -224,9 +224,20 @@ class MetricsPrinter
      */
     void print(@Nonnull CommentMetrics pMetrics)
     {
-        printIndentedLine(pMetrics.getNumLineComments(), " line comments");
-        printIndentedLine(pMetrics.getNumBlockComments(), pMetrics.getNumBlockCommentLines(), " block comments/lines");
-        printIndentedLine(pMetrics.getNumJavaDocComments(), pMetrics.getNumJavaDocLines(), " JavaDocs/lines");
+        printIndentedLine(
+            pMetrics.getNumLineComments(),
+            pMetrics.getLineCommentsLength(),
+            " line comments/length");
+        printIndentedLine(
+            pMetrics.getNumBlockComments(),
+            pMetrics.getNumBlockCommentLines(),
+            pMetrics.getBlockCommentsLength(),
+            " block comments/lines/length");
+        printIndentedLine(
+            pMetrics.getNumJavaDocComments(),
+            pMetrics.getNumJavaDocLines(),
+            pMetrics.getJavaDocCommentsLength(),
+            " JavaDocs/lines/length");
     }
 
 
@@ -272,8 +283,8 @@ class MetricsPrinter
 
     /**
      * Print a line at the current indentation to the stream specified in the constructor. The line
-     * consists of two integer values separated by a slash ('/') and immediately followed by a
-     * string. The line is only printed if the first value is positive.
+     * consists of two integer values separated by a slash ('/'), immediately followed by a string.
+     * The line is only printed if the first value is positive.
      *
      * @param pValue1   The first integer value to print.
      * @param pValue2   The second integer value to print.
@@ -287,6 +298,31 @@ class MetricsPrinter
             fPrintStream.print(pValue1);
             fPrintStream.print('/');
             fPrintStream.print(pValue2);
+            fPrintStream.println(pText);
+        }
+    }
+
+
+    /**
+     * Print a line at the current indentation to the stream specified in the constructor. The line
+     * consists of three integer values separated by a slash ('/'), immediately followed by a
+     * string. The line is only printed if the first value is positive.
+     *
+     * @param pValue1   The first integer value to print.
+     * @param pValue2   The second integer value to print.
+     * @param pValue3   The third integer value to print.
+     * @param pText     The string to print.
+     */
+    private void printIndentedLine(int pValue1, int pValue2, int pValue3, @Nullable  String pText)
+    {
+        if (pValue1 > 0)
+        {
+            printIndentation();
+            fPrintStream.print(pValue1);
+            fPrintStream.print('/');
+            fPrintStream.print(pValue2);
+            fPrintStream.print('/');
+            fPrintStream.print(pValue3);
             fPrintStream.println(pText);
         }
     }

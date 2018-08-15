@@ -33,10 +33,13 @@ public class CommentMetrics
 
 
     private int fNumLineComments;
+    private int fLineCommentsLength;
     private int fNumBlockComments;
     private int fNumBlockCommentLines;
+    private int fBlockCommentsLength;
     private int fNumJavaDocComments;
     private int fNumJavaDocLines;
+    private int fJavaDocCommentsLength;
 
 
     /**
@@ -65,6 +68,19 @@ public class CommentMetrics
 
 
     /**
+     * Get the total number of significant characters in the {@code LineComment} instances added to
+     * this instance. Significant characters are the ones remaining when leading and trailing
+     * whitespace has been trimmed away.
+     *
+     * @return  The content length of the line comments.
+     */
+    public int getLineCommentsLength()
+    {
+        return fLineCommentsLength;
+    }
+
+
+    /**
      * Get the number of block comments collected from the {@code BlockComment} instances added to
      * this instance.
      *
@@ -85,6 +101,19 @@ public class CommentMetrics
     public int getNumBlockCommentLines()
     {
         return fNumBlockCommentLines;
+    }
+
+
+    /**
+     * Get the total number of significant characters in the {@code BlockComment} instances added to
+     * this instance. Significant characters are the ones remaining when leading and trailing
+     * whitespace and asterisks have been trimmed away from each line in the comments.
+     *
+     * @return  The content length of the block comments.
+     */
+    public int getBlockCommentsLength()
+    {
+        return fBlockCommentsLength;
     }
 
 
@@ -113,6 +142,19 @@ public class CommentMetrics
 
 
     /**
+     * Get the total number of significant characters in the {@code JavadocComment} instances added
+     * to this instance. Significant characters are the ones remaining when leading and trailing
+     * whitespace and asterisks have been trimmed away from each line in the comments.
+     *
+     * @return  The content length of the JavaDoc comments.
+     */
+    public int getJavaDocCommentsLength()
+    {
+        return fJavaDocCommentsLength;
+    }
+
+
+    /**
      * Add the values of another {@code CommentMetrics} to this instance.
      *
      * @param pValues   The values to add.
@@ -122,10 +164,13 @@ public class CommentMetrics
     public void add(@Nonnull CommentMetrics pValues)
     {
         fNumLineComments += pValues.fNumLineComments;
+        fLineCommentsLength += pValues.fLineCommentsLength;
         fNumBlockComments += pValues.fNumBlockComments;
         fNumBlockCommentLines += pValues.fNumBlockCommentLines;
+        fBlockCommentsLength += pValues.fBlockCommentsLength;
         fNumJavaDocComments += pValues.fNumJavaDocComments;
         fNumJavaDocLines += pValues.fNumJavaDocLines;
+        fJavaDocCommentsLength += pValues.fJavaDocCommentsLength;
     }
 
 
@@ -139,6 +184,7 @@ public class CommentMetrics
     public void add(@Nonnull LineComment pComment)
     {
         fNumLineComments += getLineCount(pComment);
+        fLineCommentsLength += getCommentLength(pComment);
     }
 
 
@@ -153,6 +199,7 @@ public class CommentMetrics
     {
         fNumBlockComments++;
         fNumBlockCommentLines += getLineCount(pComment);
+        fBlockCommentsLength += getCommentLength(pComment);
     }
 
 
@@ -167,6 +214,7 @@ public class CommentMetrics
     {
         fNumJavaDocComments++;
         fNumJavaDocLines += getLineCount(pComment);
+        fJavaDocCommentsLength += getCommentLength(pComment);
     }
 
 
@@ -183,5 +231,74 @@ public class CommentMetrics
     {
         Range aRange = pComment.getRange().orElse(ZERO_LINE_RANGE);
         return aRange.end.line - aRange.begin.line + 1;
+    }
+
+
+    /**
+     * Get the number of characters in a comment. Only the characters that remain after each line
+     * in the comment's contents has been trimmed of leading and trailing white space and asterisks
+     * are counted.
+     *
+     * @param pComment  The comment to get the number of characters for.
+     *
+     * @return  The number of characters in the comment.
+     *
+     * @throws NullPointerException if {@code pComment} is null.
+     */
+    static private int getCommentLength(@Nonnull Comment pComment)
+    {
+        int aLength = 0;
+        String aContent = pComment.getContent();
+        int aPos = 0, aNumChars = aContent.length();
+        int aStart = 0, aEnd = 0;
+        boolean aBeginningOfLine = true;
+        while (aPos < aNumChars)
+        {
+            char aChar = aContent.charAt(aPos);
+            if (isLineBreak(aChar))
+            {
+                // Found a line break, count the characters on the line that just ended and reset
+                // the start and end of the character range on the next line.
+                aLength += aEnd - aStart;
+                aStart = aEnd = aPos;
+                aBeginningOfLine = true;
+            }
+            else if (!isAsteriskOrWhitespace(aChar))
+            {
+                // The current character is a regular character (not a line break, nor whitespace or
+                // asterisk).
+                if (aBeginningOfLine)
+                {
+                    // We're at the beginning of the line, this character is the first that should
+                    // be counted on the current line.
+                    aBeginningOfLine = false;
+                    aStart = aPos;
+                }
+
+                // The range of characters to count on the current line now ends after this
+                // character.
+                aEnd = aPos + 1;
+            }
+
+            // Move on to the next character. Note that nothing is done for whitespace or asterisks;
+            // they don't count unless followed by a regular character on the same line, and if so
+            // they will be included in the range of counted characters when that regular character
+            // is detected.
+            aPos++;
+        }
+
+        return aLength + (aEnd - aStart);
+    }
+
+
+    static private boolean isLineBreak(char pChar)
+    {
+        return pChar == '\r' || pChar == '\n';
+    }
+
+
+    static private boolean isAsteriskOrWhitespace(char pChar)
+    {
+        return pChar == '*' || Character.isWhitespace(pChar);
     }
 }
