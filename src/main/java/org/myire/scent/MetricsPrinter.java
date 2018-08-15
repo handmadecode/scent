@@ -256,9 +256,20 @@ class MetricsPrinter
         printIndentedLine(pMetrics.getNumMethods(), " methods");
         printIndentedLine(pMetrics.getNumFields(), " fields");
         printIndentedLine(pMetrics.getNumStatements(), " statements");
-        printIndentedLine(pMetrics.getNumLineComments(), " line comments");
-        printIndentedLine(pMetrics.getNumBlockComments(), pMetrics.getNumBlockCommentLines(), " block comments/lines");
-        printIndentedLine(pMetrics.getNumJavaDocComments(), pMetrics.getNumJavaDocLines(), " JavaDocs/lines");
+        printIndentedLine(
+            pMetrics.getNumLineComments(),
+            pMetrics.getLineCommentsLength(),
+            " line comments/length");
+        printIndentedLine(
+            pMetrics.getNumBlockComments(),
+            pMetrics.getNumBlockCommentLines(),
+            pMetrics.getBlockCommentsLength(),
+            " block comments/lines/length");
+        printIndentedLine(
+            pMetrics.getNumJavaDocComments(),
+            pMetrics.getNumJavaDocLines(),
+            pMetrics.getJavaDocCommentsLength(),
+            " JavaDocs/lines/length");
     }
 
 

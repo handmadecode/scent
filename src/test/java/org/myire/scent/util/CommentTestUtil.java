@@ -10,6 +10,8 @@ import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.comments.LineComment;
 import static com.github.javaparser.Range.range;
 
+import org.myire.scent.metrics.CommentMetrics;
+
 
 /**
  * Utility methods for unit tests related to comments.
@@ -18,6 +20,10 @@ import static com.github.javaparser.Range.range;
  */
 public final class CommentTestUtil
 {
+    // Characters that count as comment length (a selection).
+    static private final char[] COMMENT_CHARS = "abcdefghijklmnopqrtsuvwxuzåäöüg".toCharArray();
+
+
     /**
      * Private constructor to disallow instantiations of utility method class.
      */
@@ -287,6 +293,79 @@ public final class CommentTestUtil
         return aBuilder.toString();
     }
 
-    // Characters that count as comment length (a selection).
-    static private final char[] COMMENT_CHARS = "abcdefghijklmnopqrtsuvwxuzåäöüg".toCharArray();
+
+    /**
+     * Builder for {@code CommentMetrics} instances to help create test scenarios.
+     */
+    static public class Builder
+    {
+        int fNumLineComments;
+        int fLineCommentsLength;
+        int fNumBlockComments;
+        int fNumBlockCommentLines;
+        int fBlockCommentsLength;
+        int fNumJavaDocComments;
+        int fNumJavaDocLines;
+        int fJavaDocCommentsLength;
+
+        public CommentMetrics build()
+        {
+            CommentMetrics aMetrics = new CommentMetrics();
+
+            // Add n-1 line comments with 1 line.
+            for (int i = 0; i < fNumLineComments - 1; i++)
+                aMetrics.add(createLineComment(i+1, 0, i+1, 1));
+
+            // Add one line comment with 1 line and the entire line comment length.
+            aMetrics.add(
+                createLineComment(
+                    fNumLineComments,
+                    0,
+                    fNumLineComments,
+                    fLineCommentsLength,
+                    fLineCommentsLength));
+
+            // Add n-1 block comments with 1 line.
+            for (int i = 0; i < fNumBlockComments - 1; i++)
+                aMetrics.add(createBlockComment(i+1, 0, i+1, 3));
+
+            // Add one block comment with the remaining lines and the entire block comment length.
+            int aNumLines = fNumBlockCommentLines - fNumBlockComments;
+            aMetrics.add(createBlockComment(1, 0, 1 + aNumLines, 3, fBlockCommentsLength));
+
+            // Add n-1 JavaDoc comments with 1 line.
+            for (int i = 0; i < fNumJavaDocComments - 1; i++)
+                aMetrics.add(createJavadocComment(i+1, 0, i+1, 4));
+
+            // Add one JavaDoc comment with the remaining lines and the entire JavaDoc comment
+            // length.
+            aNumLines = fNumJavaDocLines - fNumJavaDocComments;
+            aMetrics.add(createJavadocComment(1, 0, 1 + aNumLines, 4, fJavaDocCommentsLength));
+
+            return aMetrics;
+        }
+
+        public Builder withLineComments(int pNumComments, int pLength)
+        {
+            fNumLineComments = pNumComments;
+            fLineCommentsLength = pLength;
+            return this;
+        }
+
+        public Builder withBlockComments(int pNumComments, int pNumLines, int pLength)
+        {
+            fNumBlockComments = pNumComments;
+            fNumBlockCommentLines = pNumLines;
+            fBlockCommentsLength = pLength;
+            return this;
+        }
+
+        public Builder withJavaDocComments(int pNumComments, int pNumLines, int pLength)
+        {
+            fNumJavaDocComments = pNumComments;
+            fNumJavaDocLines = pNumLines;
+            fJavaDocCommentsLength = pLength;
+            return this;
+        }
+    }
 }

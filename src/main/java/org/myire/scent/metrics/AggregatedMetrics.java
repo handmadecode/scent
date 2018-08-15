@@ -1,11 +1,12 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
 package org.myire.scent.metrics;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.NotThreadSafe;
 
 
 /**
@@ -13,6 +14,7 @@ import javax.annotation.Nonnull;
  *
  * @author <a href="mailto:peter@myire.org">Peter Franzen</a>
  */
+@NotThreadSafe
 public class AggregatedMetrics
 {
     private int fNumPackages;
@@ -22,10 +24,13 @@ public class AggregatedMetrics
     private int fNumFields;
     private int fNumStatements;
     private int fNumLineComments;
+    private int fLineCommentsLength;
     private int fNumBlockComments;
     private int fNumBlockCommentLines;
+    private int fBlockCommentsLength;
     private int fNumJavaDocComments;
     private int fNumJavaDocLines;
+    private int fJavaDocCommentsLength;
 
 
     /**
@@ -306,6 +311,19 @@ public class AggregatedMetrics
 
 
     /**
+     * Get the length of the line comments' content in this aggregation. The length is the number
+     * of characters remaining when leading and trailing whitespace has been trimmed away from the
+     * comments.
+     *
+     * @return  The content length of the line comments.
+     */
+    public int getLineCommentsLength()
+    {
+        return fLineCommentsLength;
+    }
+
+
+    /**
      * Get the number of block comments in this aggregation.
      *
      * @return  The number of block comments.
@@ -328,6 +346,19 @@ public class AggregatedMetrics
 
 
     /**
+     * Get the length of the block comments' content in this aggregation. The length is the number
+     * of characters remaining when leading and trailing whitespace and asterisks have been trimmed
+     * away from each line in the comments.
+     *
+     * @return  The content length of the block comments.
+     */
+    public int getBlockCommentsLength()
+    {
+        return fBlockCommentsLength;
+    }
+
+
+    /**
      * Get the number of JavaDoc comments in this aggregation.
      *
      * @return  The number of JavaDoc comments.
@@ -346,6 +377,19 @@ public class AggregatedMetrics
     public int getNumJavaDocLines()
     {
         return fNumJavaDocLines;
+    }
+
+
+    /**
+     * Get the length of the JavaDoc comments' content in this aggregation. The length is the number
+     * of characters remaining when leading and trailing whitespace and asterisks have been trimmed
+     * away from each line in the comments.
+     *
+     * @return  The content length of the JavaDoc comments.
+     */
+    public int getJavaDocCommentsLength()
+    {
+        return fJavaDocCommentsLength;
     }
 
 
@@ -570,10 +614,13 @@ public class AggregatedMetrics
     public AggregatedMetrics add(@Nonnull CommentMetrics pValues)
     {
         fNumLineComments += pValues.getNumLineComments();
+        fLineCommentsLength += pValues.getLineCommentsLength();
         fNumBlockComments += pValues.getNumBlockComments();
         fNumBlockCommentLines += pValues.getNumBlockCommentLines();
+        fBlockCommentsLength += pValues.getBlockCommentsLength();
         fNumJavaDocComments += pValues.getNumJavaDocComments();
         fNumJavaDocLines += pValues.getNumJavaDocLines();
+        fJavaDocCommentsLength += pValues.getJavaDocCommentsLength();
         return this;
     }
 }

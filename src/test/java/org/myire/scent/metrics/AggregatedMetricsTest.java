@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -9,6 +9,8 @@ import java.util.Arrays;
 
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+
+import org.myire.scent.util.CommentTestUtil;
 
 
 /**
@@ -35,10 +37,13 @@ public class AggregatedMetricsTest
         assertEquals(0, aMetrics.getNumFields());
         assertEquals(0, aMetrics.getNumStatements());
         assertEquals(0, aMetrics.getNumLineComments());
+        assertEquals(0, aMetrics.getLineCommentsLength());
         assertEquals(0, aMetrics.getNumBlockComments());
         assertEquals(0, aMetrics.getNumBlockCommentLines());
+        assertEquals(0, aMetrics.getBlockCommentsLength());
         assertEquals(0, aMetrics.getNumJavaDocComments());
         assertEquals(0, aMetrics.getNumJavaDocLines());
+        assertEquals(0, aMetrics.getJavaDocCommentsLength());
     }
 
 
@@ -143,8 +148,8 @@ public class AggregatedMetricsTest
     {
         // Given
         CommentMetrics aComments =
-                new CommentMetricsTest.Builder()
-                .withBlockComments(1, 6)
+                new CommentTestUtil.Builder()
+                .withBlockComments(1, 6, 24)
                 .build();
         CompilationUnitMetrics aCompilationUnit = new CompilationUnitMetrics("x.java");
         aCompilationUnit.getComments().add(aComments);
@@ -158,10 +163,13 @@ public class AggregatedMetricsTest
         assertEquals(1, aAggregation.getNumCompilationUnits());
         assertEquals(2, aAggregation.getNumTypes());
         assertEquals(aComments.getNumLineComments(), aAggregation.getNumLineComments());
+        assertEquals(aComments.getLineCommentsLength(), aAggregation.getLineCommentsLength());
         assertEquals(aComments.getNumBlockComments(), aAggregation.getNumBlockComments());
         assertEquals(aComments.getNumBlockCommentLines(), aAggregation.getNumBlockCommentLines());
+        assertEquals(aComments.getBlockCommentsLength(), aAggregation.getBlockCommentsLength());
         assertEquals(aComments.getNumJavaDocComments(), aAggregation.getNumJavaDocComments());
         assertEquals(aComments.getNumJavaDocLines(), aAggregation.getNumJavaDocLines());
+        assertEquals(aComments.getJavaDocCommentsLength(), aAggregation.getJavaDocCommentsLength());
     }
 
 
@@ -175,8 +183,8 @@ public class AggregatedMetricsTest
     {
         // Given
         CommentMetrics aComments =
-                new CommentMetricsTest.Builder()
-                .withBlockComments(1, 6)
+                new CommentTestUtil.Builder()
+                .withBlockComments(1, 6, 13)
                 .build();
         CompilationUnitMetrics aCompilationUnit = new CompilationUnitMetrics("x.java");
         aCompilationUnit.getComments().add(aComments);
@@ -190,10 +198,13 @@ public class AggregatedMetricsTest
         assertEquals(0, aAggregation.getNumCompilationUnits());
         assertEquals(2, aAggregation.getNumTypes());
         assertEquals(aComments.getNumLineComments(), aAggregation.getNumLineComments());
+        assertEquals(aComments.getLineCommentsLength(), aAggregation.getLineCommentsLength());
         assertEquals(aComments.getNumBlockComments(), aAggregation.getNumBlockComments());
         assertEquals(aComments.getNumBlockCommentLines(), aAggregation.getNumBlockCommentLines());
+        assertEquals(aComments.getBlockCommentsLength(), aAggregation.getBlockCommentsLength());
         assertEquals(aComments.getNumJavaDocComments(), aAggregation.getNumJavaDocComments());
         assertEquals(aComments.getNumJavaDocLines(), aAggregation.getNumJavaDocLines());
+        assertEquals(aComments.getJavaDocCommentsLength(), aAggregation.getJavaDocCommentsLength());
     }
 
 
@@ -207,8 +218,8 @@ public class AggregatedMetricsTest
         // Given
         AggregatedMetrics aAggregation = new AggregatedMetrics();
         CommentMetrics aComments =
-                new CommentMetricsTest.Builder()
-                .withBlockComments(1, 6)
+                new CommentTestUtil.Builder()
+                .withBlockComments(2, 15, 93)
                 .build();
         CompilationUnitMetrics aCompilationUnit = new CompilationUnitMetrics("x.java");
         aCompilationUnit.getComments().add(aComments);
@@ -222,10 +233,13 @@ public class AggregatedMetricsTest
         assertEquals(1, aAggregation.getNumCompilationUnits());
         assertEquals(2, aAggregation.getNumTypes());
         assertEquals(aComments.getNumLineComments(), aAggregation.getNumLineComments());
+        assertEquals(aComments.getLineCommentsLength(), aAggregation.getLineCommentsLength());
         assertEquals(aComments.getNumBlockComments(), aAggregation.getNumBlockComments());
         assertEquals(aComments.getNumBlockCommentLines(), aAggregation.getNumBlockCommentLines());
+        assertEquals(aComments.getBlockCommentsLength(), aAggregation.getBlockCommentsLength());
         assertEquals(aComments.getNumJavaDocComments(), aAggregation.getNumJavaDocComments());
         assertEquals(aComments.getNumJavaDocLines(), aAggregation.getNumJavaDocLines());
+        assertEquals(aComments.getJavaDocCommentsLength(), aAggregation.getJavaDocCommentsLength());
     }
 
 
@@ -238,10 +252,10 @@ public class AggregatedMetricsTest
     {
         // Given
         CommentMetrics aComments =
-                new CommentMetricsTest.Builder()
-                .withLineComments(2)
-                .withBlockComments(4, 10)
-                .withJavaDocComments(1, 7)
+                new CommentTestUtil.Builder()
+                .withLineComments(2, 21)
+                .withBlockComments(4, 10, 99)
+                .withJavaDocComments(1, 7, 30)
                 .build();
         TypeMetrics aType = new TypeMetrics("X", TypeMetrics.Kind.ANNOTATION);
         aType.add(new FieldMetrics("staticField", FieldMetrics.Kind.STATIC_FIELD));
@@ -257,10 +271,13 @@ public class AggregatedMetricsTest
         assertEquals(1, aAggregation.getNumFields());
         assertEquals(1, aAggregation.getNumMethods());
         assertEquals(aComments.getNumLineComments(), aAggregation.getNumLineComments());
+        assertEquals(aComments.getLineCommentsLength(), aAggregation.getLineCommentsLength());
         assertEquals(aComments.getNumBlockComments(), aAggregation.getNumBlockComments());
         assertEquals(aComments.getNumBlockCommentLines(), aAggregation.getNumBlockCommentLines());
+        assertEquals(aComments.getBlockCommentsLength(), aAggregation.getBlockCommentsLength());
         assertEquals(aComments.getNumJavaDocComments(), aAggregation.getNumJavaDocComments());
         assertEquals(aComments.getNumJavaDocLines(), aAggregation.getNumJavaDocLines());
+        assertEquals(aComments.getJavaDocCommentsLength(), aAggregation.getJavaDocCommentsLength());
     }
 
 
@@ -274,10 +291,10 @@ public class AggregatedMetricsTest
     {
         // Given
         CommentMetrics aComments =
-                new CommentMetricsTest.Builder()
-                .withLineComments(2)
-                .withBlockComments(4, 10)
-                .withJavaDocComments(1, 7)
+                new CommentTestUtil.Builder()
+                .withLineComments(2, 19)
+                .withBlockComments(4, 10, 28)
+                .withJavaDocComments(3, 21, 50)
                 .build();
         TypeMetrics aType = new TypeMetrics("X", TypeMetrics.Kind.ANNOTATION);
         aType.add(new FieldMetrics("staticField", FieldMetrics.Kind.STATIC_FIELD));
@@ -293,10 +310,13 @@ public class AggregatedMetricsTest
         assertEquals(1, aAggregation.getNumFields());
         assertEquals(1, aAggregation.getNumMethods());
         assertEquals(aComments.getNumLineComments(), aAggregation.getNumLineComments());
+        assertEquals(aComments.getLineCommentsLength(), aAggregation.getLineCommentsLength());
         assertEquals(aComments.getNumBlockComments(), aAggregation.getNumBlockComments());
         assertEquals(aComments.getNumBlockCommentLines(), aAggregation.getNumBlockCommentLines());
+        assertEquals(aComments.getBlockCommentsLength(), aAggregation.getBlockCommentsLength());
         assertEquals(aComments.getNumJavaDocComments(), aAggregation.getNumJavaDocComments());
         assertEquals(aComments.getNumJavaDocLines(), aAggregation.getNumJavaDocLines());
+        assertEquals(aComments.getJavaDocCommentsLength(), aAggregation.getJavaDocCommentsLength());
     }
 
 
@@ -310,10 +330,10 @@ public class AggregatedMetricsTest
         // Given
         AggregatedMetrics aAggregation = new AggregatedMetrics();
         CommentMetrics aComments =
-                new CommentMetricsTest.Builder()
-                .withLineComments(2)
-                .withBlockComments(4, 10)
-                .withJavaDocComments(1, 7)
+                new CommentTestUtil.Builder()
+                .withLineComments(5, 70)
+                .withBlockComments(1, 2, 14)
+                .withJavaDocComments(3, 48, 109)
                 .build();
         TypeMetrics aType = new TypeMetrics("X", TypeMetrics.Kind.ANNOTATION);
         aType.add(new FieldMetrics("staticField", FieldMetrics.Kind.STATIC_FIELD));
@@ -330,10 +350,13 @@ public class AggregatedMetricsTest
         assertEquals(2, aAggregation.getNumFields());
         assertEquals(1, aAggregation.getNumMethods());
         assertEquals(aComments.getNumLineComments(), aAggregation.getNumLineComments());
+        assertEquals(aComments.getLineCommentsLength(), aAggregation.getLineCommentsLength());
         assertEquals(aComments.getNumBlockComments(), aAggregation.getNumBlockComments());
         assertEquals(aComments.getNumBlockCommentLines(), aAggregation.getNumBlockCommentLines());
+        assertEquals(aComments.getBlockCommentsLength(), aAggregation.getBlockCommentsLength());
         assertEquals(aComments.getNumJavaDocComments(), aAggregation.getNumJavaDocComments());
         assertEquals(aComments.getNumJavaDocLines(), aAggregation.getNumJavaDocLines());
+        assertEquals(aComments.getJavaDocCommentsLength(), aAggregation.getJavaDocCommentsLength());
     }
 
 
@@ -347,10 +370,10 @@ public class AggregatedMetricsTest
         // Given
         StatementMetrics aStatements = StatementMetricsTest.createStatementMetrics(1);
         CommentMetrics aComments =
-                new CommentMetricsTest.Builder()
-                .withLineComments(12)
-                .withBlockComments(5, 28)
-                .withJavaDocComments(1, 16)
+                new CommentTestUtil.Builder()
+                .withLineComments(12, 81)
+                .withBlockComments(5, 28, 66)
+                .withJavaDocComments(1, 16, 54)
                 .build();
         MethodMetrics aMethod = new MethodMetrics("someMethod", MethodMetrics.Kind.STATIC_METHOD);
         aMethod.add(new TypeMetrics("Local", TypeMetrics.Kind.CLASS));
@@ -365,10 +388,13 @@ public class AggregatedMetricsTest
         assertEquals(1, aAggregation.getNumTypes());
         assertEquals(aStatements.getNumStatements(), aAggregation.getNumStatements());
         assertEquals(aComments.getNumLineComments(), aAggregation.getNumLineComments());
+        assertEquals(aComments.getLineCommentsLength(), aAggregation.getLineCommentsLength());
         assertEquals(aComments.getNumBlockComments(), aAggregation.getNumBlockComments());
         assertEquals(aComments.getNumBlockCommentLines(), aAggregation.getNumBlockCommentLines());
+        assertEquals(aComments.getBlockCommentsLength(), aAggregation.getBlockCommentsLength());
         assertEquals(aComments.getNumJavaDocComments(), aAggregation.getNumJavaDocComments());
         assertEquals(aComments.getNumJavaDocLines(), aAggregation.getNumJavaDocLines());
+        assertEquals(aComments.getJavaDocCommentsLength(), aAggregation.getJavaDocCommentsLength());
     }
 
 
@@ -382,10 +408,10 @@ public class AggregatedMetricsTest
         // Given
         StatementMetrics aStatements = StatementMetricsTest.createStatementMetrics(1);
         CommentMetrics aComments =
-                new CommentMetricsTest.Builder()
-                .withLineComments(12)
-                .withBlockComments(5, 28)
-                .withJavaDocComments(1, 16)
+                new CommentTestUtil.Builder()
+                .withLineComments(4, 61)
+                .withBlockComments(1, 12, 86)
+                .withJavaDocComments(2, 16, 31)
                 .build();
         MethodMetrics aMethod = new MethodMetrics("someMethod", MethodMetrics.Kind.STATIC_METHOD);
         aMethod.add(new TypeMetrics("Local", TypeMetrics.Kind.CLASS));
@@ -400,10 +426,13 @@ public class AggregatedMetricsTest
         assertEquals(1, aAggregation.getNumTypes());
         assertEquals(aStatements.getNumStatements(), aAggregation.getNumStatements());
         assertEquals(aComments.getNumLineComments(), aAggregation.getNumLineComments());
+        assertEquals(aComments.getLineCommentsLength(), aAggregation.getLineCommentsLength());
         assertEquals(aComments.getNumBlockComments(), aAggregation.getNumBlockComments());
         assertEquals(aComments.getNumBlockCommentLines(), aAggregation.getNumBlockCommentLines());
+        assertEquals(aComments.getBlockCommentsLength(), aAggregation.getBlockCommentsLength());
         assertEquals(aComments.getNumJavaDocComments(), aAggregation.getNumJavaDocComments());
         assertEquals(aComments.getNumJavaDocLines(), aAggregation.getNumJavaDocLines());
+        assertEquals(aComments.getJavaDocCommentsLength(), aAggregation.getJavaDocCommentsLength());
     }
 
 
@@ -418,10 +447,10 @@ public class AggregatedMetricsTest
         AggregatedMetrics aAggregation = new AggregatedMetrics();
         StatementMetrics aStatements = StatementMetricsTest.createStatementMetrics(1);
         CommentMetrics aComments =
-                new CommentMetricsTest.Builder()
-                .withLineComments(12)
-                .withBlockComments(5, 28)
-                .withJavaDocComments(1, 16)
+                new CommentTestUtil.Builder()
+                .withLineComments(2, 27)
+                .withBlockComments(2, 2, 23)
+                .withJavaDocComments(4, 52, 200)
                 .build();
         MethodMetrics aMethod = new MethodMetrics("someMethod", MethodMetrics.Kind.STATIC_METHOD);
         aMethod.add(new TypeMetrics("Local", TypeMetrics.Kind.CLASS));
@@ -436,10 +465,13 @@ public class AggregatedMetricsTest
         assertEquals(1, aAggregation.getNumTypes());
         assertEquals(aStatements.getNumStatements(), aAggregation.getNumStatements());
         assertEquals(aComments.getNumLineComments(), aAggregation.getNumLineComments());
+        assertEquals(aComments.getLineCommentsLength(), aAggregation.getLineCommentsLength());
         assertEquals(aComments.getNumBlockComments(), aAggregation.getNumBlockComments());
         assertEquals(aComments.getNumBlockCommentLines(), aAggregation.getNumBlockCommentLines());
+        assertEquals(aComments.getBlockCommentsLength(), aAggregation.getBlockCommentsLength());
         assertEquals(aComments.getNumJavaDocComments(), aAggregation.getNumJavaDocComments());
         assertEquals(aComments.getNumJavaDocLines(), aAggregation.getNumJavaDocLines());
+        assertEquals(aComments.getJavaDocCommentsLength(), aAggregation.getJavaDocCommentsLength());
     }
 
 
@@ -453,8 +485,8 @@ public class AggregatedMetricsTest
         // Given
         StatementMetrics aStatements = StatementMetricsTest.createStatementMetrics(1);
         CommentMetrics aComments =
-                new CommentMetricsTest.Builder()
-                .withJavaDocComments(1, 16)
+                new CommentTestUtil.Builder()
+                .withJavaDocComments(2, 19, 98)
                 .build();
         FieldMetrics aField = new FieldMetrics("X", FieldMetrics.Kind.ENUM_CONSTANT);
         aField.getStatements().add(aStatements);
@@ -467,10 +499,13 @@ public class AggregatedMetricsTest
         assertEquals(1, aAggregation.getNumFields());
         assertEquals(aStatements.getNumStatements(), aAggregation.getNumStatements());
         assertEquals(aComments.getNumLineComments(), aAggregation.getNumLineComments());
+        assertEquals(aComments.getLineCommentsLength(), aAggregation.getLineCommentsLength());
         assertEquals(aComments.getNumBlockComments(), aAggregation.getNumBlockComments());
         assertEquals(aComments.getNumBlockCommentLines(), aAggregation.getNumBlockCommentLines());
+        assertEquals(aComments.getBlockCommentsLength(), aAggregation.getBlockCommentsLength());
         assertEquals(aComments.getNumJavaDocComments(), aAggregation.getNumJavaDocComments());
         assertEquals(aComments.getNumJavaDocLines(), aAggregation.getNumJavaDocLines());
+        assertEquals(aComments.getJavaDocCommentsLength(), aAggregation.getJavaDocCommentsLength());
     }
 
 
@@ -484,8 +519,8 @@ public class AggregatedMetricsTest
         // Given
         StatementMetrics aStatements = StatementMetricsTest.createStatementMetrics(1);
         CommentMetrics aComments =
-                new CommentMetricsTest.Builder()
-                .withJavaDocComments(1, 16)
+                new CommentTestUtil.Builder()
+                .withJavaDocComments(2, 45, 512)
                 .build();
         FieldMetrics aField = new FieldMetrics("X", FieldMetrics.Kind.ENUM_CONSTANT);
         aField.getStatements().add(aStatements);
@@ -498,10 +533,13 @@ public class AggregatedMetricsTest
         assertEquals(0, aAggregation.getNumFields());
         assertEquals(aStatements.getNumStatements(), aAggregation.getNumStatements());
         assertEquals(aComments.getNumLineComments(), aAggregation.getNumLineComments());
+        assertEquals(aComments.getLineCommentsLength(), aAggregation.getLineCommentsLength());
         assertEquals(aComments.getNumBlockComments(), aAggregation.getNumBlockComments());
         assertEquals(aComments.getNumBlockCommentLines(), aAggregation.getNumBlockCommentLines());
+        assertEquals(aComments.getBlockCommentsLength(), aAggregation.getBlockCommentsLength());
         assertEquals(aComments.getNumJavaDocComments(), aAggregation.getNumJavaDocComments());
         assertEquals(aComments.getNumJavaDocLines(), aAggregation.getNumJavaDocLines());
+        assertEquals(aComments.getJavaDocCommentsLength(), aAggregation.getJavaDocCommentsLength());
     }
 
 
@@ -516,8 +554,8 @@ public class AggregatedMetricsTest
         AggregatedMetrics aAggregation = new AggregatedMetrics();
         StatementMetrics aStatements = StatementMetricsTest.createStatementMetrics(1);
         CommentMetrics aComments =
-                new CommentMetricsTest.Builder()
-                .withJavaDocComments(1, 16)
+                new CommentTestUtil.Builder()
+                .withJavaDocComments(4, 41, 107)
                 .build();
         FieldMetrics aField = new FieldMetrics("X", FieldMetrics.Kind.ENUM_CONSTANT);
         aField.getStatements().add(aStatements);
@@ -530,10 +568,13 @@ public class AggregatedMetricsTest
         assertEquals(1, aAggregation.getNumFields());
         assertEquals(aStatements.getNumStatements(), aAggregation.getNumStatements());
         assertEquals(aComments.getNumLineComments(), aAggregation.getNumLineComments());
+        assertEquals(aComments.getLineCommentsLength(), aAggregation.getLineCommentsLength());
         assertEquals(aComments.getNumBlockComments(), aAggregation.getNumBlockComments());
         assertEquals(aComments.getNumBlockCommentLines(), aAggregation.getNumBlockCommentLines());
+        assertEquals(aComments.getBlockCommentsLength(), aAggregation.getBlockCommentsLength());
         assertEquals(aComments.getNumJavaDocComments(), aAggregation.getNumJavaDocComments());
         assertEquals(aComments.getNumJavaDocLines(), aAggregation.getNumJavaDocLines());
+        assertEquals(aComments.getJavaDocCommentsLength(), aAggregation.getJavaDocCommentsLength());
     }
 
 
@@ -567,10 +608,10 @@ public class AggregatedMetricsTest
         // Given
         AggregatedMetrics aAggregation = new AggregatedMetrics();
         CommentMetrics aComments =
-                new CommentMetricsTest.Builder()
-                .withLineComments(14)
-                .withBlockComments(22, 75)
-                .withJavaDocComments(12, 900)
+                new CommentTestUtil.Builder()
+                .withLineComments(14, 89)
+                .withBlockComments(22, 75, 2143)
+                .withJavaDocComments(12, 900, 16430)
                 .build();
 
         // When
@@ -579,9 +620,12 @@ public class AggregatedMetricsTest
 
         // Then
         assertEquals(2 * aComments.getNumLineComments(), aAggregation.getNumLineComments());
+        assertEquals(2 * aComments.getLineCommentsLength(), aAggregation.getLineCommentsLength());
         assertEquals(2 * aComments.getNumBlockComments(), aAggregation.getNumBlockComments());
         assertEquals(2 * aComments.getNumBlockCommentLines(), aAggregation.getNumBlockCommentLines());
+        assertEquals(2 * aComments.getBlockCommentsLength(), aAggregation.getBlockCommentsLength());
         assertEquals(2 * aComments.getNumJavaDocComments(), aAggregation.getNumJavaDocComments());
         assertEquals(2 * aComments.getNumJavaDocLines(), aAggregation.getNumJavaDocLines());
+        assertEquals(2 * aComments.getJavaDocCommentsLength(), aAggregation.getJavaDocCommentsLength());
     }
 }
