@@ -174,7 +174,7 @@ class MethodMetricsCollector
 
     /**
      * An abstract syntax tree visitor that visits method members and collects metrics for them. The
-     * collected metrics are added to the {@code MethodMetrics} passed as  argument to each
+     * collected metrics are added to the {@code MethodMetrics} passed as argument to each
      * {@code visit} method.
      *<p>
      * Note that not all subclasses of {@code com.github.javaparser.ast.stmt.Statement} are

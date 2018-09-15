@@ -11,8 +11,8 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 import org.myire.scent.metrics.CommentMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.MethodMetrics;
-import org.myire.scent.metrics.PackageMetrics;
 
 import static org.myire.scent.util.CollectTestUtil.collect;
 import static org.myire.scent.util.CollectTestUtil.getFirstMethod;
@@ -39,7 +39,7 @@ abstract public class MethodCollectTestBase
         String aName = createMethodName();
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(createMethodDeclarationInsideType(aName));
+        JavaMetrics aMetrics = collect(createMethodDeclarationInsideType(aName));
 
         // Then
         assertEquals(aName, getFirstMethod(aMetrics).getName());
@@ -55,7 +55,7 @@ abstract public class MethodCollectTestBase
     public void methodMetricsHasTheCorrectKind() throws ParseException
     {
         // When
-        Iterable<PackageMetrics> aMetrics = collect(createMethodDeclarationInsideType(createMethodName()));
+        JavaMetrics aMetrics = collect(createMethodDeclarationInsideType(createMethodName()));
 
         // Then
         assertEquals(getMethodKind(), getFirstMethod(aMetrics).getKind());
@@ -83,7 +83,7 @@ abstract public class MethodCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstMethod(aMetrics).getComments();
@@ -111,7 +111,7 @@ abstract public class MethodCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstMethod(aMetrics).getComments();
@@ -138,7 +138,7 @@ abstract public class MethodCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstMethod(aMetrics).getComments();
@@ -166,7 +166,7 @@ abstract public class MethodCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstMethod(aMetrics).getComments();
@@ -191,7 +191,7 @@ abstract public class MethodCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstMethod(aMetrics).getComments();
@@ -219,7 +219,7 @@ abstract public class MethodCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstMethod(aMetrics).getComments();
@@ -252,7 +252,7 @@ abstract public class MethodCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstMethod(aMetrics).getComments();

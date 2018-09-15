@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -14,6 +14,7 @@ import static org.junit.Assert.assertEquals;
 import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.CompilationUnitMetrics;
 import org.myire.scent.metrics.FieldMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.MethodMetrics;
 import org.myire.scent.metrics.PackageMetrics;
 import org.myire.scent.metrics.TypeMetrics;
@@ -47,7 +48,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         String aSrc = "@interface TheAnnotation { char " + aName + " = 'c';}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         FieldMetrics aFieldMetrics = getFirstField(aMetrics);
@@ -68,7 +69,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         String aSrc = "@interface TheAnnotation { static int field=1;}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         assertEquals(FieldMetrics.Kind.STATIC_FIELD, getFirstField(aMetrics).getKind());
@@ -89,7 +90,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         String aSrc = "@interface TheAnnotation { int field=2;}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         assertEquals(FieldMetrics.Kind.STATIC_FIELD, getFirstField(aMetrics).getKind());
@@ -109,7 +110,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         String aSrc = "@interface TheAnnotation { int field=2;}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         assertEquals(1, getFirstField(aMetrics).getStatements().getNumStatements());
@@ -130,7 +131,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         String aSrc = "@interface TheAnnotation { int " + aName + "();}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         FieldMetrics aFieldMetrics = getFirstField(aMetrics);
@@ -152,7 +153,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         String aSrc = "public @interface TheAnnotation { int annotationMember();}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         FieldMetrics aFieldMetrics = getFirstField(aMetrics);
@@ -173,7 +174,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         String aSrc = "public @interface TheAnnotation { int annotationMember() default 5;}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         FieldMetrics aFieldMetrics = getFirstField(aMetrics);
@@ -194,7 +195,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         String aResourceName = "/FullAnnotation.java";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collectFromResource(aResourceName);
+        JavaMetrics aMetrics = collectFromResource(aResourceName);
 
         // Assert package metrics name
         PackageMetrics aPackage = getFirstPackage(aMetrics);

@@ -10,7 +10,7 @@ import java.text.ParseException;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
-import org.myire.scent.metrics.PackageMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.StatementMetrics;
 
 import static org.myire.scent.util.CollectTestUtil.collect;
@@ -564,7 +564,7 @@ public class StatementCollectTest
         String aResourceName = "/Statements.java";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collectFromResource(aResourceName);
+        JavaMetrics aMetrics = collectFromResource(aResourceName);
 
         // Then
         StatementMetrics aStatements = getFirstMethod(aMetrics).getStatements();
@@ -574,7 +574,7 @@ public class StatementCollectTest
 
     static private StatementMetrics collectStatementMetrics(String[] pSourceLines) throws ParseException
     {
-        Iterable<PackageMetrics> aMetrics = collect(pSourceLines);
+        JavaMetrics aMetrics = collect(pSourceLines);
         return getFirstMethod(aMetrics).getStatements();
     }
 }

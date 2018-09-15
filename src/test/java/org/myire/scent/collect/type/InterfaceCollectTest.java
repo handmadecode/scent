@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -14,6 +14,7 @@ import static org.junit.Assert.assertEquals;
 import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.CompilationUnitMetrics;
 import org.myire.scent.metrics.FieldMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.MethodMetrics;
 import org.myire.scent.metrics.PackageMetrics;
 import org.myire.scent.metrics.TypeMetrics;
@@ -47,7 +48,7 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         String aSrc = "interface Miserable { char " + aName + " = 'c';}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         FieldMetrics aFieldMetrics = getFirstField(aMetrics);
@@ -68,7 +69,7 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         String aSrc = "interface Miserable { static int X=1;}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         assertEquals(FieldMetrics.Kind.STATIC_FIELD, getFirstField(aMetrics).getKind());
@@ -89,7 +90,7 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         String aSrc = "interface Miserable { int field=2;}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         assertEquals(FieldMetrics.Kind.STATIC_FIELD, getFirstField(aMetrics).getKind());
@@ -109,7 +110,7 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         String aSrc = "interface Miserable { char VALUE = 'c';}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         FieldMetrics aFieldMetrics = getFirstField(aMetrics);
@@ -131,7 +132,7 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         String aSrc = createTypeDeclarationWithMembers(aName + ';');
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         MethodMetrics aMethodMetrics = getFirstMethod(aMetrics);
@@ -154,7 +155,7 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         String aSrc = createTypeDeclarationWithMembers("default " + aName + "{System.out.println();}");
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         MethodMetrics aMethodMetrics = getFirstMethod(aMetrics);
@@ -177,7 +178,7 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         String aSrc = createTypeDeclarationWithMembers("private " + aName + "{System.exit();}");
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         MethodMetrics aMethodMetrics = getFirstMethod(aMetrics);
@@ -199,7 +200,7 @@ public class InterfaceCollectTest extends TypeCollectTestBase
         String aResourceName = "/FullInterface.java";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collectFromResource(aResourceName);
+        JavaMetrics aMetrics = collectFromResource(aResourceName);
 
         // Assert package metrics name
         PackageMetrics aPackage = getFirstPackage(aMetrics);

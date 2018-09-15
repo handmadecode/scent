@@ -13,7 +13,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 
-import org.myire.scent.metrics.PackageMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 
 
 /**
@@ -119,9 +119,9 @@ public class JavaMetricsCollectorTest
     public void collectMetricsReturnsEmptyMetricsWhenParseHasNotBeenCalled()
     {
         // When
-        Iterable<PackageMetrics> aMetrics = new JavaMetricsCollector().getCollectedMetrics();
+        JavaMetrics aMetrics = new JavaMetricsCollector().getCollectedMetrics();
 
         // Then
-        assertFalse(aMetrics.iterator().hasNext());
+        assertFalse(aMetrics.getPackages().iterator().hasNext());
     }
 }

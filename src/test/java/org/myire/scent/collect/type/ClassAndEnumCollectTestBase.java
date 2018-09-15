@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -11,8 +11,8 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 import org.myire.scent.metrics.FieldMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.MethodMetrics;
-import org.myire.scent.metrics.PackageMetrics;
 
 import static org.myire.scent.util.CollectTestUtil.collect;
 import static org.myire.scent.util.CollectTestUtil.getFirstField;
@@ -40,7 +40,7 @@ abstract public class ClassAndEnumCollectTestBase extends TypeCollectTestBase
         String aSrc = createTypeDeclarationWithMembers("static int " + aName + ";");
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         FieldMetrics aField = getFirstField(aMetrics);
@@ -62,7 +62,7 @@ abstract public class ClassAndEnumCollectTestBase extends TypeCollectTestBase
         String aSrc = createTypeDeclarationWithMembers("static int cField;");
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         FieldMetrics aFieldMetrics = getFirstField(aMetrics);
@@ -83,7 +83,7 @@ abstract public class ClassAndEnumCollectTestBase extends TypeCollectTestBase
         String aSrc = createTypeDeclarationWithMembers("static int cField = 17;");
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         FieldMetrics aFieldMetrics = getFirstField(aMetrics);
@@ -105,7 +105,7 @@ abstract public class ClassAndEnumCollectTestBase extends TypeCollectTestBase
         String aSrc = createTypeDeclarationWithMembers("int " + aName + ";");
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         FieldMetrics aField = getFirstField(aMetrics);
@@ -127,7 +127,7 @@ abstract public class ClassAndEnumCollectTestBase extends TypeCollectTestBase
         String aSrc = createTypeDeclarationWithMembers("int fField;");
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         FieldMetrics aFieldMetrics = getFirstField(aMetrics);
@@ -148,7 +148,7 @@ abstract public class ClassAndEnumCollectTestBase extends TypeCollectTestBase
         String aSrc = createTypeDeclarationWithMembers("int fField = 4711;");
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         FieldMetrics aFieldMetrics = getFirstField(aMetrics);
@@ -168,7 +168,7 @@ abstract public class ClassAndEnumCollectTestBase extends TypeCollectTestBase
         String aSrc = createTypeDeclarationWithMembers("static {System.out.println();}");
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         assertEquals(MethodMetrics.Kind.STATIC_INITIALIZER, getFirstMethod(aMetrics).getKind());
@@ -188,7 +188,7 @@ abstract public class ClassAndEnumCollectTestBase extends TypeCollectTestBase
         String aSrc = createTypeDeclarationWithMembers("{System.out.println();}");
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         assertEquals(MethodMetrics.Kind.INSTANCE_INITIALIZER, getFirstMethod(aMetrics).getKind());
@@ -209,7 +209,7 @@ abstract public class ClassAndEnumCollectTestBase extends TypeCollectTestBase
         String aSrc = createTypeDeclarationWithMembers("static " + aName + "{System.out.println();}");
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         MethodMetrics aMethod = getFirstMethod(aMetrics);
@@ -232,7 +232,7 @@ abstract public class ClassAndEnumCollectTestBase extends TypeCollectTestBase
         String aSrc = createTypeDeclarationWithMembers(aName + "{System.out.println();}");
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         MethodMetrics aMethod = getFirstMethod(aMetrics);

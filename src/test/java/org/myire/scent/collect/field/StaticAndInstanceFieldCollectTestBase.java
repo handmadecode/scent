@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.FieldMetrics;
-import org.myire.scent.metrics.PackageMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 
 import static org.myire.scent.util.CollectTestUtil.collect;
 import static org.myire.scent.util.CollectTestUtil.getFirstType;
@@ -48,7 +48,7 @@ abstract public class StaticAndInstanceFieldCollectTestBase extends FieldCollect
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         Iterator<FieldMetrics> aFields = getFirstType(aMetrics).getFields().iterator();
@@ -84,7 +84,7 @@ abstract public class StaticAndInstanceFieldCollectTestBase extends FieldCollect
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         Iterator<FieldMetrics> aFields = getFirstType(aMetrics).getFields().iterator();
@@ -125,7 +125,7 @@ abstract public class StaticAndInstanceFieldCollectTestBase extends FieldCollect
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         Iterator<FieldMetrics> aFields = getFirstType(aMetrics).getFields().iterator();

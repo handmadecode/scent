@@ -5,8 +5,6 @@
  */
 package org.myire.scent.metrics;
 
-import java.util.Arrays;
-
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
@@ -48,23 +46,24 @@ public class AggregatedMetricsTest
 
 
     /**
-     * Calling {@code of(Iterable&lt;PackageMetrics&gt;)} should create an {@code AggregatedMetrics}
-     * instance with the values from all of the package metrics.
+     * Calling {@code of(JavaMetrics)} should create an {@code AggregatedMetrics} instance with the
+     * values from the Java metrics.
      */
     @Test
-    public void ofIterableCreatesInstanceWithPackageValues()
+    public void ofCreatesInstanceWithJavaMetricsValues()
     {
         // Given
-        PackageMetrics aPackage1 = new PackageMetrics("org.myire");
+        JavaMetrics aJavaMetrics = new JavaMetrics();
+        PackageMetrics aPackage1 = aJavaMetrics.maybeCreate("org.myire");
         aPackage1.add(new CompilationUnitMetrics("x.java"));
         aPackage1.add(new CompilationUnitMetrics("y.java"));
         aPackage1.add(new CompilationUnitMetrics("z.java"));
-        PackageMetrics aPackage2 = new PackageMetrics("com.acme");
+        PackageMetrics aPackage2 = aJavaMetrics.maybeCreate("com.acme");
         aPackage2.add(new CompilationUnitMetrics("w.java"));
         aPackage2.add(new CompilationUnitMetrics("q.java"));
 
         // When
-        AggregatedMetrics aAggregation = AggregatedMetrics.of(Arrays.asList(aPackage1, aPackage2));
+        AggregatedMetrics aAggregation = AggregatedMetrics.of(aJavaMetrics);
 
         // Then
         assertEquals(2, aAggregation.getNumPackages());

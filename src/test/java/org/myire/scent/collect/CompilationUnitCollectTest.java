@@ -16,6 +16,7 @@ import static org.junit.Assert.assertTrue;
 import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.CompilationUnitMetrics;
 import org.myire.scent.metrics.FieldMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.PackageMetrics;
 import org.myire.scent.metrics.TypeMetrics;
 
@@ -47,7 +48,7 @@ public class CompilationUnitCollectTest
         String aName = "Test.java";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aName, "class Test {}");
+        JavaMetrics aMetrics = collect(aName, "class Test {}");
 
         // Then
         assertEquals(aName, getFirstCompilationUnit(aMetrics).getName());
@@ -102,10 +103,10 @@ public class CompilationUnitCollectTest
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
-        assertFalse(aMetrics.iterator().hasNext());
+        assertFalse(aMetrics.getPackages().iterator().hasNext());
     }
 
 
@@ -128,7 +129,7 @@ public class CompilationUnitCollectTest
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstCompilationUnit(aMetrics).getComments();
@@ -154,7 +155,7 @@ public class CompilationUnitCollectTest
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstCompilationUnit(aMetrics).getComments();
@@ -181,7 +182,7 @@ public class CompilationUnitCollectTest
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstCompilationUnit(aMetrics).getComments();
@@ -208,7 +209,7 @@ public class CompilationUnitCollectTest
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstCompilationUnit(aMetrics).getComments();
@@ -233,7 +234,7 @@ public class CompilationUnitCollectTest
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstCompilationUnit(aMetrics).getComments();
@@ -259,7 +260,7 @@ public class CompilationUnitCollectTest
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstCompilationUnit(aMetrics).getComments();
@@ -285,7 +286,7 @@ public class CompilationUnitCollectTest
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstCompilationUnit(aMetrics).getComments();
@@ -312,7 +313,7 @@ public class CompilationUnitCollectTest
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         PackageMetrics aPackageMetrics = getFirstPackage(aMetrics);
@@ -375,7 +376,7 @@ public class CompilationUnitCollectTest
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CompilationUnitMetrics aCompilationUnit = getFirstCompilationUnit(aMetrics);

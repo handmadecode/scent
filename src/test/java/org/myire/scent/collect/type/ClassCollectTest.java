@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -14,6 +14,7 @@ import static org.junit.Assert.assertEquals;
 import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.CompilationUnitMetrics;
 import org.myire.scent.metrics.FieldMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.MethodMetrics;
 import org.myire.scent.metrics.PackageMetrics;
 import org.myire.scent.metrics.TypeMetrics;
@@ -46,7 +47,7 @@ public class ClassCollectTest extends ClassAndEnumCollectTestBase
         String aSrc = "class X { X() {} }";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         assertEquals(MethodMetrics.Kind.CONSTRUCTOR, getFirstMethod(aMetrics).getKind());
@@ -67,7 +68,7 @@ public class ClassCollectTest extends ClassAndEnumCollectTestBase
         String aClassName = "FullClass";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collectFromResource(aResourceName);
+        JavaMetrics aMetrics = collectFromResource(aResourceName);
 
         // Assert package metrics name
         PackageMetrics aPackage = getFirstPackage(aMetrics);

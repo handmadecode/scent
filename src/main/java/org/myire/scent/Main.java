@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 
 import org.myire.scent.collect.JavaMetricsCollector;
 import org.myire.scent.metrics.AggregatedMetrics;
-import org.myire.scent.metrics.PackageMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 
 
 /**
@@ -45,8 +45,9 @@ public final class Main
         JavaMetricsCollector aCollector = new JavaMetricsCollector();
         collectMetrics(aCollector, pArgs);
 
-        if (aCollector.getNumCollectedPackages() > 0)
-           printMetrics(aCollector.getCollectedMetrics());
+        JavaMetrics aMetrics = aCollector.getCollectedMetrics();
+        if (aMetrics.getNumPackages() > 0)
+           printMetrics(aMetrics);
     }
 
 
@@ -86,7 +87,7 @@ public final class Main
      *
      * @throws NullPointerException if {@code pMetrics} is null.
      */
-    static private void printMetrics(@Nonnull Iterable<PackageMetrics> pMetrics)
+    static private void printMetrics(@Nonnull JavaMetrics pMetrics)
     {
         PrintStream aOutStream = getOutStream();
         MetricsPrinter aPrinter = new MetricsPrinter(aOutStream);

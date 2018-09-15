@@ -12,8 +12,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.FieldMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.MethodMetrics;
-import org.myire.scent.metrics.PackageMetrics;
 import org.myire.scent.metrics.TypeMetrics;
 
 import static org.myire.scent.util.CollectTestUtil.collect;
@@ -50,7 +50,7 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         MethodMetrics aMethod = getFirstMethod(aMetrics);
@@ -93,7 +93,7 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         MethodMetrics aMethod = getFirstMethod(aMetrics);
@@ -146,7 +146,7 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         MethodMetrics aMethod = getFirstMethod(aMetrics);
@@ -188,7 +188,7 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         MethodMetrics aMethod = getFirstMethod(aMetrics);
@@ -238,7 +238,7 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         MethodMetrics aMethod = getFirstMethod(aMetrics);
@@ -272,7 +272,7 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstMethod(aMetrics).getComments();
@@ -299,7 +299,7 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstMethod(aMetrics).getComments();
@@ -326,7 +326,7 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstMethod(aMetrics).getComments();
@@ -364,7 +364,7 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstMethod(aMetrics).getComments();

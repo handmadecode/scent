@@ -14,6 +14,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.myire.scent.metrics.CommentMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.PackageMetrics;
 
 import static org.myire.scent.util.CollectTestUtil.collect;
@@ -42,7 +43,7 @@ public class PackageCollectTest
         String aSrc = "package " + aPackage + ";";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         assertEquals(aPackage, getFirstPackage(aMetrics).getName());
@@ -69,7 +70,7 @@ public class PackageCollectTest
         aParser.collect("3", aSrc);
 
         // Then
-        Iterator<PackageMetrics> aIterator = aParser.getCollectedMetrics().iterator();
+        Iterator<PackageMetrics> aIterator = aParser.getCollectedMetrics().getPackages().iterator();
         assertEquals(aPackage, aIterator.next().getName());
         assertFalse(aIterator.hasNext());
     }
@@ -94,10 +95,10 @@ public class PackageCollectTest
         aParser.collect("1", "package " + aPackage1 + ";");
         aParser.collect("2", "package " + aPackage2 + ";");
         aParser.collect("3", "package " + aPackage3 + ";");
-        Iterable<PackageMetrics> aMetrics = aParser.getCollectedMetrics();
+        JavaMetrics aMetrics = aParser.getCollectedMetrics();
 
         // Then
-        Iterator<PackageMetrics> aIterator = aMetrics.iterator();
+        Iterator<PackageMetrics> aIterator = aMetrics.getPackages().iterator();
         assertEquals(aPackage1, aIterator.next().getName());
         assertEquals(aPackage2, aIterator.next().getName());
         assertEquals(aPackage3, aIterator.next().getName());
@@ -115,7 +116,7 @@ public class PackageCollectTest
     public void defaultPackageHasEmptyName() throws ParseException
     {
         // When
-        Iterable<PackageMetrics> aMetrics = collect("class X {}");
+        JavaMetrics aMetrics = collect("class X {}");
 
         // Then
         assertTrue(getFirstPackage(aMetrics).getName().isEmpty());
@@ -134,7 +135,7 @@ public class PackageCollectTest
         String aResourceName = "/package-info.java";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collectFromResource(aResourceName);
+        JavaMetrics aMetrics = collectFromResource(aResourceName);
 
         // Then
         PackageMetrics aPackage = getFirstPackage(aMetrics);

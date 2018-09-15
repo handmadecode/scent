@@ -15,6 +15,7 @@ import org.myire.scent.metrics.AggregatedMetrics;
 import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.CompilationUnitMetrics;
 import org.myire.scent.metrics.FieldMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.MethodMetrics;
 import org.myire.scent.metrics.PackageMetrics;
 import org.myire.scent.metrics.StatementMetrics;
@@ -46,15 +47,15 @@ class MetricsPrinter
 
 
     /**
-     * Print zero or more {@code PackageMetrics} to the stream specified in the constructor.
+     * Print a {@code JavaMetrics} to the stream specified in the constructor.
      *
      * @param pMetrics  The metrics to print.
      *
      * @throws NullPointerException if {@code pMetrics} is null.
      */
-    void print(@Nonnull Iterable<PackageMetrics> pMetrics)
+    void print(@Nonnull JavaMetrics pMetrics)
     {
-        for (PackageMetrics aMetrics : pMetrics)
+        for (PackageMetrics aMetrics : pMetrics.getPackages())
             print(aMetrics);
     }
 

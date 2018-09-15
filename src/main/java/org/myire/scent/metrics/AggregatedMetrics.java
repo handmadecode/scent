@@ -34,8 +34,8 @@ public class AggregatedMetrics
 
 
     /**
-     * Create a new {@code AggregatedMetrics} and add the values from zero or more
-     * {@code PackageMetrics} to the aggregation.
+     * Create a new {@code AggregatedMetrics} and add the values from a {@code JavaMetrics} to the
+     * aggregation.
      *
      * @param pValues   The values to add.
      *
@@ -44,10 +44,10 @@ public class AggregatedMetrics
      * @throws NullPointerException if {@code pValues} is null.
      */
     @Nonnull
-    static public AggregatedMetrics of(@Nonnull Iterable<PackageMetrics> pValues)
+    static public AggregatedMetrics of(@Nonnull JavaMetrics pValues)
     {
         AggregatedMetrics aMetrics = new AggregatedMetrics();
-        for (PackageMetrics aPackage : pValues)
+        for (PackageMetrics aPackage : pValues.getPackages())
             aMetrics.add(aPackage);
 
         return aMetrics;

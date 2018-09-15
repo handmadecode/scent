@@ -8,9 +8,7 @@ package org.myire.scent.collect;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.text.ParseException;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import static java.util.Objects.requireNonNull;
 
 import javax.annotation.CheckForNull;
@@ -28,6 +26,7 @@ import com.github.javaparser.Providers;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.PackageDeclaration;
 
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.PackageMetrics;
 
 
@@ -45,7 +44,7 @@ import org.myire.scent.metrics.PackageMetrics;
 public class JavaMetricsCollector
 {
     private final JavaParser fJavaParser;
-    private final Map<String, PackageMetrics> fPackages = new LinkedHashMap<>();
+    private final JavaMetrics fCollectedMetrics = new JavaMetrics();
 
 
     /**
@@ -112,27 +111,14 @@ public class JavaMetricsCollector
 
 
     /**
-     * Get the number of packages for which metrics have been collected in all calls to
-     * {@code collect}.
+     * Get the metrics collected in all calls to {@code collect}.
      *
-     * @return  The number of collected package metrics.
-     */
-    public int getNumCollectedPackages()
-    {
-        return fPackages.size();
-    }
-
-
-    /**
-     * Get an {@code Iterable} that iterates over the metrics collected in all calls to
-     * {@code collect}.
-     *
-     * @return  An {@code Iterable} for the collected package metrics, never null.
+     * @return  A {@code JavaMetrics} containing the collected metrics, never null.
      */
     @Nonnull
-    public Iterable<PackageMetrics> getCollectedMetrics()
+    public JavaMetrics getCollectedMetrics()
     {
-        return fPackages.values();
+        return fCollectedMetrics;
     }
 
 
@@ -195,14 +181,7 @@ public class JavaMetricsCollector
     private PackageMetrics getPackageMetrics(@CheckForNull PackageDeclaration pPackage)
     {
         String aPackageName = pPackage != null ? pPackage.getName().asString() : "";
-        PackageMetrics aPackageMetrics = fPackages.get(aPackageName);
-        if (aPackageMetrics == null)
-        {
-            aPackageMetrics = new PackageMetrics(aPackageName);
-            fPackages.put(aPackageName, aPackageMetrics);
-        }
-
-        return aPackageMetrics;
+        return fCollectedMetrics.maybeCreate(aPackageName);
     }
 
 
