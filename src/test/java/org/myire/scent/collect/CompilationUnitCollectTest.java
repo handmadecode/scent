@@ -11,6 +11,7 @@ import java.util.Iterator;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.CompilationUnitMetrics;
@@ -122,7 +123,8 @@ public class CompilationUnitCollectTest
                 "/*",
                 " * Copyright (c) 2016",
                 " */",
-                "package x.y.z;"
+                "package x.y.z;",
+                "class X{}"
         };
 
         // When
@@ -147,7 +149,8 @@ public class CompilationUnitCollectTest
         // Given
         String[] aSourceLines = {
                 "// Copyright (c) 2016",
-                "package x.y.z;"
+                "package x.y.z;",
+                "interface Z {}"
         };
 
         // When
@@ -173,7 +176,8 @@ public class CompilationUnitCollectTest
                 "// Copyright (c)",
                 "// All rights etc",
                 "",
-                "package x.y.z;"
+                "package x.y.z;",
+                "enum Q {}"
         };
 
         // When
@@ -286,6 +290,40 @@ public class CompilationUnitCollectTest
         // Then
         CommentMetrics aComments = getFirstCompilationUnit(aMetrics).getComments();
         assertEquals(1, aComments.getNumLineComments());
+    }
+
+
+    /**
+     * A compilation unit containing only comments and a package declaration should be collected in
+     * the {@code CommentMetrics} associated with the package, not the compilation unit.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void commentsInEmptyCompilationUnitAreCollectedForPackage() throws ParseException
+    {
+        // Given
+        String[] aSourceLines = {
+            "// Line comment for package",
+            "/**",
+            " * Package JavaDoc.",
+            " */",
+            "package x.y.z;",
+        };
+
+        // When
+        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+
+        // Then
+        PackageMetrics aPackageMetrics = getFirstPackage(aMetrics);
+        CommentMetrics aComments = aPackageMetrics.getComments();
+        assertEquals(1, aComments.getNumLineComments());
+        assertEquals(24, aComments.getLineCommentsLength());
+        assertEquals(1, aComments.getNumJavaDocComments());
+        assertEquals(3, aComments.getNumJavaDocLines());
+        assertEquals(16, aComments.getJavaDocCommentsLength());
+        aComments = getFirstCompilationUnit(aPackageMetrics).getComments();
+        assertTrue(aComments.isEmpty());
     }
 
 

@@ -13,9 +13,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.PackageMetrics;
 
 import static org.myire.scent.util.CollectTestUtil.collect;
+import static org.myire.scent.util.CollectTestUtil.collectFromResource;
 import static org.myire.scent.util.CollectTestUtil.getFirstPackage;
 
 
@@ -117,5 +119,30 @@ public class PackageCollectTest
 
         // Then
         assertTrue(getFirstPackage(aMetrics).getName().isEmpty());
+    }
+
+
+    /**
+     * The comments in a package-info.java compilation unit should be associated with the package.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void commentsInPackageInfoAreCollected() throws ParseException
+    {
+        // Given
+        String aResourceName = "/package-info.java";
+
+        // When
+        Iterable<PackageMetrics> aMetrics = collectFromResource(aResourceName);
+
+        // Then
+        PackageMetrics aPackage = getFirstPackage(aMetrics);
+        CommentMetrics aComments = aPackage.getComments();
+        assertEquals(1, aComments.getNumLineComments());
+        assertEquals(36, aComments.getLineCommentsLength());
+        assertEquals(1, aComments.getNumJavaDocComments());
+        assertEquals(4, aComments.getNumJavaDocLines());
+        assertEquals(34, aComments.getJavaDocCommentsLength());
     }
 }

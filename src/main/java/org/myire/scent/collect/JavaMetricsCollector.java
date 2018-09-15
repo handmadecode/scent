@@ -175,9 +175,9 @@ public class JavaMetricsCollector
             // Don't collect compilation units containing only a module declaration.
             return;
 
-        CompilationUnitMetricsCollector aCollector = new CompilationUnitMetricsCollector(pCompilationUnit, pName);
-        PackageMetrics aPackageMetrics = getPackageMetrics(pCompilationUnit.getPackageDeclaration().orElse(null));
-        aPackageMetrics.add(aCollector.collect());
+        CompilationUnitMetricsCollector aCollector =
+            new CompilationUnitMetricsCollector(pCompilationUnit, pName);
+        aCollector.collect(this::getPackageMetrics);
     }
 
 

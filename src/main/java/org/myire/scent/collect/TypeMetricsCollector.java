@@ -26,8 +26,8 @@ import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import org.myire.scent.metrics.TypeMetrics;
+import static org.myire.scent.collect.Collectors.collectAdjacentParentOrphanComments;
 import static org.myire.scent.collect.Collectors.collectNodeComments;
-import static org.myire.scent.collect.Collectors.collectParentOrphanComments;
 
 
 /**
@@ -136,7 +136,7 @@ class TypeMetricsCollector
 
         // Collect the type's comments, including the orphan comments of the enclosing compilation
         // unit that logically belong to the type's comment.
-        collectParentOrphanComments(fTypeNode, aMetrics.getComments());
+        collectAdjacentParentOrphanComments(fTypeNode, aMetrics.getComments());
         collectNodeComments(fTypeNode, aMetrics.getComments());
 
         return aMetrics;

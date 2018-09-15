@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -14,8 +14,11 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 
 /**
- * Source code metrics for a java package. A package's metrics is simply a container for the metrics
- * of all compilation units that have the same package declaration.
+ * Source code metrics for a java package. A package's metrics contain the metrics of all
+ * compilation units that have the same package declaration. It may also contain comments, e.g.
+ * JavaDocs, from a package declaration in a <i>package-info.java</i> file. Comments adjacent to
+ * the package declaration in any other compilation unit are not associated with the package but
+ * with the compilation unit.
  *<p>
  * Instances of this class are <b>not</b> safe for use by multiple threads without external
  * synchronization.
@@ -23,9 +26,8 @@ import javax.annotation.concurrent.NotThreadSafe;
  * @author <a href="mailto:peter@myire.org">Peter Franzen</a>
  */
 @NotThreadSafe
-public class PackageMetrics
+public class PackageMetrics extends CodeElementMetrics
 {
-    private final String fName;
     private final Collection<CompilationUnitMetrics> fCompilationUnits = new ArrayList<>();
 
 
@@ -38,19 +40,7 @@ public class PackageMetrics
      */
     public PackageMetrics(@Nonnull String pName)
     {
-        fName = requireNonNull(pName);
-    }
-
-
-    /**
-     * Get the name of the package.
-     *
-     * @return  The name, never null.
-     */
-    @Nonnull
-    public String getName()
-    {
-        return fName;
+        super(pName);
     }
 
 

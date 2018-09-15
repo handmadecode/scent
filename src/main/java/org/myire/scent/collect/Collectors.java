@@ -152,28 +152,53 @@ final class Collectors
 
 
     /**
-     * Collect the orphan comments from a node's parent that logically belong to the node, not to
-     * the parent. An orphan comment in the parent that immediately precedes the node's comment
-     * belongs to the node rather than to the parent. The same goes for an orphan comment that
-     * begins on the same line as the node ends on.
+     * Collect the orphan comments from a node's parent that are adjacent to the node or its
+     * comment. Orphan comments that immediately precede the node or its comment are considered to
+     * be adjacent to the node. The same goes for an orphan comment that begins on the same line as
+     * the node ends on.
      *<p>
      * The collected comments will be removed from the parent to prevent them from being collected
      * twice when the parent's comments are collected in a call to
      * {@link #collectNodeComments(Node, CommentMetrics)}.
      *
-     * @param pNode     The node to collect parent orphan comments for.
+     * @param pNode     The node to collect adjacent parent orphan comments for.
      * @param pMetrics  Where to put the collected metrics.
      *
      * @throws NullPointerException if any of the parameters is null.
      */
-    static void collectParentOrphanComments(@Nonnull Node pNode, @Nonnull CommentMetrics pMetrics)
+    static void collectAdjacentParentOrphanComments(@Nonnull Node pNode, @Nonnull CommentMetrics pMetrics)
+    {
+        collectAdjacentParentComments(pNode, pMetrics, true);
+    }
+
+
+    /**
+     * Collect the comments from a node's parent that are adjacent to the node or its comment.
+     * Comments belonging to the parent that immediately precede the node or its comment are
+     * considered to be adjacent to the node. The same goes for a parent comment that begins on the
+     * same line as the node ends on.
+     *<p>
+     * The collected comments will be removed from the parent to prevent them from being collected
+     * twice when the parent's comments are collected in a call to
+     * {@link #collectNodeComments(Node, CommentMetrics)}.
+     *
+     * @param pNode         The node to collect adjacent parent comments for.
+     * @param pMetrics      Where to put the collected metrics.
+     * @param pOrphansOnly  If true, only the parent's orphan comments will be examined.
+     *
+     * @throws NullPointerException if any of the reference parameters is null.
+     */
+    static void collectAdjacentParentComments(
+        @Nonnull Node pNode,
+        @Nonnull CommentMetrics pMetrics,
+        boolean pOrphansOnly)
     {
         Node aParent = pNode.getParentNode().orElse(null);
         Range aRange = pNode.getRange().orElse(null);
         if (aParent == null || aRange == null)
-            // If the node doesn't have a parent there are no orphan comments to reassign; if the
-            // node doesn't have a range there is no way of telling which of the parent's orphan
-            // comments should be reassigned to it.
+            // If the node doesn't have a parent there are no parent comments to collect; if the
+            // node doesn't have a range there is no way of telling which of the parent's comments
+            // that are adjacent to it.
             return;
 
         // Get the begin and end line of the node for which comment metrics are collected.
@@ -185,37 +210,44 @@ final class Collectors
         if (aComment != null)
             aBeginLine = aComment.getRange().orElse(aRange).begin.line;
 
-        // Sort the parent's orphan comments on their position in the enclosing compilation unit.
-        List<Comment> aOrphans = aParent.getOrphanComments();
-        aOrphans.sort(CommentComparator.SINGLETON);
+        // Get the parent's comments.
+        List<Comment> aParentComments = aParent.getOrphanComments();
+        Comment aParentMainComment = pOrphansOnly ? null : aParent.getComment().orElse(null);
+        if (aParentMainComment != null)
+            aParentComments.add(aParentMainComment);
 
-        // Examine the parent's orphan comments starting from the bottom of the enclosing
-        // compilation unit.
-        ListIterator<Comment> aIterator = aOrphans.listIterator(aOrphans.size());
+        // Sort the parent's comments on their position in the enclosing compilation unit.
+        aParentComments.sort(CommentComparator.SINGLETON);
+
+        // Examine the parent's comments starting from the bottom of the enclosing compilation unit.
+        ListIterator<Comment> aIterator = aParentComments.listIterator(aParentComments.size());
         while (aIterator.hasPrevious())
         {
-            Comment aOrphan = aIterator.previous();
-            Range aOrphanRange = aOrphan.getRange().orElse(NO_RANGE);
-            if (aOrphanRange.end.line < aBeginLine - 1)
-                // When an orphan comment that ends on a line not immediately preceding the node
-                // being examined there are no more orphans adjacent to that node.
+            Comment aParentComment = aIterator.previous();
+            Range aParentCommentRange = aParentComment.getRange().orElse(NO_RANGE);
+            if (aParentCommentRange.end.line < aBeginLine - 1)
+                // The parent comment ends on a line not immediately preceding the node being
+                // examined; there are no more parent comments adjacent to that node.
                 break;
 
-            if (aOrphanRange.begin.line > aEndLine)
-                // This orphan comments begins after the node being examined, continue with the
-                // previous orphan, which is located above the current.
+            if (aParentCommentRange.begin.line > aEndLine)
+                // This parent comment begins after the node being examined, continue with the
+                // previous parent comment, which is located above the current one.
                 continue;
 
-            // The orphan comment either ends on the same line or the line immediately preceding the
-            // node, or begins on the same line as the node ends. In either case the orphan
-            // logically belongs to the node rather than to its parent; remove the comment from the
-            // parent and collect its metrics.
-            aParent.removeOrphanComment(aOrphan);
-            aOrphan.accept(CommentVisitor.SINGLETON, pMetrics);
+            // The parent comment either ends on the same line or the line immediately preceding the
+            // node, or begins on the same line as the node ends. In either case the parent comment
+            // is adjacent to the node; remove the comment from the parent and collect its metrics.
+            aParentComment.accept(CommentVisitor.SINGLETON, pMetrics);
+            if (aParentComment == aParentMainComment)
+                aParent.setComment(null);
+            else
+                aParent.removeOrphanComment(aParentComment);
 
-            if (aOrphanRange.end.line <= aBeginLine)
-                // If the orphan precedes the node the latter now logically begins with the orphan.
-                aBeginLine = aOrphanRange.begin.line;
+            if (aParentCommentRange.end.line <= aBeginLine)
+                // If the parent comment precedes the node the latter now logically begins with the
+                // parent comment.
+                aBeginLine = aParentCommentRange.begin.line;
         }
     }
 

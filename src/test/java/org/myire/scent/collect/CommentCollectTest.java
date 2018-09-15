@@ -342,8 +342,37 @@ public class CommentCollectTest
 
 
     /**
-     * {@code collectParentOrphanComments()} should collect parent orphans that immediately precede
-     * the node's main comment.
+     * {@code collectAdjacentParentComments()} should collect parent comments that immediately
+     * precede the node's main comment.
+     */
+    @Test
+    public void parentCommentsThatPrecedeNodeCommentAreCollected()
+    {
+        // Given
+        // aOrphanComment immediately precedes the node's main comment
+        // aMainComment immediately precedes aOrphanComment
+        LineComment aMainComment = createLineComment(1, 1, 1, 2);
+        LineComment aOrphanComment = createLineComment(2, 1, 2, 2);
+        Node aParent = createNodeWithComment(aMainComment);
+        aParent.addOrphanComment(aOrphanComment);
+        LineComment aComment3 = createLineComment(3, 1, 3, 2);
+        Node aNode = createNodeWithComment(aComment3);
+        aNode.setParentNode(aParent);
+        CommentMetrics aMetrics = new CommentMetrics();
+
+        // When
+        Collectors.collectAdjacentParentComments(aNode, aMetrics, false);
+
+        // Then (the parent comments but not the main comment should have been collected)
+        assertEquals(2, aMetrics.getNumLineComments());
+        assertFalse(aParent.getComment().isPresent());
+        assertTrue(aParent.getOrphanComments().isEmpty());
+    }
+
+
+    /**
+     * {@code collectAdjacentParentOrphanComments()} should collect parent orphans that immediately
+     * precede the node's main comment.
      */
     @Test
     public void parentOrphansThatPrecedeMainCommentAreCollected()
@@ -360,17 +389,17 @@ public class CommentCollectTest
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
-        Collectors.collectParentOrphanComments(aNode, aMetrics);
+        Collectors.collectAdjacentParentOrphanComments(aNode, aMetrics);
 
-        // Then (the orphans  but not the main comment should have been collected)
+        // Then (the orphans but not the main comment should have been collected)
         assertEquals(2, aMetrics.getNumLineComments());
         assertTrue(aParent.getOrphanComments().isEmpty());
     }
 
 
     /**
-     * {@code collectParentOrphanComments()} should collect multiple parent orphans on the same line
-     * if they immediately precede the node's main comment.
+     * {@code collectAdjacentParentOrphanComments()} should collect multiple parent orphans on the
+     * same line if they immediately precede the node's main comment.
      */
     @Test
     public void parentOrphansOnSameLineAreCollected()
@@ -389,7 +418,7 @@ public class CommentCollectTest
         aNode.setParentNode(aParent);
 
         // When
-        Collectors.collectParentOrphanComments(aNode, aMetrics);
+        Collectors.collectAdjacentParentOrphanComments(aNode, aMetrics);
 
         // Then
         assertEquals(3, aMetrics.getNumBlockComments());
@@ -399,8 +428,8 @@ public class CommentCollectTest
 
 
     /**
-     * {@code collectParentOrphanComments()} should collect a parent orphan comment that is located
-     * on the same line as the node's main comment.
+     * {@code collectAdjacentParentOrphanComments()} should collect a parent orphan comment that is
+     * located on the same line as the node's main comment.
      */
     @Test
     public void parentOrphanOnSameLineAsNodeCommentAreCollected()
@@ -414,7 +443,7 @@ public class CommentCollectTest
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
-        Collectors.collectParentOrphanComments(aNode, aMetrics);
+        Collectors.collectAdjacentParentOrphanComments(aNode, aMetrics);
 
         // Then
         assertEquals(1, aMetrics.getNumBlockComments());
@@ -424,7 +453,7 @@ public class CommentCollectTest
 
 
     /**
-     * {@code collectParentOrphanComments()} should collect parent orphan comments that have
+     * {@code collectAdjacentParentOrphanComments()} should collect parent orphan comments that have
      * overlapping ranges. This is a contrived scenario but such an AST is nevertheless possible to
      * construct.
      */
@@ -443,7 +472,7 @@ public class CommentCollectTest
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
-        Collectors.collectParentOrphanComments(aNode, aMetrics);
+        Collectors.collectAdjacentParentOrphanComments(aNode, aMetrics);
 
         // Then
         assertEquals(2, aMetrics.getNumLineComments());
@@ -456,8 +485,36 @@ public class CommentCollectTest
 
 
     /**
-     * {@code collectParentOrphanComments()} should not collect parent orphans that don't precede
-     * the node's main comment.
+     * {@code collectAdjacentParentComments()} should not collect parent comments that don't
+     * precede the node's main comment.
+     */
+    @Test
+    public void parentCommentsThatDoNotPrecedeMainCommentAreNotCollected()
+    {
+        // Given
+        // only the orphan comment immediately precedes the node's comment
+        LineComment aMainComment = createLineComment(1, 1, 1, 2);
+        LineComment aOrphanComment = createLineComment(3, 14, 3, 26);
+        Node aParent = createNodeWithComment(aMainComment);
+        aParent.addOrphanComment(aOrphanComment);
+        LineComment aNodeComment = createLineComment(4, 1, 4, 2);
+        Node aNode = createNodeWithComment(aNodeComment);
+        aNode.setParentNode(aParent);
+        CommentMetrics aMetrics = new CommentMetrics();
+
+        // When
+        Collectors.collectAdjacentParentComments(aNode, aMetrics, false);
+
+        // Then
+        assertEquals(1, aMetrics.getNumLineComments());
+        assertTrue(aParent.getComment().isPresent());
+        assertTrue(aParent.getOrphanComments().isEmpty());
+    }
+
+
+    /**
+     * {@code collectAdjacentParentOrphanComments()} should not collect parent orphans that don't
+     * precede the node's main comment.
      */
     @Test
     public void parentOrphansThatDoNotPrecedeMainCommentAreNotCollected()
@@ -474,7 +531,7 @@ public class CommentCollectTest
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
-        Collectors.collectParentOrphanComments(aNode, aMetrics);
+        Collectors.collectAdjacentParentOrphanComments(aNode, aMetrics);
 
         // Then
         assertEquals(1, aMetrics.getNumLineComments());
@@ -483,8 +540,8 @@ public class CommentCollectTest
 
 
     /**
-     * {@code collectParentOrphanComments()} should not collect parent orphans that don't have a
-     * range and thus cannot be determined to be adjacent to the child node.
+     * {@code collectAdjacentParentOrphanComments()} should not collect parent orphans that don't
+     * have a range and thus cannot be determined to be adjacent to the child node.
      */
     @Test
     public void parentOrphansWithoutRangeAreNotCollected()
@@ -500,7 +557,7 @@ public class CommentCollectTest
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
-        Collectors.collectParentOrphanComments(aNode, aMetrics);
+        Collectors.collectAdjacentParentOrphanComments(aNode, aMetrics);
 
         // Then
         assertEquals(1, aMetrics.getNumLineComments());
@@ -509,8 +566,8 @@ public class CommentCollectTest
 
 
     /**
-     * {@code collectParentOrphanComments()} should not attempt to collect parent orphans for a node
-     * that doesn't have a parent.
+     * {@code collectAdjacentParentOrphanComments()} should not attempt to collect parent orphans
+     * for a node that doesn't have a parent.
      */
     @Test
     public void parentOrphansAreNotCollectedForNodeWithoutParent()
@@ -519,7 +576,7 @@ public class CommentCollectTest
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
-        Collectors.collectParentOrphanComments(aNode, aMetrics);
+        Collectors.collectAdjacentParentOrphanComments(aNode, aMetrics);
 
         // Then
         assertEquals(0, aMetrics.getNumLineComments());
@@ -531,8 +588,8 @@ public class CommentCollectTest
 
 
     /**
-     * {@code collectParentOrphanComments()} should not attempt to collect parent orphans for a node
-     * that doesn't have a range since it cannot be determined which comments are adjacent to it.
+     * {@code collectAdjacentParentOrphanComments()} should not attempt to collect parent orphans
+     * for a node that doesn't have a range since it cannot be determined which comments are adjacent to it.
      */
     @Test
     public void parentOrphansAreNotCollectedForNodeWithoutRange()
@@ -544,7 +601,7 @@ public class CommentCollectTest
         CommentMetrics aMetrics = new CommentMetrics();
 
         // When
-        Collectors.collectParentOrphanComments(aNode, aMetrics);
+        Collectors.collectAdjacentParentOrphanComments(aNode, aMetrics);
 
         // Then
         assertEquals(0, aMetrics.getNumLineComments());

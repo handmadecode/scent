@@ -39,10 +39,10 @@ import com.github.javaparser.ast.stmt.WhileStmt;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import org.myire.scent.metrics.MethodMetrics;
+import static org.myire.scent.collect.Collectors.collectAdjacentParentOrphanComments;
 import static org.myire.scent.collect.Collectors.collectChildComments;
 import static org.myire.scent.collect.Collectors.collectExpression;
 import static org.myire.scent.collect.Collectors.collectNodeComments;
-import static org.myire.scent.collect.Collectors.collectParentOrphanComments;
 import static org.myire.scent.collect.Collectors.moveNodeComments;
 
 
@@ -133,7 +133,7 @@ class MethodMetricsCollector
 
         // Collect the method's comments, including the orphan comments of the enclosing type that
         // logically belong to the method's comment.
-        collectParentOrphanComments(fMethodNode, aMetrics.getComments());
+        collectAdjacentParentOrphanComments(fMethodNode, aMetrics.getComments());
         collectNodeComments(fMethodNode, aMetrics.getComments());
 
         // Collect all comments not already collected from the method's children, e.g. comments

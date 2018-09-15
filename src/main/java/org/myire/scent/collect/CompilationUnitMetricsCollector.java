@@ -5,6 +5,7 @@
  */
 package org.myire.scent.collect;
 
+import java.util.function.Function;
 import static java.util.Objects.requireNonNull;
 
 import javax.annotation.Nonnull;
@@ -13,13 +14,17 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
+import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.CompilationUnitMetrics;
+import org.myire.scent.metrics.PackageMetrics;
+import static org.myire.scent.collect.Collectors.collectAdjacentParentComments;
 import static org.myire.scent.collect.Collectors.collectNodeComments;
 
 
@@ -56,34 +61,49 @@ class CompilationUnitMetricsCollector
 
 
     /**
-     * Collect metrics for the compilation unit node passed to the constructor.
+     * Collect metrics for the compilation unit node passed to the constructor and add them to a
+     * {@code PackageMetrics} instance.
      *
-     * @return  A new {@code CompilationUnitMetrics} instance with the collected metrics, never
-     *          null.
+     * @param pPackageMetricsLookup A function that returns the {@code PackageMetrics} for a
+     *                              {@code PackageDeclaration}.
+     *
+     * @throws NullPointerException if {@code pPackageMetricsLookup} is null.
      */
-    @Nonnull
-    CompilationUnitMetrics collect()
+    void collect(@Nonnull Function<PackageDeclaration, PackageMetrics> pPackageMetricsLookup)
     {
         CompilationUnitMetrics aMetrics = new CompilationUnitMetrics(fCompilationUnitName);
+
+        // Lookup the package metrics to add the collected metrics to.
+        PackageDeclaration aPackageDeclaration = fCompilationUnitNode.getPackageDeclaration().orElse(null);
+        PackageMetrics aPackageMetrics = pPackageMetricsLookup.apply(aPackageDeclaration);
 
         // Let each type declaration accept the visitor to collect metrics for the corresponding
         // top-level type.
         for (TypeDeclaration aType : fCompilationUnitNode.getTypes())
             aType.accept(TypeVisitor.SINGLETON, aMetrics);
 
-        // Collect comments for the compilation unit.
-        collectNodeComments(fCompilationUnitNode, aMetrics.getComments());
-
-        // Collect all comments from the package declaration and associate them with the compilation
-        // unit, since package declarations don't have their own metrics.
-        fCompilationUnitNode.getPackageDeclaration().ifPresent(p -> collectNodeComments(p, aMetrics.getComments()));
-
         // Collect all comments from the import declarations and associate them with the compilation
         // unit, since import declarations don't have their own metrics.
         for (ImportDeclaration aImport : fCompilationUnitNode.getImports())
             collectNodeComments(aImport, aMetrics.getComments());
 
-        return aMetrics;
+        // Collect all comments from the package declaration if there is one.
+        if (aPackageDeclaration != null)
+        {
+            // If there are no types in the compilation unit the package declaration comments are
+            // associated with the package declaration, otherwise they are associated with the
+            // compilation unit, since a package declaration isn't viewed as a separate code element
+            // unless it is the only entity in the compilation unit.
+            CommentMetrics aPackageCommentMetrics =
+                fCompilationUnitNode.getTypes().isEmpty() ? aPackageMetrics.getComments() : aMetrics.getComments();
+            collectAdjacentParentComments(aPackageDeclaration, aPackageCommentMetrics, false);
+            collectNodeComments(aPackageDeclaration, aPackageCommentMetrics);
+        }
+
+        // Collect comments for the compilation unit.
+        collectNodeComments(fCompilationUnitNode, aMetrics.getComments());
+
+        aPackageMetrics.add(aMetrics);
     }
 
 
