@@ -12,6 +12,8 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import static org.myire.scent.util.CollectTestUtil.getFirstModularCompilationUnit;
+
 
 /**
  * Unit tests for {@code JavaMetrics}.
@@ -21,10 +23,10 @@ import static org.junit.Assert.assertTrue;
 public class JavaMetricsTest
 {
     /**
-     * A newly created {@code JavaMetrics} should have zero packages.
+     * A newly created {@code JavaMetrics} should have zero packages and modular compilation units.
      */
     @Test
-    public void newInstanceHasZeroPackages()
+    public void newInstanceHasZeroPackagesAndModularCompilationUnits()
     {
         // When
         JavaMetrics aMetrics = new JavaMetrics();
@@ -32,6 +34,8 @@ public class JavaMetricsTest
         // Then
         assertEquals(0, aMetrics.getNumPackages());
         assertFalse(aMetrics.getPackages().iterator().hasNext());
+        assertEquals(0, aMetrics.getNumModularCompilationUnits());
+        assertFalse(aMetrics.getModularCompilationUnits().iterator().hasNext());
     }
 
 
@@ -111,5 +115,113 @@ public class JavaMetricsTest
 
         // Then
         assertNotSame(aPackageMetrics1, aPackageMetrics2);
+    }
+
+
+    /**
+     * {@code maybeCreate()} should increment the value returned by {@code getNumPackages} if the
+     * package is created by the call.
+     */
+    @Test
+    public void maybeCreateIncreasesPackageCountWhenPackageIsCreated()
+    {
+        // Given
+        JavaMetrics aMetrics = new JavaMetrics();
+        int aNumPackages = aMetrics.getNumPackages();
+
+        // When
+        aMetrics.maybeCreate("pkg1");
+
+        // Then
+        assertEquals(++aNumPackages, aMetrics.getNumPackages());
+
+        // When
+        aMetrics.maybeCreate("pkg2");
+
+        // Then
+        assertEquals(++aNumPackages, aMetrics.getNumPackages());
+    }
+
+
+    /**
+     * {@code maybeCreate()} should not increment the value returned by {@code getNumPackages} if
+     * the package isn't created by the call.
+     */
+    @Test
+    public void maybeCreateDoesNotIncreasePackageCountWhenPackageIsNotCreated()
+    {
+        // Given
+        String aPackageName = "p.k.g";
+        JavaMetrics aMetrics = new JavaMetrics();
+        aMetrics.maybeCreate(aPackageName);
+        int aNumPackages = aMetrics.getNumPackages();
+
+        // When
+        aMetrics.maybeCreate(aPackageName);
+
+        // Then
+        assertEquals(aNumPackages, aMetrics.getNumPackages());
+    }
+
+
+    /**
+     * {@code add(ModularCompilationUnitMetrics)} should throw a {@code NullPointerException} when
+     * passed a null argument.
+     */
+    @Test(expected=NullPointerException.class)
+    public void addThrowsForNullArgument()
+    {
+        // Given
+        ModularCompilationUnitMetrics aModule = null;
+
+        // When
+        new JavaMetrics().add(aModule);
+    }
+
+
+    /**
+     * Adding a {@code ModularCompilationUnitMetrics} instance with a call to {@code add} should
+     * increment the value returned by {@code getNumModularCompilationUnits}.
+     */
+    @Test
+    public void addIncrementsModuleCount()
+    {
+        // Given
+        ModuleDeclarationMetrics aModule1 = new ModuleDeclarationMetrics("m1", true);
+        ModuleDeclarationMetrics aModule2 = new ModuleDeclarationMetrics("m2", false);
+        JavaMetrics aMetrics = new JavaMetrics();
+        int aNumModules = aMetrics.getNumModularCompilationUnits();
+
+        // When
+        aMetrics.add(new ModularCompilationUnitMetrics("module-info.java", aModule1));
+
+        // Then
+        assertEquals(++aNumModules, aMetrics.getNumModularCompilationUnits());
+
+        // When
+        aMetrics.add(new ModularCompilationUnitMetrics("module-info.java", aModule2));
+
+        // Then
+        assertEquals(++aNumModules, aMetrics.getNumModularCompilationUnits());
+    }
+
+
+    /**
+     * A {@code ModularCompilationUnitMetrics} instance passed to {@code add} should be returned by
+     * {@code getModules}.
+     */
+    @Test
+    public void modularCompilationUnitMetricsIsReturnedByGetter()
+    {
+        // Given
+        ModularCompilationUnitMetrics aModularCompilationUnitMetrics =
+            new ModularCompilationUnitMetrics("", new ModuleDeclarationMetrics("modus", false));
+        JavaMetrics aJavaMetrics = new JavaMetrics();
+
+        // When
+        aJavaMetrics.add(aModularCompilationUnitMetrics);
+
+        // Then
+        assertSame(aModularCompilationUnitMetrics, getFirstModularCompilationUnit(aJavaMetrics));
     }
 }

@@ -157,23 +157,29 @@ public class JavaMetricsCollector
      */
     private void collectMetrics(@Nonnull CompilationUnit pCompilationUnit, @Nonnull String pName)
     {
-        if (pCompilationUnit.getModule().isPresent() && pCompilationUnit.getTypes().isEmpty())
-            // Don't collect compilation units containing only a module declaration.
-            return;
-
-        CompilationUnitMetricsCollector aCollector =
-            new CompilationUnitMetricsCollector(pCompilationUnit, pName);
-        aCollector.collect(this::getPackageMetrics);
+        if (pCompilationUnit.getModule().isPresent())
+        {
+            // A modular compilation unit, collect metrics for it and add to the overall results.
+            ModularCompilationUnitMetricsCollector aCollector =
+                new ModularCompilationUnitMetricsCollector(pCompilationUnit, pName);
+            fCollectedMetrics.add(aCollector.collect());
+        }
+        else
+        {
+            // An ordinary compilation unit, collect its metrics into the appropriate package's
+            // metrics.
+            CompilationUnitMetricsCollector aCollector =
+                new CompilationUnitMetricsCollector(pCompilationUnit, pName);
+            aCollector.collect(this::getPackageMetrics);
+        }
     }
 
 
     /**
-     * Get the {@code PackageMetrics} for a package from the internal map. If the specified package
-     * doesn't have an entry in the internal map a new {@code PackageMetrics} will be created an put
-     * into the map before it is returned.
+     * Get, possibly first creating, the {@code PackageMetrics} for a {@code PackageDeclaration}.
      *
-     * @param pPackage  The package to get the {@code PackageMetrics} for, or null to get the
-     *                  metrics for the default package.
+     * @param pPackage  The package declaration to get the metrics for. A null instance represents
+     *                  the default package.
      *
      * @return  The {@code PackageMetrics} instance for the specified package, never null.
      */

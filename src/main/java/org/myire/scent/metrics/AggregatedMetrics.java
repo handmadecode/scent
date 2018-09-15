@@ -17,6 +17,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 @NotThreadSafe
 public class AggregatedMetrics
 {
+    private int fNumModularCompilationUnits;
     private int fNumPackages;
     private int fNumCompilationUnits;
     private int fNumTypes;
@@ -47,8 +48,12 @@ public class AggregatedMetrics
     static public AggregatedMetrics of(@Nonnull JavaMetrics pValues)
     {
         AggregatedMetrics aMetrics = new AggregatedMetrics();
+
         for (PackageMetrics aPackage : pValues.getPackages())
             aMetrics.add(aPackage);
+
+        for (ModularCompilationUnitMetrics aModule : pValues.getModularCompilationUnits())
+            aMetrics.add(aModule);
 
         return aMetrics;
     }
@@ -234,6 +239,17 @@ public class AggregatedMetrics
 
 
     /**
+     * Get the number of modular compilation units in this aggregation.
+     *
+     * @return  The number of modular compilation units.
+     */
+    public int getNumModularCompilationUnits()
+    {
+        return fNumModularCompilationUnits;
+    }
+
+
+    /**
      * Get the number of packages in this aggregation.
      *
      * @return  The number of packages.
@@ -390,6 +406,25 @@ public class AggregatedMetrics
     public int getJavaDocCommentsLength()
     {
         return fJavaDocCommentsLength;
+    }
+
+
+    /**
+     * Add a {@code ModularCompilationUnitMetrics} to this aggregation.
+     *
+     * @param pValues   The values to add.
+     *
+     * @return  This instance.
+     *
+     * @throws NullPointerException if {@code pValues} is null.
+     */
+    @Nonnull
+    public AggregatedMetrics add(@Nonnull ModularCompilationUnitMetrics pValues)
+    {
+        fNumModularCompilationUnits++;
+        add(pValues.getComments());
+        add(pValues.getModule().getComments());
+        return this;
     }
 
 

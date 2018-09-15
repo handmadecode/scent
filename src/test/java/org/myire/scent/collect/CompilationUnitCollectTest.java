@@ -29,7 +29,8 @@ import static org.myire.scent.util.CollectTestUtil.getFirstType;
 
 
 /**
- * Unit tests for parsing a compilation unit and collecting the source code metrics related it.
+ * Unit tests for parsing an ordinary compilation unit and collecting the source code metrics
+ * related it.
  *
  * @author <a href="mailto:peter@myire.org">Peter Franzen</a>
  */
@@ -83,30 +84,6 @@ public class CompilationUnitCollectTest
         assertEquals(aName2, aIterator.next().getName());
         assertEquals(aName3, aIterator.next().getName());
         assertFalse(aIterator.hasNext());
-    }
-
-
-    /**
-     * A compilation unit containing only a module declaration should not be collected.
-     *
-     * @throws ParseException   if the test fails unexpectedly.
-     */
-    @Test
-    public void moduleDeclarationIsNotCollected() throws ParseException
-    {
-        // Given
-        String[] aSourceLines = {
-            "module org.acme.util {",
-            "  requires java.sql;",
-            "  exports org.acme.util;",
-            "}"
-        };
-
-        // When
-        JavaMetrics aMetrics = collect(aSourceLines);
-
-        // Then
-        assertFalse(aMetrics.getPackages().iterator().hasNext());
     }
 
 

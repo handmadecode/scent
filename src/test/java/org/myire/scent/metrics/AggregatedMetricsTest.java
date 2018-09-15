@@ -28,6 +28,7 @@ public class AggregatedMetricsTest
         AggregatedMetrics aMetrics = new AggregatedMetrics();
 
         // Then
+        assertEquals(0, aMetrics.getNumModularCompilationUnits());
         assertEquals(0, aMetrics.getNumPackages());
         assertEquals(0, aMetrics.getNumCompilationUnits());
         assertEquals(0, aMetrics.getNumTypes());
@@ -61,6 +62,9 @@ public class AggregatedMetricsTest
         PackageMetrics aPackage2 = aJavaMetrics.maybeCreate("com.acme");
         aPackage2.add(new CompilationUnitMetrics("w.java"));
         aPackage2.add(new CompilationUnitMetrics("q.java"));
+        ModularCompilationUnitMetrics aModule =
+            new ModularCompilationUnitMetrics("m-i.java", new ModuleDeclarationMetrics("x", false));
+        aJavaMetrics.add(aModule);
 
         // When
         AggregatedMetrics aAggregation = AggregatedMetrics.of(aJavaMetrics);
@@ -68,6 +72,7 @@ public class AggregatedMetricsTest
         // Then
         assertEquals(2, aAggregation.getNumPackages());
         assertEquals(5, aAggregation.getNumCompilationUnits());
+        assertEquals(1, aAggregation.getNumModularCompilationUnits());
     }
 
 
@@ -112,6 +117,54 @@ public class AggregatedMetricsTest
         // Then
         assertEquals(0, aAggregation.getNumPackages());
         assertEquals(3, aAggregation.getNumCompilationUnits());
+    }
+
+
+    /**
+     * Adding a {@code ModularCompilationUnitMetrics} instance to an aggregation should increment
+     * the modular compilation unit count.
+     */
+    @Test
+    public void addModularCompilationUnitMetricsIncrementsCount()
+    {
+        // Given
+        AggregatedMetrics aAggregation = new AggregatedMetrics();
+        ModuleDeclarationMetrics aModule = new ModuleDeclarationMetrics("org.myire.scent", false);
+        ModularCompilationUnitMetrics aModularCompilationUnit =
+            new ModularCompilationUnitMetrics("x.java", aModule);
+
+        // When
+        aAggregation.add(aModularCompilationUnit);
+
+        // Then
+        assertEquals(1, aAggregation.getNumModularCompilationUnits());
+    }
+
+
+    /**
+     * Adding a {@code ModularCompilationUnitMetrics} instance to an aggregation should add the
+     * comment metrics from both the compilation unit and the module declaration to the aggregation.
+     */
+    @Test
+    public void addModularCompilationUnitsAggregatesComments()
+    {
+        // Given
+        AggregatedMetrics aAggregation = new AggregatedMetrics();
+
+        ModuleDeclarationMetrics aModule = new ModuleDeclarationMetrics("org.myire.scent", false);
+        aModule.getComments().add(CommentTestUtil.createLineComment());
+
+        ModularCompilationUnitMetrics aModularCompilationUnit =
+            new ModularCompilationUnitMetrics("module-info.java", aModule);
+        aModularCompilationUnit.getComments().add(CommentTestUtil.createBlockComment(12));
+
+        // When
+        aAggregation.add(aModularCompilationUnit);
+
+        // Then
+        assertEquals(1, aAggregation.getNumLineComments());
+        assertEquals(1, aAggregation.getNumBlockComments());
+        assertEquals(12, aAggregation.getNumBlockCommentLines());
     }
 
 

@@ -15,6 +15,8 @@ import org.myire.scent.metrics.CompilationUnitMetrics;
 import org.myire.scent.metrics.FieldMetrics;
 import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.MethodMetrics;
+import org.myire.scent.metrics.ModularCompilationUnitMetrics;
+import org.myire.scent.metrics.ModuleDeclarationMetrics;
 import org.myire.scent.metrics.PackageMetrics;
 import org.myire.scent.metrics.TypeMetrics;
 
@@ -119,6 +121,40 @@ final public class CollectTestUtil
         {
             throw new RuntimeException(e);
         }
+    }
+
+
+    /**
+     * Get the metrics for the first modular compilation unit in a {@code JavaMetrics}.
+     *
+     * @param pMetrics  The {@code JavaMetrics} to get the first modular compilation unit metrics
+     *                  from.
+     *
+     * @return  A {@code ModularCompilationUnitMetrics} instance.
+     *
+     * @throws java.util.NoSuchElementException if {@code pMetrics} has no modular compilation
+     *                                          units.
+     */
+    static public ModularCompilationUnitMetrics getFirstModularCompilationUnit(JavaMetrics pMetrics)
+    {
+        return pMetrics.getModularCompilationUnits().iterator().next();
+    }
+
+
+    /**
+     * Get the metrics for the module declaration of the first modular compilation unit in a
+     * {@code JavaMetrics}.
+     *
+     * @param pMetrics  The {@code JavaMetrics} to get the first module declaration metrics from.
+     *
+     * @return  A {@code ModuleDeclarationMetrics} instance.
+     *
+     * @throws java.util.NoSuchElementException if {@code pMetrics} has no modular compilation
+     *                                          units.
+     */
+    static public ModuleDeclarationMetrics getFirstModuleDeclaration(JavaMetrics pMetrics)
+    {
+        return getFirstModularCompilationUnit(pMetrics).getModule();
     }
 
 
