@@ -552,6 +552,30 @@ public class StatementCollectTest
 
 
     /**
+     * A lambda expression with local variable syntax should be collected in the method's
+     * {@code StatementMetrics}.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void localVariableSyntaxLambdaIsCollected() throws ParseException
+    {
+        // Given
+        String[] aSourceLines = {
+            "class X { void m(Map<String, Integer> pMap) {",
+            "pMap.forEach((var k, var v) -> System.out.println(k + v));",
+            "}}"
+        };
+
+        // When
+        StatementMetrics aStatements = collectStatementMetrics(aSourceLines);
+
+        // Then
+        assertEquals(2, aStatements.getNumStatements());
+    }
+
+
+    /**
      * An annotation with all kinds of members should have the corresponding code element metrics
      * collected.
      *

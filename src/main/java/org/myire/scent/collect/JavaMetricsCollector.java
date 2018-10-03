@@ -219,6 +219,10 @@ public class JavaMetricsCollector
                 aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_10);
                 break;
 
+            case JAVA_11:
+                aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_11);
+                break;
+
             default:
                 break;
         }
@@ -271,7 +275,10 @@ public class JavaMetricsCollector
         JAVA_9,
 
         /** Java 10 (introducing local variable type inference). */
-        JAVA_10
+        JAVA_10,
+
+        /** Java 11 (introducing local variable syntax for lambda parameters (JEP 323)). */
+        JAVA_11
         ;
 
         /**
@@ -282,7 +289,7 @@ public class JavaMetricsCollector
         @Nonnull
         static public LanguageLevel getDefault()
         {
-            return JAVA_10;
+            return JAVA_11;
         }
     }
 }

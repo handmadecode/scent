@@ -85,7 +85,7 @@ public class JavaMetricsCollectorTest
     @Test(expected=ParseException.class)
     public void collectThrowsForInvalidJava8Construct() throws ParseException
     {
-        // Given
+        // Given (private interface method requires language level 9)
         String aSrc = "interface X { private void m() {} }";
 
         // When
@@ -103,11 +103,29 @@ public class JavaMetricsCollectorTest
     @Test(expected=ParseException.class)
     public void collectThrowsForInvalidJava9Construct() throws ParseException
     {
-        // Given
+        // Given (underscore variable name not allowed in language levels >= 9)
         String aSrc = "class X {int _;}";
 
         // When
         new JavaMetricsCollector(JavaMetricsCollector.LanguageLevel.JAVA_9).collect("src", aSrc);
+    }
+
+
+    /**
+     * A {@code JavaMetricsCollector} for language level 10 should throw a {@code ParseException}
+     * in  {@code collect(String)} when passed a syntactically invalid source code for the Java 10
+     * language level.
+     *
+     * @throws ParseException   always.
+     */
+    @Test(expected=ParseException.class)
+    public void collectThrowsForInvalidJava10Construct() throws ParseException
+    {
+        // Given (local variable syntax for lambda parameters requires language level 11)
+        String aSrc = "class X { void x(Map m) { m.forEach((var x, var y) -> System.out.println(x==y)); } }";
+
+        // When
+        new JavaMetricsCollector(JavaMetricsCollector.LanguageLevel.JAVA_10).collect("src", aSrc);
     }
 
 
