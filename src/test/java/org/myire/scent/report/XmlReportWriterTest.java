@@ -473,7 +473,6 @@ public class XmlReportWriterTest extends OutputStreamReportWriterTestBase
 
         // When
         writeReport(null, aVersion);
-        System.out.println(new String(getReportContents()));
 
         // Then
         Document aDocument = parseReport();
