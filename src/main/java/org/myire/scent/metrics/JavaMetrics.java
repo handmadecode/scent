@@ -39,6 +39,18 @@ public class JavaMetrics
 
 
     /**
+     * Is this instance empty?
+     *
+     * @return  True iff no package metrics or modular compilation unit metrics have been added to
+     *          this instance.
+     */
+    public boolean isEmpty()
+    {
+        return fPackages.isEmpty() && fModules.isEmpty();
+    }
+
+
+    /**
      * Get the number of packages for which metrics have been collected in this instance.
      *
      * @return  The number of packages.

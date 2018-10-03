@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -77,10 +76,10 @@ public class JavaFileMetricsCollectorTest extends FileTestBase
     {
         // Given
         String aFileName = "FullClass.java";
-        fTestFile = copyResourceToFile('/' + aFileName, Paths.get(aFileName));
+        Path aFile = createTestFileFromJavaResource(aFileName);
 
         // When
-        fCollector.visitFile(fTestFile, null);
+        fCollector.visitFile(aFile, null);
 
         // Then
         verify(fDelegate).collect(eq(aFileName), any(InputStream.class), any(Charset.class));
@@ -96,10 +95,10 @@ public class JavaFileMetricsCollectorTest extends FileTestBase
     {
         // Given
         String aFileName = "FullInterface.java";
-        fTestFile = copyResourceToFile('/' + aFileName, Paths.get(aFileName));
+        Path aFile = createTestFileFromJavaResource(aFileName);
 
         // When
-        fCollector.visitFile(fTestFile, null);
+        fCollector.visitFile(aFile, null);
 
         // Then
         assertEquals(1, fCollector.getNumFiles());
@@ -150,10 +149,10 @@ public class JavaFileMetricsCollectorTest extends FileTestBase
     public void visitFileIgnoresNonJavaFile() throws IOException
     {
         // Given
-        fTestFile = Files.createFile(Paths.get("NotAJavaFile.txt"));
+        Path aTestFile = createTestFile("NotAJavaFile.txt");
 
         // When
-        fCollector.visitFile(fTestFile, null);
+        fCollector.visitFile(aTestFile, null);
 
         // Then
         verifyZeroInteractions(fDelegate);
@@ -182,10 +181,10 @@ public class JavaFileMetricsCollectorTest extends FileTestBase
     public void visitFileDoesNotIncrementFileCountForNonJavaFile() throws IOException
     {
         // Given
-        fTestFile = Files.createFile(Paths.get("NotAJavaFile.txt"));
+        Path aTestFile = createTestFile("NotAJavaFile.txt");
 
         // When
-        fCollector.visitFile(fTestFile, null);
+        fCollector.visitFile(aTestFile, null);
 
         // Then
         assertEquals(0, fCollector.getNumFiles());
@@ -200,12 +199,11 @@ public class JavaFileMetricsCollectorTest extends FileTestBase
     public void visitFileThrowsForInvalidJavaFile() throws IOException
     {
         // Given
-        String aFileName = "Invalid.java";
-        fTestFile = copyResourceToFile('/' + aFileName, Paths.get(aFileName));
+        Path aFile = createTestFileFromJavaResource("Invalid.java");
         JavaFileMetricsCollector aVisitor = new JavaFileMetricsCollector(new JavaMetricsCollector());
 
         // When
-        aVisitor.visitFile(fTestFile, null);
+        aVisitor.visitFile(aFile, null);
     }
 
 
@@ -218,12 +216,11 @@ public class JavaFileMetricsCollectorTest extends FileTestBase
     public void visitFileThrowsForJavaFileWithWrongEncoding() throws IOException
     {
         // Given
-        String aFileName = "FullAnnotation.java";
-        fTestFile = copyResourceToFile('/' + aFileName, Paths.get(aFileName));
+        Path aFile = createTestFileFromJavaResource("FullAnnotation.java");
         JavaFileMetricsCollector aVisitor =
                 new JavaFileMetricsCollector(new JavaMetricsCollector(), StandardCharsets.UTF_16LE);
 
         // When
-        aVisitor.visitFile(fTestFile, null);
+        aVisitor.visitFile(aFile, null);
     }
 }

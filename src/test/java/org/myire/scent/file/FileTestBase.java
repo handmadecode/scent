@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -9,30 +9,145 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.After;
+import org.junit.Before;
 
 
 /**
- * Base class for tests creating a file that should be deleted when the test finishes.
+ * Base class for tests that create one or more files that should be deleted when the test finishes.
  *
  * @author <a href="mailto:peter@myire.org">Peter Franzen</a>
  */
 public class FileTestBase
 {
-    protected Path fTestFile;
+    static private final String JAVA_FILE_RESOURCE_ROOT = "/";
+    static private final String XSL_FILE_RESOURCE_ROOT = "/xsl/";
+
+    private final List<Path> fTestFiles = new ArrayList<>();
+    private Path fTestDirectory;
 
 
     /**
-     * Delete the test file if created by the test.
+     * Create the temporary directory where all test files will be created.
      *
-     * @throws IOException  if deleting the file fails.
+     * @throws IOException  if creating the directory fails.
+     */
+    @Before
+    public void createTestDirectory() throws IOException
+    {
+        fTestDirectory = Files.createTempDirectory(getClass().getName());
+    }
+
+
+    /**
+     * Delete the test files and directory created by the test.
+     *
+     * @throws IOException  if deleting a file or the directory fails.
      */
     @After
-    public void deleteTestFile() throws IOException
+    public void deleteTestFiles() throws IOException
     {
-        if (fTestFile != null)
-            Files.deleteIfExists(fTestFile);
+        for (Path aTestFile : fTestFiles)
+            Files.deleteIfExists(aTestFile);
+
+        if (fTestDirectory != null)
+            Files.deleteIfExists(fTestDirectory);
+    }
+
+
+    /**
+     * Get the test directory where the test files by default are created.
+     *
+     * @return  The test directory.
+     */
+    protected Path getTestDirectory()
+    {
+        return fTestDirectory;
+    }
+
+
+    /**
+     * Mark a file to be deleted after the test has run.
+     *
+     * @param pTestFile The file to delete after the test.
+     */
+    protected void markForDeletion(Path pTestFile)
+    {
+        fTestFiles.add(pTestFile);
+    }
+
+
+    /**
+     * Create a file in the temporary test directory and mark the file for deletion after the test
+     * has finished.
+     *
+     * @param pFileName The name of the file to create.
+     *
+     * @return  The path to the created file.
+     *
+     * @throws IOException  if creating the file fails.
+     */
+    protected Path createTestFile(String pFileName) throws IOException
+    {
+        Path aPath = Files.createFile(fTestDirectory.resolve(pFileName));
+        markForDeletion(aPath);
+        return aPath;
+    }
+
+
+    /**
+     * Copy a classpath resource to a file in the temporary test directory and mark the file for
+     * deletion after the test has finished.
+     *
+     * @param pResourceName The name of the resource relative to the test Java resource root.
+     *
+     * @return  The path to the created file.
+     *
+     * @throws IOException  if accessing the resource or writing to the file fails.
+     */
+    protected Path createTestFileFromJavaResource(String pResourceName) throws IOException
+    {
+        return createTestFileFromResource(JAVA_FILE_RESOURCE_ROOT, pResourceName);
+    }
+
+
+    /**
+     * Copy a classpath resource to a file in the temporary test directory and mark the file for
+     * deletion after the test has finished.
+     *
+     * @param pResourceName The name of the resource relative to the test XSL resource root.
+     *
+     * @return  The path to the created file.
+     *
+     * @throws IOException  if accessing the resource or writing to the file fails.
+     */
+    protected Path createTestFileFromXslResource(String pResourceName) throws IOException
+    {
+        return createTestFileFromResource(XSL_FILE_RESOURCE_ROOT, pResourceName);
+    }
+
+
+    /**
+     * Copy a classpath resource to a file in the temporary test directory and mark the file for
+     * deletion after the test has finished.
+     *
+     * @param pResourcePrefix   The prefix that should be prepended to the file name to get the
+     *                          resource path.
+     * @param pFileName         The name of the file to create.
+     *
+     * @return  The path to the created file.
+     *
+     * @throws IOException  if accessing the resource or writing to the file fails.
+     */
+    protected Path createTestFileFromResource(String pResourcePrefix, String pFileName) throws IOException
+    {
+        Path aPath = copyResourceToFile(pResourcePrefix + pFileName, fTestDirectory.resolve(pFileName));
+        markForDeletion(aPath);
+        return aPath;
     }
 
 
@@ -50,7 +165,7 @@ public class FileTestBase
     {
         try (InputStream aStream = FileTestBase.class.getResourceAsStream(pResource))
         {
-            Files.copy(aStream, pFilePath);
+            Files.copy(aStream, pFilePath, StandardCopyOption.REPLACE_EXISTING);
             return pFilePath;
         }
     }

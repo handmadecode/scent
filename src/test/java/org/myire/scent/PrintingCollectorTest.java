@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -8,6 +8,7 @@ package org.myire.scent;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.junit.Test;
@@ -66,10 +67,10 @@ public class PrintingCollectorTest extends FileTestBase
     {
         // Given
         String aFileName = "Invalid.java";
-        fTestFile = copyResourceToFile('/' + aFileName, Paths.get(aFileName));
+        Path aInvalidPath = createTestFileFromJavaResource(aFileName);
 
         // When
-        fCollector.visitFile(fTestFile, null);
+        fCollector.visitFile(aInvalidPath, null);
 
         // Then
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
@@ -88,7 +89,7 @@ public class PrintingCollectorTest extends FileTestBase
     {
         // Given
         String aFileName = "FullAnnotation.java";
-        fTestFile = copyResourceToFile('/' + aFileName, Paths.get(aFileName));
+        Path aTestFile = createTestFileFromJavaResource(aFileName);
         PrintingCollector aCollector = new PrintingCollector(
                 new JavaMetricsCollector(),
                 StandardCharsets.UTF_16LE,
@@ -96,7 +97,7 @@ public class PrintingCollectorTest extends FileTestBase
                 fErrStream);
 
         // When
-        aCollector.visitFile(fTestFile, null);
+        aCollector.visitFile(aTestFile, null);
 
         // Then
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);

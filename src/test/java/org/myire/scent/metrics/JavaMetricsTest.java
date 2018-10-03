@@ -32,6 +32,7 @@ public class JavaMetricsTest
         JavaMetrics aMetrics = new JavaMetrics();
 
         // Then
+        assertTrue(aMetrics.isEmpty());
         assertEquals(0, aMetrics.getNumPackages());
         assertFalse(aMetrics.getPackages().iterator().hasNext());
         assertEquals(0, aMetrics.getNumModularCompilationUnits());
@@ -203,6 +204,62 @@ public class JavaMetricsTest
 
         // Then
         assertEquals(++aNumModules, aMetrics.getNumModularCompilationUnits());
+    }
+
+
+    /**
+     * The {@code isEmpty} method should return false after creating a {@code PackageMetrics}
+     * instance with a call to {@code maybeCreate}.
+     */
+    @Test
+    public void isEmptyReturnsFalseAfterMaybeCreate()
+    {
+        // Given
+        JavaMetrics aMetrics = new JavaMetrics();
+
+        // When
+        aMetrics.maybeCreate("x.y.z");
+
+        // Then
+        assertFalse(aMetrics.isEmpty());
+    }
+
+
+    /**
+     * The {@code isEmpty} method should return false after creating a
+     * {@code ModularCompilationUnitMetrics} instance with a call to {@code add}.
+     */
+    @Test
+    public void isEmptyReturnsFalseAfterAdd()
+    {
+        // Given
+        JavaMetrics aMetrics = new JavaMetrics();
+
+        // When
+        aMetrics.add(new ModularCompilationUnitMetrics("module-info.java", new ModuleDeclarationMetrics("m", true)));
+
+        // Then
+        assertFalse(aMetrics.isEmpty());
+    }
+
+
+    /**
+     * The {@code isEmpty} method should return false after creating a {@code PackageMetrics}
+     * instance with a call to {@code maybeCreate} and a {@code ModularCompilationUnitMetrics}
+     * instance with a call to {@code add}.
+     */
+    @Test
+    public void isEmptyReturnsFalseAfterMaybeCreateAndAdd()
+    {
+        // Given
+        JavaMetrics aMetrics = new JavaMetrics();
+
+        // When
+        aMetrics.maybeCreate("x.y.z");
+        aMetrics.add(new ModularCompilationUnitMetrics("module-info.java", new ModuleDeclarationMetrics("m", false)));
+
+        // Then
+        assertFalse(aMetrics.isEmpty());
     }
 
 
