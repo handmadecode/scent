@@ -17,7 +17,7 @@ buildscript
   // This script uses the Quill plugins.
   dependencies 
   {
-    classpath 'org.myire:quill:1.4'
+    classpath 'org.myire:quill:1.5'
   }
 }
 
