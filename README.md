@@ -15,8 +15,8 @@ Note that Scent is not a drop-in replacement for JavaNCSS, nor does it produce e
 metrics. See the [Differences with JavaNCSS](#differences-with-javancss) section for more details on
 how Scent and JavaNCSS differ.
 
-Scent is compiled with Java 1.7, but can parse and collect metrics for source code with language
-level 1.8.
+Scent must compiled with at least Java 9, but can still be run with Java 8. It parses and collects
+metrics for source code up to and including language level 11.
 
 
 ## Contents
@@ -28,6 +28,22 @@ level 1.8.
 
 
 ## Release Notes
+
+### version 2.0
+
+* Support for language levels 9, 10, and 11.
+* Requires Java 8 or higher to run.
+* Packaged as a modular jar file. The classes in the jar file are still targeted for Java 8.
+* Private interface methods are categorized as instance methods, not as abstract methods.
+* Native methods are categorized separately from instance methods.
+* The length, i.e. the number of characters, are collected for each comment.
+* Comments in `package-info.java` files are collected and associated with the package.
+* Report format and output file can be specified in the arguments to `org.myire.scent.Main::main`.
+* API breaking change: `JavaMetricsCollector::getCollectedMetrics()` returns a `JavaMetrics`
+instance, not an `Iterable<PackageMetrics>`.
+* API breaking change: `org.myire.scent.MetricsPrinter` has been removed and is replaced by
+`org.myire.scent.report.MetricsReportWriter` implementations, which can create text, xml, html and
+xsl reports.
 
 ### version 1.0
 
@@ -41,6 +57,8 @@ type.
 
 ## General Usage
 
+### From code
+
 The central class in Scent is `org.myire.scent.collect.JavaMetricsCollector`. To collect metrics for
 a compilation unit (e.g. a Java source file), call the method
 `collect(String, InputStream, Charset)`. This method will parse the source code from the specified
@@ -49,11 +67,14 @@ stored in the `JavaMetricsCollector` instance. This allows collecting metrics fo
 compilation units before getting the metrics from the `JavaMetricsCollector`.
 
 Once all compilation units have been passed to `collect`, the metrics can be retrieved with a call
-to `getCollectedMetrics`. This method returns an `Iterable` of
-`org.myire.scent.metrics.PackageMetrics` instances, one for each unique Java package declared by the
-compilation units passed to `collect`. These package metrics contain all other collected metrics,
-see the section [Collected Metrics](#collected-metrics) for details on the various types of metrics
-that are collected.
+to `getCollectedMetrics`. This method returns a `JavaMetrics` instance, which contains metrics for
+each unique Java package declared by the ordinary compilation units passed to `collect`. These
+package metrics contain all other collected metrics, see the section
+[Collected Metrics](#collected-metrics) for details on the various types of metrics that are
+collected.
+
+The `JavaMetrics` instance also contains metrics for the module declaration in any modular
+compilation unit passed to `JavaMetricsCollector::collect`.
 
 The pattern for collecting metrics is something like
 
@@ -66,15 +87,23 @@ The pattern for collecting metrics is something like
         c.collect(compilationUnitName, is, cs);
     }
 
-    for (PackageMetrics metrics : c.getCollectedMetrics())
+    JavaMetrics m = c.getCollectedMetrics();
+    for (PackageMetrics p : m.getPackages())
+        ...
+    for (ModularCompilationUnitMetrics mcu : m.getModularCompilationUnits())
         ...
 
 The class `org.myire.scent.Main` is an example of how to collect metrics for Java source code files.
 The method `main` will collect metrics from all files ending in ".java" found in the path(s)
 specified as argument(s) to the method, recursively descending into subdirectories.
 
-The `Main` class is specified as the main class of the Scent jar file. This means that the jar file
-can be used as a tool for collecting and printing metrics for Java source code. For example,
+### Running the jar file
+
+The scent jar file can be used as a tool for collecting and printing metrics for Java source code.
+Note that the `javaparser-core` jar file must be on the class path, see the
+[Dependencies](#dependencies) section.
+
+For example,
 
     java -cp ... org.myire.scent.Main SomeClass.java
 
@@ -85,31 +114,77 @@ would collect and print metrics for the file `SomeClass.java` in the current dir
 would collect and print metrics for the main and test Java code when run from the root directory of
 a project with a standard Maven layout.
 
-Note that the Scent jar requires that the `javaparser-core` jar file is on the class path, see the
-section [Dependencies](#dependencies). If that file is located next to the scent jar, it is
-sufficient to run the command
+The `org.myire.scent.Main` class is specified as the main class of the Scent jar file, and the
+`javaparser-core` jar file is listed in the manifest's `Class-Path` attribute. This means that if
+the `javaparser-core` jar file is located next to the scent jar file, it is sufficient to run the
+command
 
-    java -jar scent-x.y.jar <files>
+    java -jar scent-x.y.jar <paths>
 
 where `x.y` is the version number part of the scent jar file.
 
+The scent jar file is a modular jar file. If both that file and the `javaparser-core` jar file are
+on the module path, for instance in a directory called `modules`, the `Main` class can also be run
+with the command
+
+    java -p modules -m org.myire.scent <paths>
+
+#### Main options
+
+By default, the `Main` class writes a report of the collected metrics on plain text format to the
+console. The format and destination of this report can be specified through options passed in the
+arguments to the `Main` class.
+
+The synopsis for the arguments to `Main` are:
+
+    [-text | -xml | -html | -xsl xsl-file] [-o output-file] <paths>
+
+where the options are
+
+* `-text`: report the collected metrics on plain text format
+* `-xml`: report the collected metrics on xml format
+* `-html`: report the collected metrics on html format
+* `-xsl xsl-file`: report the collected metrics by applying the specified xsl file to an
+intermediate xml report
+* `-o output-file`: write the report to the specified file
+
+If no format is specified, the plain text format will be used. If multiple formats are specified,
+the last will take precedence. If no output file is specified, the report will be written to the
+console.
 
 ## Collected Metrics
 
 Scent collects source code metrics on different levels. Each level contains metrics for the level
 itself as well as metrics for its sub-levels.
 
+There are two top-level metrics, package metrics and modular compilation unit metrics.
+
+### Modular compilation unit
+
+Scent creates an instance of `org.myire.scent.metrics.ModularCompilationUnitMetrics` for each
+modular compilation unit passed to `JavaMetricsCollector::collect`. These
+`ModularCompilationUnitMetrics` instances are returned by `JavaMetrics::getModularCompilationUnits`
+and each of them contains metrics for the module declaration and for comments associated with the
+compilation unit itself, such as file headers.
+
+### Module declaration
+
+The metrics for a module declaration are collected in an
+`org.myire.scent.metrics.ModuleDeclarationMetrics` instance. These metrics contain the number of
+different module directives (requires, exports, provides, uses, and opens) and the comments
+associated with the module declaration.
+
 ### Package
 
-The top level metric collected by Scent is the package metric. Scent creates an instance of
-`org.myire.scent.metrics.PackageMetrics` for each unique package declared by the compilation units
-passed to `JavaMetricsCollector::collect`. These `PackageMetrics` instances are returned by
-`JavaMetricsCollector::getCollectedMetrics` and each of them contains metrics for the compilation
-units that declare the package.
+Scent creates an instance of `org.myire.scent.metrics.PackageMetrics` for each unique package
+declared by the ordinary compilation units passed to `JavaMetricsCollector::collect`. These
+`PackageMetrics` instances are returned by `JavaMetrics::getPackages` and each of them contains
+metrics for the ordinary compilation units that declare the package, as well as metrics for any
+comments associated with the package itself (collected from a `package-info.java` file).
 
 ### Compilation Unit
 
-The metrics for a compilation unit are collected in an
+The metrics for an ordinary compilation unit are collected in an
 `org.myire.scent.metrics.CompilationUnitMetrics` instance. It contains metrics for the type(s)
 declared within the compilation unit, and for the comments not associated with these types. These
 comments are basically all comments positioned before, between, and after the type declaration(s),
@@ -175,6 +250,7 @@ information about the method's kind, which is one of
 * a static method in a class, interface or an enum
 * an abstract method in a class, interface, or enum
 * a default method in an interface
+* a native method in a class or an enum
 
 ### Field
 
@@ -533,17 +609,14 @@ If the aggregation shouldn't contain the metrics from the type but only from its
     TypeMetrics typeMetrics = ...
     AggregatedMetrics aggregation = AggregatedMetrics.ofChildren(typeMetrics);
 
-More examples of aggregated metrics can be found in `org.myire.scent.MetricsPrinter`.
-
 
 ## Dependencies
 
 Scent uses the terrific [JavaParser](http://javaparser.org) to parse Java source code. The jar file
 `javaparser-core` is the only runtime dependency that Scent has.
 
-The current version of Scent is compiled and tested with version 2.4 of `javaparser-core`. Newer
-versions of JavaParser are compiled for Java 1.8, and since Scent only requires Java 1.7 to run,
-those newer versions are currently not an option.
+The current version of Scent is compiled and tested with version 3.6.24 of `javaparser-core`. Any
+version >= 3.6.18, where support for Java 11 was finalized, will most likely work equally well.
 
 
 ## Differences with JavaNCSS
