@@ -1,20 +1,22 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.myire.scent.collect;
+package org.myire.scent.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 
+import org.myire.scent.collect.JavaMetricsCollector;
 import org.myire.scent.metrics.CompilationUnitMetrics;
 import org.myire.scent.metrics.FieldMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.MethodMetrics;
+import org.myire.scent.metrics.ModularCompilationUnitMetrics;
+import org.myire.scent.metrics.ModuleDeclarationMetrics;
 import org.myire.scent.metrics.PackageMetrics;
 import org.myire.scent.metrics.TypeMetrics;
 
@@ -52,11 +54,11 @@ final public class CollectTestUtil
      *
      * @param pSource   The Java source to collect metrics from.
      *
-     * @return  An {@code Iterable} for the collected source code metrics.
+     * @return  A {@code JavaMetrics} with the collected source code metrics.
      *
      * @throws ParseException   if the specified source code is lexically or syntactically invalid.
      */
-    static public Iterable<PackageMetrics> collect(String pSource) throws ParseException
+    static public JavaMetrics collect(String pSource) throws ParseException
     {
         return collect("inMemory", pSource);
     }
@@ -68,11 +70,11 @@ final public class CollectTestUtil
      *
      * @param pSourceLines  The Java source code lines to collect metrics from.
      *
-     * @return  An {@code Iterable} for the collected source code metrics.
+     * @return  A {@code JavaMetrics} with the collected source code metrics.
      *
      * @throws ParseException   if the specified source code is lexically or syntactically invalid.
      */
-    static public Iterable<PackageMetrics> collect(String[] pSourceLines) throws ParseException
+    static public JavaMetrics collect(String[] pSourceLines) throws ParseException
     {
         return collect(toSourceString(pSourceLines));
     }
@@ -84,31 +86,15 @@ final public class CollectTestUtil
      * @param pName     The name to give the {@code CompilationUnitMetrics}.
      * @param pSource   The Java source to collect metrics from.
      *
-     * @return  An {@code Iterable} for the collected source code metrics.
+     * @return  A {@code JavaMetrics} with the collected source code metrics.
      *
      * @throws ParseException   if the specified source code is lexically or syntactically invalid.
      */
-    static public Iterable<PackageMetrics> collect(String pName, String pSource) throws ParseException
+    static public JavaMetrics collect(String pName, String pSource) throws ParseException
     {
         JavaMetricsCollector aCollector = new JavaMetricsCollector();
-        collect(pName, pSource, aCollector);
+        aCollector.collect(pName, pSource);
         return aCollector.getCollectedMetrics();
-    }
-
-
-    /**
-     * Parse a string containing Java source using a specific {@code JavaMetricsCollector} instance.
-     *
-     * @param pName         The name to give the {@code CompilationUnitMetrics}.
-     * @param pSource       The Java source to collect metrics from.
-     * @param pCollector    The instance to collect metrics with.
-     *
-     * @throws ParseException   if the specified source code is lexically or syntactically invalid.
-     */
-    static public void collect(String pName, String pSource, JavaMetricsCollector pCollector) throws ParseException
-    {
-        Charset aCharset = StandardCharsets.UTF_8;
-        pCollector.collect(pName, new ByteArrayInputStream(pSource.getBytes(aCharset)), aCharset);
     }
 
 
@@ -118,12 +104,12 @@ final public class CollectTestUtil
      *
      * @param pResourceName The name of the resource to collect metrics from.
      *
-     * @return  An {@code Iterable} for the collected source code metrics.
+     * @return  A {@code JavaMetrics} with the collected source code metrics.
      *
      * @throws ParseException   if the specified source code is lexically or syntactically invalid.
      * @throws RuntimeException if the resource doesn't exist.
      */
-    static public Iterable<PackageMetrics> collectFromResource(String pResourceName) throws ParseException
+    static public JavaMetrics collectFromResource(String pResourceName) throws ParseException
     {
         try (InputStream aStream = CollectTestUtil.class.getResourceAsStream(pResourceName))
         {
@@ -139,17 +125,51 @@ final public class CollectTestUtil
 
 
     /**
-     * Get the metrics for the first package in an {@code Iterable}.
+     * Get the metrics for the first modular compilation unit in a {@code JavaMetrics}.
      *
-     * @param pMetrics  The {@code Iterable} to get the first package metrics from.
+     * @param pMetrics  The {@code JavaMetrics} to get the first modular compilation unit metrics
+     *                  from.
+     *
+     * @return  A {@code ModularCompilationUnitMetrics} instance.
+     *
+     * @throws java.util.NoSuchElementException if {@code pMetrics} has no modular compilation
+     *                                          units.
+     */
+    static public ModularCompilationUnitMetrics getFirstModularCompilationUnit(JavaMetrics pMetrics)
+    {
+        return pMetrics.getModularCompilationUnits().iterator().next();
+    }
+
+
+    /**
+     * Get the metrics for the module declaration of the first modular compilation unit in a
+     * {@code JavaMetrics}.
+     *
+     * @param pMetrics  The {@code JavaMetrics} to get the first module declaration metrics from.
+     *
+     * @return  A {@code ModuleDeclarationMetrics} instance.
+     *
+     * @throws java.util.NoSuchElementException if {@code pMetrics} has no modular compilation
+     *                                          units.
+     */
+    static public ModuleDeclarationMetrics getFirstModuleDeclaration(JavaMetrics pMetrics)
+    {
+        return getFirstModularCompilationUnit(pMetrics).getModule();
+    }
+
+
+    /**
+     * Get the metrics for the first package in a {@code JavaMetrics}.
+     *
+     * @param pMetrics  The {@code JavaMetrics} to get the first package metrics from.
      *
      * @return  A {@code PackageMetrics} instance.
      *
-     * @throws java.util.NoSuchElementException if {@code pMetrics} has no elements.
+     * @throws java.util.NoSuchElementException if {@code pMetrics} has no packages.
      */
-    static public PackageMetrics getFirstPackage(Iterable<PackageMetrics> pMetrics)
+    static public PackageMetrics getFirstPackage(JavaMetrics pMetrics)
     {
-        return pMetrics.iterator().next();
+        return pMetrics.getPackages().iterator().next();
     }
 
 
@@ -169,16 +189,16 @@ final public class CollectTestUtil
 
 
     /**
-     * Get the metrics for the first compilation unit in the first package in an {@code Iterable}.
+     * Get the metrics for the first compilation unit in the first package in a {@code JavaMetrics}.
      *
      * @param pMetrics  The instance to get the first compilation unit metrics from.
      *
      * @return  A {@code CompilationUnitMetrics} instance.
      *
-     * @throws java.util.NoSuchElementException if {@code pMetrics} has no elements, or if the
-     *                                          first package element has no compilation units.
+     * @throws java.util.NoSuchElementException if {@code pMetrics} has no packages, or if the first
+     *                                          package has no compilation units.
      */
-    static public CompilationUnitMetrics getFirstCompilationUnit(Iterable<PackageMetrics> pMetrics)
+    static public CompilationUnitMetrics getFirstCompilationUnit(JavaMetrics pMetrics)
     {
         return getFirstCompilationUnit(getFirstPackage(pMetrics));
     }
@@ -200,18 +220,18 @@ final public class CollectTestUtil
 
 
     /**
-     * Get the metrics for the first type in the first compilation unit in the first package in an
-     * {@code Iterable}.
+     * Get the metrics for the first type in the first compilation unit in the first package in a
+     * {@code JavaMetrics}.
      *
      * @param pMetrics  The instance to get the first type metrics from.
      *
      * @return  A {@code TypeMetrics} instance.
      *
-     * @throws java.util.NoSuchElementException if {@code pMetrics} has no elements, or if the first
-     *                                          package element has no compilation units, or if the
-     *                                          first compilation unit has no types.
+     * @throws java.util.NoSuchElementException if {@code pMetrics} has no packages, or if the first
+     *                                          package has no compilation units, or if the first
+     *                                          compilation unit has no types.
      */
-    static public TypeMetrics getFirstType(Iterable<PackageMetrics> pMetrics)
+    static public TypeMetrics getFirstType(JavaMetrics pMetrics)
     {
         return getFirstType(getFirstCompilationUnit(pMetrics));
     }
@@ -234,18 +254,18 @@ final public class CollectTestUtil
 
     /**
      * Get the metrics for the first field in the first type in the first compilation unit in the
-     * first package in an {@code Iterable}.
+     * first package in a {@code JavaMetrics}.
      *
      * @param pMetrics  The instance to get the first field metrics from.
      *
      * @return  A {@code FieldMetrics} instance.
      *
-     * @throws java.util.NoSuchElementException if {@code pMetrics} has no package elements, or if
-     *                                          the first package has no compilation units, or if
-     *                                          the first compilation unit has no types, or if the
-     *                                          first type has no fields.
+     * @throws java.util.NoSuchElementException if {@code pMetrics} has no packages, or if the first
+     *                                          package has no compilation units, or if the first
+     *                                          compilation unit has no types, or if the first type
+     *                                          has no fields.
      */
-    static public FieldMetrics getFirstField(Iterable<PackageMetrics> pMetrics)
+    static public FieldMetrics getFirstField(JavaMetrics pMetrics)
     {
         return getFirstField(getFirstType(pMetrics));
     }
@@ -268,18 +288,18 @@ final public class CollectTestUtil
 
     /**
      * Get the metrics for the first method in the first type in the first compilation unit in the
-     * first package in an {@code Iterable}.
+     * first package in a {@code JavaMetrics}.
      *
      * @param pMetrics  The instance to get the first method metrics from.
      *
      * @return  A {@code MethodMetrics} instance.
      *
-     * @throws java.util.NoSuchElementException if {@code pMetrics} has no package elements, or if
-     *                                          the first package has no compilation units, or if
-     *                                          the first compilation unit has no types, or if the
-     *                                          first type has no methods.
+     * @throws java.util.NoSuchElementException if {@code pMetrics} has no packages, or if the first
+     *                                          package has no compilation units, or if the first
+     *                                          compilation unit has no types, or if the first type
+     *                                          has no methods.
      */
-    static public MethodMetrics getFirstMethod(Iterable<PackageMetrics> pMetrics)
+    static public MethodMetrics getFirstMethod(JavaMetrics pMetrics)
     {
         return getFirstMethod(getFirstType(pMetrics));
     }
@@ -302,18 +322,18 @@ final public class CollectTestUtil
 
     /**
      * Get the metrics for the first inner type in the first type in the first compilation unit in
-     * the first package in an {@code Iterable}.
+     * the first package in a {@code JavaMetrics}.
      *
      * @param pMetrics  The instance to get the first inner type metrics from.
      *
      * @return  A {@code TypeMetrics} instance.
      *
-     * @throws java.util.NoSuchElementException if {@code pMetrics} has no package elements, or if
-     *                                          the first package has no compilation units, or if
-     *                                          the first compilation unit has no types, or if the
-     *                                          first type has no inner types.
+     * @throws java.util.NoSuchElementException if {@code pMetrics} has no packages, or if the first
+     *                                          package has no compilation units, or if the first
+     *                                          compilation unit has no types, or if the first type
+     *                                          has no inner types.
      */
-    static public TypeMetrics getFirstInnerType(Iterable<PackageMetrics> pMetrics)
+    static public TypeMetrics getFirstInnerType(JavaMetrics pMetrics)
     {
         return getFirstInnerType(getFirstType(pMetrics));
     }
@@ -336,19 +356,19 @@ final public class CollectTestUtil
 
     /**
      * Get the metrics for the first local type in the first method in the first type in the
-     * first compilation unit in the first package in an {@code Iterable}.
+     * first compilation unit in the first package in a {@code JavaMetrics}.
      *
      * @param pMetrics  The instance to get the first local type metrics from.
      *
      * @return  A {@code TypeMetrics} instance.
      *
-     * @throws java.util.NoSuchElementException if {@code pMetrics} has no package elements, or if
-     *                                          the first package has no compilation units, or if
-     *                                          the first compilation unit has no types, or if the
-     *                                          first type has methods, or if the first method has
-     *                                          no local types.
+     * @throws java.util.NoSuchElementException if {@code pMetrics} has no packages, or if the first
+     *                                          package has no compilation units, or if the first
+     *                                          compilation unit has no types, or if the first type
+     *                                          has methods, or if the first method has no local
+     *                                          types.
      */
-    static public TypeMetrics getFirstLocalType(Iterable<PackageMetrics> pMetrics)
+    static public TypeMetrics getFirstLocalType(JavaMetrics pMetrics)
     {
         return getFirstLocalType(getFirstMethod(pMetrics));
     }

@@ -12,14 +12,14 @@ import static org.junit.Assert.assertEquals;
 
 import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.FieldMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.MethodMetrics;
-import org.myire.scent.metrics.PackageMetrics;
 import org.myire.scent.metrics.TypeMetrics;
 
-import static org.myire.scent.collect.CollectTestUtil.collect;
-import static org.myire.scent.collect.CollectTestUtil.getFirstField;
-import static org.myire.scent.collect.CollectTestUtil.getFirstLocalType;
-import static org.myire.scent.collect.CollectTestUtil.getFirstMethod;
+import static org.myire.scent.util.CollectTestUtil.collect;
+import static org.myire.scent.util.CollectTestUtil.getFirstField;
+import static org.myire.scent.util.CollectTestUtil.getFirstLocalType;
+import static org.myire.scent.util.CollectTestUtil.getFirstMethod;
 
 
 /**
@@ -50,7 +50,7 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         MethodMetrics aMethod = getFirstMethod(aMetrics);
@@ -93,7 +93,7 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         MethodMetrics aMethod = getFirstMethod(aMetrics);
@@ -146,7 +146,7 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         MethodMetrics aMethod = getFirstMethod(aMetrics);
@@ -188,7 +188,7 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         MethodMetrics aMethod = getFirstMethod(aMetrics);
@@ -238,7 +238,7 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         MethodMetrics aMethod = getFirstMethod(aMetrics);
@@ -272,7 +272,7 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstMethod(aMetrics).getComments();
@@ -299,11 +299,39 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstMethod(aMetrics).getComments();
         assertEquals(1, aComments.getNumLineComments());
+    }
+
+
+    /**
+     * A block comment on the same line as the method's signature should be collected in the
+     * method's {@code CommentMetrics}.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void blockCommentOnSameLineAsMethodSignatureIsCollected() throws ParseException
+    {
+        // Given
+        String[] aSourceLines = {
+                createTypeDeclarationStart(),
+                createMethodSignature(createMethodName()) + "/* Comment on the same line as signature */",
+                "{",
+                "}",
+                "}"
+        };
+
+        // When
+        JavaMetrics aMetrics = collect(aSourceLines);
+
+        // Then
+        CommentMetrics aComments = getFirstMethod(aMetrics).getComments();
+        assertEquals(1, aComments.getNumBlockComments());
+        assertEquals(1, aComments.getNumBlockCommentLines());
     }
 
 
@@ -336,7 +364,7 @@ abstract public class MethodWithBodyCollectTestBase extends MethodCollectTestBas
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstMethod(aMetrics).getComments();

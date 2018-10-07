@@ -84,6 +84,12 @@ class FullClass
         };
     }
 
+    // An abstract method
+    abstract String abstractMethod();
+
+    /* A native method */
+    native double nativeMethod(int pParam);
+
 
     /*
      * Three-line block comment for the inner interface.
@@ -94,6 +100,10 @@ class FullClass
     }
 
 
+    /*
+     **** Block comment for inner class  *****
+     **** with lots of extra asterisks   *****
+     */
     static class InnerClass implements InnerInterface
     {
         int innerField;

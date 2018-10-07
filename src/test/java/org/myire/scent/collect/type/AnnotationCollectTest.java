@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -14,17 +14,18 @@ import static org.junit.Assert.assertEquals;
 import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.CompilationUnitMetrics;
 import org.myire.scent.metrics.FieldMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.MethodMetrics;
 import org.myire.scent.metrics.PackageMetrics;
 import org.myire.scent.metrics.TypeMetrics;
 
-import static org.myire.scent.collect.CollectTestUtil.collect;
-import static org.myire.scent.collect.CollectTestUtil.collectFromResource;
-import static org.myire.scent.collect.CollectTestUtil.getFirstCompilationUnit;
-import static org.myire.scent.collect.CollectTestUtil.getFirstField;
-import static org.myire.scent.collect.CollectTestUtil.getFirstMethod;
-import static org.myire.scent.collect.CollectTestUtil.getFirstPackage;
-import static org.myire.scent.collect.CollectTestUtil.getFirstType;
+import static org.myire.scent.util.CollectTestUtil.collect;
+import static org.myire.scent.util.CollectTestUtil.collectFromResource;
+import static org.myire.scent.util.CollectTestUtil.getFirstCompilationUnit;
+import static org.myire.scent.util.CollectTestUtil.getFirstField;
+import static org.myire.scent.util.CollectTestUtil.getFirstMethod;
+import static org.myire.scent.util.CollectTestUtil.getFirstPackage;
+import static org.myire.scent.util.CollectTestUtil.getFirstType;
 
 
 /**
@@ -47,7 +48,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         String aSrc = "@interface TheAnnotation { char " + aName + " = 'c';}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         FieldMetrics aFieldMetrics = getFirstField(aMetrics);
@@ -68,7 +69,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         String aSrc = "@interface TheAnnotation { static int field=1;}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         assertEquals(FieldMetrics.Kind.STATIC_FIELD, getFirstField(aMetrics).getKind());
@@ -89,7 +90,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         String aSrc = "@interface TheAnnotation { int field=2;}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         assertEquals(FieldMetrics.Kind.STATIC_FIELD, getFirstField(aMetrics).getKind());
@@ -109,7 +110,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         String aSrc = "@interface TheAnnotation { int field=2;}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         assertEquals(1, getFirstField(aMetrics).getStatements().getNumStatements());
@@ -130,7 +131,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         String aSrc = "@interface TheAnnotation { int " + aName + "();}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         FieldMetrics aFieldMetrics = getFirstField(aMetrics);
@@ -152,7 +153,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         String aSrc = "public @interface TheAnnotation { int annotationMember();}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         FieldMetrics aFieldMetrics = getFirstField(aMetrics);
@@ -173,7 +174,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         String aSrc = "public @interface TheAnnotation { int annotationMember() default 5;}";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         FieldMetrics aFieldMetrics = getFirstField(aMetrics);
@@ -194,7 +195,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         String aResourceName = "/FullAnnotation.java";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collectFromResource(aResourceName);
+        JavaMetrics aMetrics = collectFromResource(aResourceName);
 
         // Assert package metrics name
         PackageMetrics aPackage = getFirstPackage(aMetrics);
@@ -206,6 +207,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         CommentMetrics aComments = aCompilationUnit.getComments();
         assertEquals(1, aComments.getNumBlockComments());
         assertEquals(5, aComments.getNumBlockCommentLines());
+        assertEquals(132, aComments.getBlockCommentsLength());
 
         // Assert interface name and kind, and comments
         TypeMetrics aInterface = getFirstType(aCompilationUnit);
@@ -224,7 +226,9 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         assertEquals("staticField2", aField.getName());
         assertEquals(FieldMetrics.Kind.STATIC_FIELD, aField.getKind());
         assertEquals(1, aField.getStatements().getNumStatements());
-        assertEquals(1, aField.getComments().getNumLineComments());
+        aComments = aField.getComments();
+        assertEquals(1, aComments.getNumLineComments());
+        assertEquals(45, aComments.getLineCommentsLength());
 
         // Assert annotation element without default value
         aField = aFields.next();
@@ -234,6 +238,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         aComments = aField.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(6, aComments.getNumJavaDocLines());
+        assertEquals(68, aComments.getJavaDocCommentsLength());
 
         // Assert annotation element with default value
         aField = aFields.next();
@@ -243,6 +248,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         aComments = aField.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(5, aComments.getNumJavaDocLines());
+        assertEquals(54, aComments.getJavaDocCommentsLength());
 
         // Assert inner interface
         Iterator<TypeMetrics> aInnerTypes = aInterface.getInnerTypes().iterator();
@@ -277,18 +283,21 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         aComments = aInnerType.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(4, aComments.getNumJavaDocLines());
+        assertEquals(37, aComments.getJavaDocCommentsLength());
         aFields = aInnerType.getFields().iterator();
         aField = aFields.next();
         assertEquals("ENUM_CONSTANT_1", aField.getName());
         assertEquals(FieldMetrics.Kind.ENUM_CONSTANT, aField.getKind());
         aComments = aField.getComments();
         assertEquals(1, aComments.getNumLineComments());
+        assertEquals(37, aComments.getLineCommentsLength());
         aField = aFields.next();
         assertEquals("ENUM_CONSTANT_2", aField.getName());
         assertEquals(FieldMetrics.Kind.ENUM_CONSTANT, aField.getKind());
         aComments = aField.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(1, aComments.getNumJavaDocLines());
+        assertEquals(26, aComments.getJavaDocCommentsLength());
 
         // Assert inner annotation
         aInnerType = aInnerTypes.next();
@@ -297,6 +306,7 @@ public class AnnotationCollectTest extends TypeCollectTestBase
         aComments = aInnerType.getComments();
         assertEquals(1, aComments.getNumBlockComments());
         assertEquals(3, aComments.getNumBlockCommentLines());
+        assertEquals(39, aComments.getBlockCommentsLength());
         aField = getFirstField(aInnerType);
         assertEquals("flag", aField.getName());
         assertEquals(FieldMetrics.Kind.ANNOTATION_TYPE_ELEMENT, aField.getKind());

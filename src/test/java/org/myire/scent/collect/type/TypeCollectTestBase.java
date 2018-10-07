@@ -14,13 +14,13 @@ import static org.junit.Assert.assertFalse;
 
 import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.CompilationUnitMetrics;
-import org.myire.scent.metrics.PackageMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.TypeMetrics;
 
-import static org.myire.scent.collect.CollectTestUtil.collect;
-import static org.myire.scent.collect.CollectTestUtil.getFirstCompilationUnit;
-import static org.myire.scent.collect.CollectTestUtil.getFirstInnerType;
-import static org.myire.scent.collect.CollectTestUtil.getFirstType;
+import static org.myire.scent.util.CollectTestUtil.collect;
+import static org.myire.scent.util.CollectTestUtil.getFirstCompilationUnit;
+import static org.myire.scent.util.CollectTestUtil.getFirstInnerType;
+import static org.myire.scent.util.CollectTestUtil.getFirstType;
 
 
 /**
@@ -43,7 +43,7 @@ abstract public class TypeCollectTestBase
         String aName = "TheType";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(createEmptyTypeDeclaration(aName));
+        JavaMetrics aMetrics = collect(createEmptyTypeDeclaration(aName));
 
         // Then
         CompilationUnitMetrics aUnit = getFirstCompilationUnit(aMetrics);
@@ -61,7 +61,7 @@ abstract public class TypeCollectTestBase
     public void typeMetricsHasTheCorrectKind() throws ParseException
     {
         // When
-        Iterable<PackageMetrics> aMetrics = collect(createEmptyTypeDeclaration("AnyType"));
+        JavaMetrics aMetrics = collect(createEmptyTypeDeclaration("AnyType"));
 
         // Then
         assertEquals(getTypeKind(), getFirstType(aMetrics).getKind());
@@ -81,7 +81,7 @@ abstract public class TypeCollectTestBase
         String aSrc = createTypeDeclarationWithMembers("class " + aName + "{}");
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         TypeMetrics aType = getFirstType(aMetrics);
@@ -105,7 +105,7 @@ abstract public class TypeCollectTestBase
         String aSrc = createTypeDeclarationWithMembers("interface " + aName + "{}");
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         TypeMetrics aType = getFirstType(aMetrics);
@@ -129,7 +129,7 @@ abstract public class TypeCollectTestBase
         String aSrc = createTypeDeclarationWithMembers("enum " + aName + "{}");
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         TypeMetrics aType = getFirstType(aMetrics);
@@ -153,7 +153,7 @@ abstract public class TypeCollectTestBase
         String aSrc = createTypeDeclarationWithMembers("@interface " + aName + "{}");
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         TypeMetrics aType = getFirstType(aMetrics);
@@ -185,7 +185,7 @@ abstract public class TypeCollectTestBase
                         "@interface " + aAnnotationName + "{}");
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         TypeMetrics aType = getFirstType(aMetrics);
@@ -228,7 +228,7 @@ abstract public class TypeCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstType(aMetrics).getComments();
@@ -255,7 +255,7 @@ abstract public class TypeCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstType(aMetrics).getComments();
@@ -280,7 +280,7 @@ abstract public class TypeCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstType(aMetrics).getComments();
@@ -305,7 +305,7 @@ abstract public class TypeCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstType(aMetrics).getComments();
@@ -328,7 +328,7 @@ abstract public class TypeCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstType(aMetrics).getComments();
@@ -354,7 +354,7 @@ abstract public class TypeCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstType(aMetrics).getComments();
@@ -384,7 +384,7 @@ abstract public class TypeCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstType(aMetrics).getComments();

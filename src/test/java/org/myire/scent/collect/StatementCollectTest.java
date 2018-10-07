@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -10,12 +10,12 @@ import java.text.ParseException;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
-import org.myire.scent.metrics.PackageMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.StatementMetrics;
 
-import static org.myire.scent.collect.CollectTestUtil.collect;
-import static org.myire.scent.collect.CollectTestUtil.collectFromResource;
-import static org.myire.scent.collect.CollectTestUtil.getFirstMethod;
+import static org.myire.scent.util.CollectTestUtil.collect;
+import static org.myire.scent.util.CollectTestUtil.collectFromResource;
+import static org.myire.scent.util.CollectTestUtil.getFirstMethod;
 
 
 /**
@@ -400,6 +400,32 @@ public class StatementCollectTest
 
 
     /**
+     * A {@code try-with} statement where the resource is declared outside the try clause should be
+     * collected in the method's {@code StatementMetrics}. This construct is legal starting with
+     * Java 9.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void tryWithStatementWithExternalResourceIsCollected() throws ParseException
+    {
+        // Given
+        String[] aSourceLines = {
+                VOID_METHOD_PARAM_PREFIX,
+                "try (pParam) {",
+                "}",
+                ANY_METHOD_SUFFIX
+        };
+
+        // When
+        StatementMetrics aStatements = collectStatementMetrics(aSourceLines);
+
+        // Then
+        assertEquals(1, aStatements.getNumStatements());
+    }
+
+
+    /**
      * A {@code try-catch} statement should be collected in the method's {@code StatementMetrics}.
      *
      * @throws ParseException   if the test fails unexpectedly.
@@ -502,6 +528,54 @@ public class StatementCollectTest
 
 
     /**
+     * A type inferred local variable declaration with initialization should be collected in the
+     * method's {@code StatementMetrics}.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void typeInferredVariableDeclarationWithInitializationIsCollected() throws ParseException
+    {
+        // Given
+        String[] aSourceLines = {
+            VOID_METHOD_PARAM_PREFIX,
+            "var x = 1;",
+            ANY_METHOD_SUFFIX
+        };
+
+        // When
+        StatementMetrics aStatements = collectStatementMetrics(aSourceLines);
+
+        // Then
+        assertEquals(1, aStatements.getNumStatements());
+    }
+
+
+    /**
+     * A lambda expression with local variable syntax should be collected in the method's
+     * {@code StatementMetrics}.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void localVariableSyntaxLambdaIsCollected() throws ParseException
+    {
+        // Given
+        String[] aSourceLines = {
+            "class X { void m(Map<String, Integer> pMap) {",
+            "pMap.forEach((var k, var v) -> System.out.println(k + v));",
+            "}}"
+        };
+
+        // When
+        StatementMetrics aStatements = collectStatementMetrics(aSourceLines);
+
+        // Then
+        assertEquals(2, aStatements.getNumStatements());
+    }
+
+
+    /**
      * An annotation with all kinds of members should have the corresponding code element metrics
      * collected.
      *
@@ -514,17 +588,17 @@ public class StatementCollectTest
         String aResourceName = "/Statements.java";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collectFromResource(aResourceName);
+        JavaMetrics aMetrics = collectFromResource(aResourceName);
 
         // Then
         StatementMetrics aStatements = getFirstMethod(aMetrics).getStatements();
-        assertEquals(38, aStatements.getNumStatements());
+        assertEquals(39, aStatements.getNumStatements());
     }
 
 
     static private StatementMetrics collectStatementMetrics(String[] pSourceLines) throws ParseException
     {
-        Iterable<PackageMetrics> aMetrics = collect(pSourceLines);
+        JavaMetrics aMetrics = collect(pSourceLines);
         return getFirstMethod(aMetrics).getStatements();
     }
 }

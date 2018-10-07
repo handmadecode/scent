@@ -117,5 +117,8 @@ public class MethodMetrics extends StatementElementMetrics
 
         /** A default method in an interface. */
         DEFAULT_METHOD,
+
+        /** A native method in a class or an enum. */
+        NATIVE_METHOD
     }
 }

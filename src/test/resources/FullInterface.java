@@ -40,6 +40,13 @@ interface FullInterface
     }
 
 
+    // Private methods in interfaces are allowed starting with Java 9
+    private long privateMethod()
+    {
+        return 4711L;
+    }
+
+
     /*
      * Three-line block comment for the inner interface.
      */
@@ -72,7 +79,6 @@ interface FullInterface
 
 
     static enum InnerEnum {
-        // Single line comment for enum constant
         ENUM_CONSTANT_1,
         /** JavaDoc for enum constant. */
         ENUM_CONSTANT_2
@@ -81,6 +87,7 @@ interface FullInterface
 
     @interface InnerAnnotation
     {
+        // Single line comment for annotation field
         String name() default "X";
     }
 }

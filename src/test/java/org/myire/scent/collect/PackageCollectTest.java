@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -13,10 +13,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.myire.scent.metrics.CommentMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.PackageMetrics;
 
-import static org.myire.scent.collect.CollectTestUtil.collect;
-import static org.myire.scent.collect.CollectTestUtil.getFirstPackage;
+import static org.myire.scent.util.CollectTestUtil.collect;
+import static org.myire.scent.util.CollectTestUtil.collectFromResource;
+import static org.myire.scent.util.CollectTestUtil.getFirstPackage;
 
 
 /**
@@ -40,7 +43,7 @@ public class PackageCollectTest
         String aSrc = "package " + aPackage + ";";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSrc);
+        JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         assertEquals(aPackage, getFirstPackage(aMetrics).getName());
@@ -62,12 +65,12 @@ public class PackageCollectTest
         JavaMetricsCollector aParser = new JavaMetricsCollector();
 
         // When
-        collect("1", aSrc, aParser);
-        collect("2", aSrc, aParser);
-        collect("3", aSrc, aParser);
+        aParser.collect("1", aSrc);
+        aParser.collect("2", aSrc);
+        aParser.collect("3", aSrc);
 
         // Then
-        Iterator<PackageMetrics> aIterator = aParser.getCollectedMetrics().iterator();
+        Iterator<PackageMetrics> aIterator = aParser.getCollectedMetrics().getPackages().iterator();
         assertEquals(aPackage, aIterator.next().getName());
         assertFalse(aIterator.hasNext());
     }
@@ -89,13 +92,13 @@ public class PackageCollectTest
         JavaMetricsCollector aParser = new JavaMetricsCollector();
 
         // When
-        collect("1", "package " + aPackage1 + ";", aParser);
-        collect("2", "package " + aPackage2 + ";", aParser);
-        collect("3", "package " + aPackage3 + ";", aParser);
-        Iterable<PackageMetrics> aMetrics = aParser.getCollectedMetrics();
+        aParser.collect("1", "package " + aPackage1 + ";");
+        aParser.collect("2", "package " + aPackage2 + ";");
+        aParser.collect("3", "package " + aPackage3 + ";");
+        JavaMetrics aMetrics = aParser.getCollectedMetrics();
 
         // Then
-        Iterator<PackageMetrics> aIterator = aMetrics.iterator();
+        Iterator<PackageMetrics> aIterator = aMetrics.getPackages().iterator();
         assertEquals(aPackage1, aIterator.next().getName());
         assertEquals(aPackage2, aIterator.next().getName());
         assertEquals(aPackage3, aIterator.next().getName());
@@ -113,9 +116,34 @@ public class PackageCollectTest
     public void defaultPackageHasEmptyName() throws ParseException
     {
         // When
-        Iterable<PackageMetrics> aMetrics = collect("class X {}");
+        JavaMetrics aMetrics = collect("class X {}");
 
         // Then
         assertTrue(getFirstPackage(aMetrics).getName().isEmpty());
+    }
+
+
+    /**
+     * The comments in a package-info.java compilation unit should be associated with the package.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void commentsInPackageInfoAreCollected() throws ParseException
+    {
+        // Given
+        String aResourceName = "/package-info.java";
+
+        // When
+        JavaMetrics aMetrics = collectFromResource(aResourceName);
+
+        // Then
+        PackageMetrics aPackage = getFirstPackage(aMetrics);
+        CommentMetrics aComments = aPackage.getComments();
+        assertEquals(1, aComments.getNumLineComments());
+        assertEquals(36, aComments.getLineCommentsLength());
+        assertEquals(1, aComments.getNumJavaDocComments());
+        assertEquals(4, aComments.getNumJavaDocLines());
+        assertEquals(34, aComments.getJavaDocCommentsLength());
     }
 }

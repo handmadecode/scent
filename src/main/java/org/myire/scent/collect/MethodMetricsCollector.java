@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -9,15 +9,15 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
 
+import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.ModifierSet;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.AssertStmt;
 import com.github.javaparser.ast.stmt.BreakStmt;
 import com.github.javaparser.ast.stmt.ContinueStmt;
@@ -27,6 +27,7 @@ import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.ForeachStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
+import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.SwitchEntryStmt;
@@ -34,15 +35,14 @@ import com.github.javaparser.ast.stmt.SwitchStmt;
 import com.github.javaparser.ast.stmt.SynchronizedStmt;
 import com.github.javaparser.ast.stmt.ThrowStmt;
 import com.github.javaparser.ast.stmt.TryStmt;
-import com.github.javaparser.ast.stmt.TypeDeclarationStmt;
 import com.github.javaparser.ast.stmt.WhileStmt;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import org.myire.scent.metrics.MethodMetrics;
+import static org.myire.scent.collect.Collectors.collectAdjacentParentOrphanComments;
 import static org.myire.scent.collect.Collectors.collectChildComments;
 import static org.myire.scent.collect.Collectors.collectExpression;
 import static org.myire.scent.collect.Collectors.collectNodeComments;
-import static org.myire.scent.collect.Collectors.collectParentOrphanComments;
 import static org.myire.scent.collect.Collectors.moveNodeComments;
 
 
@@ -133,7 +133,7 @@ class MethodMetricsCollector
 
         // Collect the method's comments, including the orphan comments of the enclosing type that
         // logically belong to the method's comment.
-        collectParentOrphanComments(fMethodNode, aMetrics.getComments());
+        collectAdjacentParentOrphanComments(fMethodNode, aMetrics.getComments());
         collectNodeComments(fMethodNode, aMetrics.getComments());
 
         // Collect all comments not already collected from the method's children, e.g. comments
@@ -158,11 +158,14 @@ class MethodMetricsCollector
     {
         if (pMethod.isDefault())
             return MethodMetrics.Kind.DEFAULT_METHOD;
-        else if (ModifierSet.isStatic(pMethod.getModifiers()))
+        else if (pMethod.getModifiers().contains(Modifier.STATIC))
             return MethodMetrics.Kind.STATIC_METHOD;
-        else if (ModifierSet.isAbstract(pMethod.getModifiers()))
+        else if (pMethod.getModifiers().contains(Modifier.ABSTRACT))
             return MethodMetrics.Kind.ABSTRACT_METHOD;
-        else if (Collectors.isInterface(pMethod.getParentNode()))
+        else if (pMethod.getModifiers().contains(Modifier.NATIVE))
+            return MethodMetrics.Kind.NATIVE_METHOD;
+        else if (Collectors.isInterface(pMethod.getParentNode().orElse(null)) && !pMethod.getBody().isPresent())
+            // Only interface methods without a body are abstract.
             return MethodMetrics.Kind.ABSTRACT_METHOD;
         else
             return MethodMetrics.Kind.INSTANCE_METHOD;
@@ -171,7 +174,7 @@ class MethodMetricsCollector
 
     /**
      * An abstract syntax tree visitor that visits method members and collects metrics for them. The
-     * collected metrics are added to the {@code MethodMetrics} passed as  argument to each
+     * collected metrics are added to the {@code MethodMetrics} passed as argument to each
      * {@code visit} method.
      *<p>
      * Note that not all subclasses of {@code com.github.javaparser.ast.stmt.Statement} are
@@ -249,6 +252,16 @@ class MethodMetricsCollector
         }
 
         @Override
+        public void visit(@Nonnull LocalClassDeclarationStmt pStatement, @Nonnull MethodMetrics pMetrics)
+        {
+            // Move any comments from the statement to the local class declaration so the
+            // TypeMetricsCollector can pick them up. The statement itself is not collected, only
+            // the local class declaration.
+            moveNodeComments(pStatement, pStatement.getClassDeclaration());
+            super.visit(pStatement, pMetrics);
+        }
+
+        @Override
         public void visit(@Nonnull ReturnStmt pStatement, @Nonnull MethodMetrics pMetrics)
         {
             collectStatement(pStatement, pMetrics);
@@ -290,23 +303,15 @@ class MethodMetricsCollector
             pMetrics.getStatements().add(pStatement);
 
             // Add any variable initializations in try-with statements.
-            for (VariableDeclarationExpr aDeclaration : pStatement.getResources())
+            for (Expression aResource : pStatement.getResources())
             {
-                for (VariableDeclarator aDeclarator : aDeclaration.getVars())
-                    // A variable declarator in a try-with must have an initializer expression.
-                    collectExpression(aDeclarator.getInit(), pMetrics.getStatements());
+                if (aResource.isVariableDeclarationExpr())
+                {
+                    for (VariableDeclarator aDeclarator : aResource.asVariableDeclarationExpr().getVariables())
+                        aDeclarator.getInitializer().ifPresent(i -> collectExpression(i, pMetrics.getStatements()));
+                }
             }
 
-            super.visit(pStatement, pMetrics);
-        }
-
-        @Override
-        public void visit(@Nonnull TypeDeclarationStmt pStatement, @Nonnull MethodMetrics pMetrics)
-        {
-            // Move any comments from the statement to the type declaration so the
-            // TypeMetricsCollector can pick them up. The statement itself is not collected, only
-            // the type declaration.
-            moveNodeComments(pStatement, pStatement.getTypeDeclaration());
             super.visit(pStatement, pMetrics);
         }
 
@@ -327,7 +332,7 @@ class MethodMetricsCollector
         @Override
         public void visit(@Nonnull ObjectCreationExpr pExpression, @Nonnull MethodMetrics pMetrics)
         {
-            if (pExpression.getAnonymousClassBody() != null)
+            if (pExpression.getAnonymousClassBody().isPresent())
                 // Anonymous class, collect as type metrics.
                 pMetrics.add(new TypeMetricsCollector(pExpression).collect());
         }

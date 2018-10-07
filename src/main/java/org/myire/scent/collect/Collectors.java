@@ -5,9 +5,7 @@
  */
 package org.myire.scent.collect;
 
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -15,7 +13,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.github.javaparser.ast.DocumentableNode;
+import com.github.javaparser.Range;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -38,6 +36,11 @@ import org.myire.scent.metrics.StatementMetrics;
  */
 final class Collectors
 {
+    // A range with negative coordinates to use as placeholder for nodes that don't have an explicit
+    // range.
+    static private final Range NO_RANGE = Range.range(-1, -1, -1, -1);
+
+
     /**
      * Private constructor to disallow instantiations of utility method class.
      */
@@ -48,8 +51,8 @@ final class Collectors
 
 
     /**
-     * Move the comments from one node to another. The main comment and JavaDoc comment (if
-     * applicable) will not be moved if they are non-null in the target node.
+     * Move the comments from one node to another. The main comment will not be moved if the target
+     * node already has a main comment.
      *
      * @param pSourceNode   The node to move the comments from.
      * @param pTargetNode   The node to move the comments to.
@@ -59,26 +62,17 @@ final class Collectors
     static void moveNodeComments(@Nonnull Node pSourceNode, @Nonnull Node pTargetNode)
     {
         // Move the main comment if not present in the target node.
-        if (pTargetNode.getComment() == null)
+        if (!pTargetNode.getComment().isPresent())
         {
-            pTargetNode.setComment(pSourceNode.getComment());
+            pSourceNode.getComment().ifPresent(pTargetNode::setComment);
             pSourceNode.setComment(null);
         }
 
         // Move any orphan comments.
-        pTargetNode.getOrphanComments().addAll(pSourceNode.getOrphanComments());
-        pSourceNode.getOrphanComments().clear();
-
-        // Move the JavaDoc comment if applicable and not present in the target node.
-        if (pSourceNode instanceof DocumentableNode && pTargetNode instanceof DocumentableNode)
+        for (Comment aOrphan : pSourceNode.getOrphanComments())
         {
-            DocumentableNode aDocumentableSource = (DocumentableNode) pSourceNode;
-            DocumentableNode aDocumentableTarget = (DocumentableNode) pTargetNode;
-            if (aDocumentableTarget.getJavaDoc() == null)
-            {
-                aDocumentableTarget.setJavaDoc(aDocumentableSource.getJavaDoc());
-                aDocumentableSource.setJavaDoc(null);
-            }
+            pTargetNode.addOrphanComment(aOrphan);
+            pSourceNode.removeOrphanComment(aOrphan);
         }
     }
 
@@ -94,9 +88,24 @@ final class Collectors
      */
     static void collectNodeComment(@Nonnull Node pNode, @Nonnull CommentMetrics pMetrics)
     {
-        CommentVisitor.SINGLETON.maybeVisit(pNode.getComment(), pMetrics);
-        pNode.setComment(null);
+        // In some rare cases (like some of the instances of
+        // MethodWithBodyCollectTestBase.lineCommentOnSameLineAsMethodSignatureIsCollected),
+        // the AST will have nodes with comments where the comment refers back to another node.
+        // To avoid collecting those comments multiple times a comment is only collected if it
+        // refers back to the node that has it as comment.
+        pNode.getComment().ifPresent(
+            c ->
+            {
+                if (pNode == c.getCommentedNode().orElse(pNode))
+                {
+                    // The commented node is the one for which the comment is being collected.
+                    c.accept(CommentVisitor.SINGLETON, pMetrics);
+                    pNode.setComment(null);
+                }
+            }
+        );
     }
+
 
 
     /**
@@ -115,18 +124,10 @@ final class Collectors
         collectNodeComment(pNode, pMetrics);
 
         // Collect and remove any orphan comments.
-        Iterator<Comment> aOrphans = pNode.getOrphanComments().iterator();
-        while (aOrphans.hasNext())
+        for (Comment aOrphan : pNode.getOrphanComments())
         {
-            CommentVisitor.SINGLETON.maybeVisit(aOrphans.next(), pMetrics);
-            aOrphans.remove();
-        }
-
-        // Collect and remove  the JavaDoc comment if applicable.
-        if (pNode instanceof DocumentableNode)
-        {
-            CommentVisitor.SINGLETON.maybeVisit(((DocumentableNode) pNode).getJavaDoc(), pMetrics);
-            ((DocumentableNode) pNode).setJavaDoc(null);
+            aOrphan.accept(CommentVisitor.SINGLETON, pMetrics);
+            pNode.removeOrphanComment(aOrphan);
         }
     }
 
@@ -142,7 +143,7 @@ final class Collectors
      */
     static void collectChildComments(@Nonnull Node pNode, @Nonnull CommentMetrics pMetrics)
     {
-        for (Node aChild : pNode.getChildrenNodes())
+        for (Node aChild : pNode.getChildNodes())
         {
             collectNodeComments(aChild, pMetrics);
             collectChildComments(aChild, pMetrics);
@@ -151,66 +152,102 @@ final class Collectors
 
 
     /**
-     * Collect the orphan comments from a node's parent that logically belong to the node, not to
-     * the parent. An orphan comment in the parent that immediately precedes the node's comment
-     * belongs to the node rather than to the parent. The same goes for an orphan comment that
-     * begins on the same line as the node ends on.
+     * Collect the orphan comments from a node's parent that are adjacent to the node or its
+     * comment. Orphan comments that immediately precede the node or its comment are considered to
+     * be adjacent to the node. The same goes for an orphan comment that begins on the same line as
+     * the node ends on.
      *<p>
      * The collected comments will be removed from the parent to prevent them from being collected
      * twice when the parent's comments are collected in a call to
      * {@link #collectNodeComments(Node, CommentMetrics)}.
      *
-     * @param pNode     The node to collect parent orphan comments for.
+     * @param pNode     The node to collect adjacent parent orphan comments for.
      * @param pMetrics  Where to put the collected metrics.
      *
      * @throws NullPointerException if any of the parameters is null.
      */
-    static void collectParentOrphanComments(@Nonnull Node pNode, @Nonnull CommentMetrics pMetrics)
+    static void collectAdjacentParentOrphanComments(@Nonnull Node pNode, @Nonnull CommentMetrics pMetrics)
     {
-        Node aParent = pNode.getParentNode();
-        if (aParent == null)
-            // If the node hasn't got a parent there are no orphan comments to collect.
+        collectAdjacentParentComments(pNode, pMetrics, true);
+    }
+
+
+    /**
+     * Collect the comments from a node's parent that are adjacent to the node or its comment.
+     * Comments belonging to the parent that immediately precede the node or its comment are
+     * considered to be adjacent to the node. The same goes for a parent comment that begins on the
+     * same line as the node ends on.
+     *<p>
+     * The collected comments will be removed from the parent to prevent them from being collected
+     * twice when the parent's comments are collected in a call to
+     * {@link #collectNodeComments(Node, CommentMetrics)}.
+     *
+     * @param pNode         The node to collect adjacent parent comments for.
+     * @param pMetrics      Where to put the collected metrics.
+     * @param pOrphansOnly  If true, only the parent's orphan comments will be examined.
+     *
+     * @throws NullPointerException if any of the reference parameters is null.
+     */
+    static void collectAdjacentParentComments(
+        @Nonnull Node pNode,
+        @Nonnull CommentMetrics pMetrics,
+        boolean pOrphansOnly)
+    {
+        Node aParent = pNode.getParentNode().orElse(null);
+        Range aRange = pNode.getRange().orElse(null);
+        if (aParent == null || aRange == null)
+            // If the node doesn't have a parent there are no parent comments to collect; if the
+            // node doesn't have a range there is no way of telling which of the parent's comments
+            // that are adjacent to it.
             return;
 
         // Get the begin and end line of the node for which comment metrics are collected.
-        int aBeginLine = pNode.getBeginLine();
-        int aEndLine = pNode.getEndLine();
+        int aBeginLine = aRange.begin.line;
+        int aEndLine = aRange.end.line;
 
         // Adjust the begin line to include any comment on the node.
-        Comment aComment = pNode.getComment();
+        Comment aComment = pNode.getComment().orElse(null);
         if (aComment != null)
-            aBeginLine = aComment.getBeginLine();
+            aBeginLine = aComment.getRange().orElse(aRange).begin.line;
 
-        // Sort the parent's orphan comments on their position in the enclosing compilation unit.
-        List<Comment> aOrphans = aParent.getOrphanComments();
-        Collections.sort(aOrphans, CommentComparator.SINGLETON);
+        // Get the parent's comments.
+        List<Comment> aParentComments = aParent.getOrphanComments();
+        Comment aParentMainComment = pOrphansOnly ? null : aParent.getComment().orElse(null);
+        if (aParentMainComment != null)
+            aParentComments.add(aParentMainComment);
 
-        // Examine the parent's orphan comments starting from the bottom of the enclosing
-        // compilation unit.
-        ListIterator<Comment> aIterator = aOrphans.listIterator(aOrphans.size());
+        // Sort the parent's comments on their position in the enclosing compilation unit.
+        aParentComments.sort(CommentComparator.SINGLETON);
+
+        // Examine the parent's comments starting from the bottom of the enclosing compilation unit.
+        ListIterator<Comment> aIterator = aParentComments.listIterator(aParentComments.size());
         while (aIterator.hasPrevious())
         {
-            Comment aOrphan = aIterator.previous();
-            if (aOrphan.getEndLine() < aBeginLine - 1)
-                // When an orphan comment that ends on a line not immediately preceding the node
-                // being examined there are no more orphans adjacent to that node.
+            Comment aParentComment = aIterator.previous();
+            Range aParentCommentRange = aParentComment.getRange().orElse(NO_RANGE);
+            if (aParentCommentRange.end.line < aBeginLine - 1)
+                // The parent comment ends on a line not immediately preceding the node being
+                // examined; there are no more parent comments adjacent to that node.
                 break;
 
-            if (aOrphan.getBeginLine() > aEndLine)
-                // This orphan comments begins after the node being examined, continue with the
-                // previous orphan, which is located above the current.
+            if (aParentCommentRange.begin.line > aEndLine)
+                // This parent comment begins after the node being examined, continue with the
+                // previous parent comment, which is located above the current one.
                 continue;
 
-            // The orphan comment either ends on the same line or the line immediately preceding the
-            // node, or begins on the same line as the node ends. In either case the orphan
-            // logically belongs to the node rather than to its parent; remove the comment from the
-            // parent and collect its metrics.
-            aIterator.remove();
-            aOrphan.accept(CommentVisitor.SINGLETON, pMetrics);
+            // The parent comment either ends on the same line or the line immediately preceding the
+            // node, or begins on the same line as the node ends. In either case the parent comment
+            // is adjacent to the node; remove the comment from the parent and collect its metrics.
+            aParentComment.accept(CommentVisitor.SINGLETON, pMetrics);
+            if (aParentComment == aParentMainComment)
+                aParent.setComment(null);
+            else
+                aParent.removeOrphanComment(aParentComment);
 
-            if (aOrphan.getEndLine() <= aBeginLine)
-                // If the orphan precedes the node the latter now logically begins with the orphan.
-                aBeginLine = aOrphan.getBeginLine();
+            if (aParentCommentRange.end.line <= aBeginLine)
+                // If the parent comment precedes the node the latter now logically begins with the
+                // parent comment.
+                aBeginLine = aParentCommentRange.begin.line;
         }
     }
 
@@ -227,17 +264,7 @@ final class Collectors
     static void collectExpression(@CheckForNull Expression pExpression, @Nonnull StatementMetrics pMetrics)
     {
         if (pExpression != null)
-        {
-            ExpressionStmt aStatement =
-                    new ExpressionStmt(
-                            pExpression.getBeginLine(),
-                            pExpression.getBeginColumn(),
-                            pExpression.getEndLine(),
-                            pExpression.getEndColumn(),
-                            pExpression);
-
-            pMetrics.add(aStatement);
-        }
+            pMetrics.add(new ExpressionStmt(pExpression));
     }
 
 
@@ -298,21 +325,8 @@ final class Collectors
         {
             pMetrics.add(pComment);
         }
-
-        /**
-         * Visit a {@code Comment} node if it is non-null by calling its {@code accept} method.
-         *
-         * @param pComment  The node to invoke the {@code accept} method on if it is non-null.
-         * @param pMetrics  The argument to pass to the {@code accept} method.
-         *
-         * @throws NullPointerException if {@code pNode} is non-null and {@code pMetrics} is null.
-         */
-        void maybeVisit(@CheckForNull Comment pComment, @Nonnull CommentMetrics pMetrics)
-        {
-            if (pComment != null)
-                pComment.accept(this, pMetrics);
-        }
     }
+
 
     /**
      * Comparator that sorts comments on line position and then on column position.
@@ -336,15 +350,20 @@ final class Collectors
         @Override
         public int compare(@Nonnull Comment pComment1, @Nonnull Comment pComment2)
         {
-            int aResult = pComment1.getBeginLine() - pComment2.getBeginLine();
-            if (aResult != 0)
-                return aResult;
+            Range aRange1 = pComment1.getRange().orElse(NO_RANGE);
+            Range aRange2 = pComment2.getRange().orElse(NO_RANGE);
 
-            aResult = pComment1.getEndLine() - pComment2.getEndLine();
-            if (aResult != 0)
-                return aResult;
+            if (aRange1.begin.isBefore(aRange2.begin))
+                return -1;
+            else if (aRange1.begin.isAfter(aRange2.begin))
+                return 1;
 
-            return pComment1.getBeginColumn() - pComment2.getBeginColumn();
+            if (aRange1.end.isBefore(aRange2.end))
+                return -1;
+            else if (aRange1.end.isAfter(aRange2.end))
+                return 1;
+
+            return 0;
         }
     }
 }

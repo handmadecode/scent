@@ -14,8 +14,9 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 
 /**
- * Source code metrics for a compilation unit. These metrics contain the type(s) declared within
- * the compilation unit and any comments associated with the unit itself, such as a file header.
+ * Source code metrics for an ordinary compilation unit. These metrics contain the type(s) declared
+ * within the compilation unit and any comments associated with the unit itself, such as a file
+ * header.
  *<p>
  * Instances of this class are <b>not</b> safe for use by multiple threads without external
  * synchronization.

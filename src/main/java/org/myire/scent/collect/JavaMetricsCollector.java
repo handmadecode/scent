@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -8,19 +8,25 @@ package org.myire.scent.collect;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.text.ParseException;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
+import static java.util.Objects.requireNonNull;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseProblemException;
+import com.github.javaparser.ParserConfiguration;
+import com.github.javaparser.ParseResult;
+import com.github.javaparser.ParseStart;
+import com.github.javaparser.Problem;
+import com.github.javaparser.Provider;
+import com.github.javaparser.Providers;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.PackageDeclaration;
-import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.QualifiedNameExpr;
 
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.PackageMetrics;
 
 
@@ -37,7 +43,31 @@ import org.myire.scent.metrics.PackageMetrics;
 @NotThreadSafe
 public class JavaMetricsCollector
 {
-    private final Map<String, PackageMetrics> fPackages = new LinkedHashMap<>();
+    private final JavaParser fJavaParser;
+    private final JavaMetrics fCollectedMetrics = new JavaMetrics();
+
+
+    /**
+     * Create a new {@code JavaMetricsCollector} for the default language level as specified by
+     * {@link LanguageLevel#getDefault()}.
+     */
+    public JavaMetricsCollector()
+    {
+        this(LanguageLevel.getDefault());
+    }
+
+
+    /**
+     * Create a new {@code JavaMetricsCollector} for a specific language level.
+     *
+     * @param pLanguageLevel    The language level.
+     *
+     * @throws NullPointerException if {@code pLanguageLevel} is null.
+     */
+    public JavaMetricsCollector(@Nonnull LanguageLevel pLanguageLevel)
+    {
+        fJavaParser = new JavaParser(createParserConfiguration(pLanguageLevel));
+    }
 
 
     /**
@@ -59,41 +89,61 @@ public class JavaMetricsCollector
             @Nonnull InputStream pJavaSource,
             @Nonnull Charset pEncoding) throws ParseException
     {
-        try
-        {
-            collectMetrics(JavaParser.parse(pJavaSource, pEncoding.name()), pName);
-        }
-        catch (com.github.javaparser.ParseException | com.github.javaparser.TokenMgrError e)
-        {
-            ParseException aWrapper = new ParseException(e.getMessage(), 0);
-            aWrapper.initCause(e);
-            throw aWrapper;
-        }
+        collect(pName, Providers.provider(requireNonNull(pJavaSource), requireNonNull(pEncoding)));
     }
 
 
     /**
-     * Get the number of packages for which metrics have been collected in all calls to
-     * {@code collect}.
+     * Parse a string containing Java source code and collect metrics from it. The resulting metrics
+     * will be stored in this instance and returned when {@link #getCollectedMetrics()} is called.
      *
-     * @return  The number of collected package metrics.
+     * @param pName         The name of the string's origin, will be used as the name of the
+     *                      {@code CompilationUnitMetrics} where the collected metrics are put.
+     * @param pJavaSource   The string containing the source code to parse and collect metrics for.
+     *
+     * @throws ParseException   if the string's source code is lexically or syntactically invalid.
+     * @throws NullPointerException if any of the parameters is null.
      */
-    public int getNumCollectedPackages()
+    public void collect(@Nonnull String pName, @Nonnull String pJavaSource) throws ParseException
     {
-        return fPackages.size();
+        collect(pName, Providers.provider(requireNonNull(pJavaSource)));
     }
 
 
     /**
-     * Get an {@code Iterable} that iterates over the metrics collected in all calls to
-     * {@code collect}.
+     * Get the metrics collected in all calls to {@code collect}.
      *
-     * @return  An {@code Iterable} for the collected package metrics, never null.
+     * @return  A {@code JavaMetrics} containing the collected metrics, never null.
      */
     @Nonnull
-    public Iterable<PackageMetrics> getCollectedMetrics()
+    public JavaMetrics getCollectedMetrics()
     {
-        return fPackages.values();
+        return fCollectedMetrics;
+    }
+
+
+    /**
+     * Parse the contents of {@code Provider} containing Java source code and collect metrics from
+     * it. The resulting metrics will be stored in this instance and returned when
+     * {@link #getCollectedMetrics()} is called.
+     *
+     * @param pName         The name of the source code's origin, will be used as the name of the
+     *                      {@code CompilationUnitMetrics} where the collected metrics are put.
+     * @param pJavaSource   A provider with the source code to parse and collect metrics for.
+     *
+     * @throws ParseException   if the source code is lexically or syntactically invalid.
+     * @throws NullPointerException if any of the parameters is null.
+     */
+    private void collect(
+            @Nonnull String pName,
+            @Nonnull Provider pJavaSource) throws ParseException
+    {
+        ParseResult<CompilationUnit> aResult =
+                fJavaParser.parse(ParseStart.COMPILATION_UNIT, pJavaSource);
+        if (aResult.isSuccessful())
+            aResult.getResult().ifPresent(cu -> collectMetrics(cu, pName));
+        else
+            throw createParseException(aResult);
     }
 
 
@@ -107,54 +157,139 @@ public class JavaMetricsCollector
      */
     private void collectMetrics(@Nonnull CompilationUnit pCompilationUnit, @Nonnull String pName)
     {
-        CompilationUnitMetricsCollector aCollector = new CompilationUnitMetricsCollector(pCompilationUnit, pName);
-        PackageMetrics aPackageMetrics = getPackageMetrics(pCompilationUnit.getPackage());
-        aPackageMetrics.add(aCollector.collect());
+        if (pCompilationUnit.getModule().isPresent())
+        {
+            // A modular compilation unit, collect metrics for it and add to the overall results.
+            ModularCompilationUnitMetricsCollector aCollector =
+                new ModularCompilationUnitMetricsCollector(pCompilationUnit, pName);
+            fCollectedMetrics.add(aCollector.collect());
+        }
+        else
+        {
+            // An ordinary compilation unit, collect its metrics into the appropriate package's
+            // metrics.
+            CompilationUnitMetricsCollector aCollector =
+                new CompilationUnitMetricsCollector(pCompilationUnit, pName);
+            aCollector.collect(this::getPackageMetrics);
+        }
     }
 
 
     /**
-     * Get the {@code PackageMetrics} for a package from the internal map. If the specified package
-     * doesn't have an entry in the internal map a new {@code PackageMetrics} will be created an put
-     * into the map before it is returned.
+     * Get, possibly first creating, the {@code PackageMetrics} for a {@code PackageDeclaration}.
      *
-     * @param pPackage  The package to get the {@code PackageMetrics} for, or null to get the
-     *                  metrics for the default package.
+     * @param pPackage  The package declaration to get the metrics for. A null instance represents
+     *                  the default package.
      *
      * @return  The {@code PackageMetrics} instance for the specified package, never null.
      */
     @Nonnull
     private PackageMetrics getPackageMetrics(@CheckForNull PackageDeclaration pPackage)
     {
-        String aPackageName = pPackage != null ? getQualifiedName(pPackage.getName()) : "";
-        PackageMetrics aPackageMetrics = fPackages.get(aPackageName);
-        if (aPackageMetrics == null)
-        {
-            aPackageMetrics = new PackageMetrics(aPackageName);
-            fPackages.put(aPackageName, aPackageMetrics);
-        }
-
-        return aPackageMetrics;
+        String aPackageName = pPackage != null ? pPackage.getName().asString() : "";
+        return fCollectedMetrics.maybeCreate(aPackageName);
     }
 
 
     /**
-     * Get the qualified name of a {@code NameExpr}. Since {@code QualifiedNameExpr} doesn't return
-     * the qualifier part in {@code getName}, that part must be prepended to its name explicitly.
+     * Create a {@code ParserConfiguration} for a specific language level.
      *
-     * @param pNameExpression   The instance to get the qualified name of.
+     * @param pLanguageLevel    The language level.
      *
-     * @return  The qualified name of the specified name expression.
+     * @return  A new  {@code ParserConfiguration}, never null.
      *
-     * @throws NullPointerException if {@code pNameExpression} is null.
+     * @throws NullPointerException if {@code pLanguageLevel} is null.
      */
-    static private String getQualifiedName(@Nonnull NameExpr pNameExpression)
+    @Nonnull
+    static private ParserConfiguration createParserConfiguration(@Nonnull LanguageLevel pLanguageLevel)
     {
-        if (pNameExpression instanceof QualifiedNameExpr)
-            return getQualifiedName(((QualifiedNameExpr) pNameExpression).getQualifier())
-                    + '.'
-                    + pNameExpression.getName();
-        else
-            return pNameExpression.getName();
+        ParserConfiguration aConfiguration = new ParserConfiguration();
+
+        switch (pLanguageLevel)
+        {
+            case JAVA_8:
+                aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_8);
+                break;
+
+            case JAVA_9:
+                aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_9);
+                break;
+
+            case JAVA_10:
+                aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_10);
+                break;
+
+            case JAVA_11:
+                aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_11);
+                break;
+
+            default:
+                break;
+        }
+
+        return aConfiguration;
+    }
+
+
+    /**
+     * Create a {@code ParseException} from the problems in a {@code ParseResult}.
+     *
+     * @param pResult   An unsuccessful parse result.
+     *
+     * @return  A new {@code ParseException} with message and position taken from the parse result's
+     *          problems. Null is never returned.
+     *
+     * @throws NullPointerException if {@code pResult} is null.
+     */
+    @Nonnull
+    static private ParseException createParseException(@Nonnull ParseResult<?> pResult)
+    {
+        List<Problem> aProblems = pResult.getProblems();
+        ParseProblemException aCause = new ParseProblemException(aProblems);
+        int aPosition = 0;
+        for (int i=0; i<aProblems.size() && aPosition == 0; i++)
+        {
+            // Tell me again how Optional makes code more readable.
+            aPosition =
+                    aProblems.get(i)
+                            .getLocation()
+                            .map(l -> l.getBegin().getRange().map(r -> r.begin.line).orElse(0))
+                            .orElse(0);
+        }
+
+        ParseException aParseException = new ParseException(aCause.getMessage(), aPosition);
+        aParseException.initCause(aCause);
+        return aParseException;
+    }
+
+
+    /**
+     * The supported Java language levels.
+     */
+    public enum LanguageLevel
+    {
+        /** Java 8 (introducing lambdas and type annotations). */
+        JAVA_8,
+
+        /** Java 9 (introducing modules and private interface methods). */
+        JAVA_9,
+
+        /** Java 10 (introducing local variable type inference). */
+        JAVA_10,
+
+        /** Java 11 (introducing local variable syntax for lambda parameters (JEP 323)). */
+        JAVA_11
+        ;
+
+        /**
+         * Get the default language level for Java metrics collecting.
+         *
+         * @return  The default language level, never null.
+         */
+        @Nonnull
+        static public LanguageLevel getDefault()
+        {
+            return JAVA_11;
+        }
     }
 }

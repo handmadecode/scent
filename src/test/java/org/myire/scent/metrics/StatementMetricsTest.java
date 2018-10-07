@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -8,7 +8,7 @@ package org.myire.scent.metrics;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
-import com.github.javaparser.ast.stmt.EmptyStmt;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.SwitchStmt;
 
 
@@ -77,7 +77,7 @@ public class StatementMetricsTest
         int aNumStatements = aMetrics.getNumStatements();
 
         // When
-        aMetrics.add(new EmptyStmt(1, 0, 1, 2));
+        aMetrics.add(new ExpressionStmt());
 
         // Then
         assertEquals(++aNumStatements, aMetrics.getNumStatements());
@@ -101,7 +101,7 @@ public class StatementMetricsTest
     {
         StatementMetrics aMetrics = new StatementMetrics();
         for (int i=0; i<pNumStatements; i++)
-            aMetrics.add(new EmptyStmt(1, 1, 1, 1));
+            aMetrics.add(new ExpressionStmt());
         return aMetrics;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -8,20 +8,20 @@ package org.myire.scent.collect;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
 
+import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.AnnotationMemberDeclaration;
 import com.github.javaparser.ast.body.EnumConstantDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.ModifierSet;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 
 import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.FieldMetrics;
+import static org.myire.scent.collect.Collectors.collectAdjacentParentOrphanComments;
 import static org.myire.scent.collect.Collectors.collectExpression;
 import static org.myire.scent.collect.Collectors.collectNodeComment;
 import static org.myire.scent.collect.Collectors.collectNodeComments;
-import static org.myire.scent.collect.Collectors.collectParentOrphanComments;
 
 
 /**
@@ -54,15 +54,15 @@ class FieldMetricsCollector
     FieldMetricsCollector(@Nonnull AnnotationMemberDeclaration pAnnotationMember)
     {
         fFieldNode = pAnnotationMember;
-        fFieldName = pAnnotationMember.getName();
+        fFieldName = pAnnotationMember.getName().getIdentifier();
         fFieldKind = FieldMetrics.Kind.ANNOTATION_TYPE_ELEMENT;
-        fInitializerExpression = pAnnotationMember.getDefaultValue();
+        fInitializerExpression = pAnnotationMember.getDefaultValue().orElse(null);
 
         // Collect any orphan comments from the parent that should be associated with the annotation
         // type element. This could be done in collect(), but is done here to be symmetric with the
         // constructor that creates an instance from a FieldDeclaration, where the parent comments
         // must be collected in the constructor.
-        collectParentOrphanComments(pAnnotationMember, fParentComments);
+        collectAdjacentParentOrphanComments(pAnnotationMember, fParentComments);
     }
 
 
@@ -77,13 +77,13 @@ class FieldMetricsCollector
     FieldMetricsCollector(@Nonnull EnumConstantDeclaration pEnumConstant)
     {
         fFieldNode = pEnumConstant;
-        fFieldName = pEnumConstant.getName();
+        fFieldName = pEnumConstant.getName().getIdentifier();
         fFieldKind = FieldMetrics.Kind.ENUM_CONSTANT;
         fInitializerExpression = null;
 
         // Collect any orphan comments from the parent that should be associated with the enum
         // constant.
-        collectParentOrphanComments(pEnumConstant, fParentComments);
+        collectAdjacentParentOrphanComments(pEnumConstant, fParentComments);
     }
 
 
@@ -99,21 +99,21 @@ class FieldMetricsCollector
     FieldMetricsCollector(@Nonnull FieldDeclaration pField, @Nonnull VariableDeclarator pVariable)
     {
         fFieldNode = pVariable;
-        fFieldName = pVariable.getId().getName();
+        fFieldName = pVariable.getName().getIdentifier();
         fFieldKind = getFieldKind(pField);
-        fInitializerExpression = pVariable.getInit();
+        fInitializerExpression = pVariable.getInitializer().orElse(null);
 
         // Collect any comments from the declaration (including any of its parent's orphan comments
         // that should be associated with it). These comments should be associated with the
         // variable declarator instead, since the declaration itself doesn't have any metrics. By
         // collecting (and removing) these comments here rather than in collect(), only the first
         // variable declarator gets the field's comment(s).
-        collectParentOrphanComments(pField, fParentComments);
+        collectAdjacentParentOrphanComments(pField, fParentComments);
         collectNodeComment(pField, fParentComments);
 
         // Collect any orphan comments from the variable declarator's parent (i.e. the field
         // declaration ) that should be associated with the variable declarator.
-        collectParentOrphanComments(pVariable, fParentComments);
+        collectAdjacentParentOrphanComments(pVariable, fParentComments);
     }
 
 
@@ -152,11 +152,11 @@ class FieldMetricsCollector
     {
         // Fields in interfaces and annotations are implicitly static.
         boolean aIsStatic =
-                ModifierSet.isStatic(pField.getModifiers())
+                pField.getModifiers().contains(Modifier.STATIC)
                 ||
-                Collectors.isInterface(pField.getParentNode())
+                Collectors.isInterface(pField.getParentNode().orElse(null))
                 ||
-                Collectors.isAnnotation(pField.getParentNode());
+                Collectors.isAnnotation(pField.getParentNode().orElse(null));
 
         return aIsStatic ? FieldMetrics.Kind.STATIC_FIELD : FieldMetrics.Kind.INSTANCE_FIELD;
     }

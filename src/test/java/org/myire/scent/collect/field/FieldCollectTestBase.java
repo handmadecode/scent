@@ -12,11 +12,11 @@ import static org.junit.Assert.assertEquals;
 
 import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.FieldMetrics;
-import org.myire.scent.metrics.PackageMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 
-import static org.myire.scent.collect.CollectTestUtil.collect;
-import static org.myire.scent.collect.CollectTestUtil.getFirstField;
-import static org.myire.scent.collect.CollectTestUtil.toSourceString;
+import static org.myire.scent.util.CollectTestUtil.collect;
+import static org.myire.scent.util.CollectTestUtil.getFirstField;
+import static org.myire.scent.util.CollectTestUtil.toSourceString;
 
 
 /**
@@ -39,7 +39,7 @@ abstract public class FieldCollectTestBase
         String aName = createFieldName();
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(createFieldDeclarationInsideType(aName));
+        JavaMetrics aMetrics = collect(createFieldDeclarationInsideType(aName));
 
         // Then
         assertEquals(aName, getFirstField(aMetrics).getName());
@@ -55,7 +55,7 @@ abstract public class FieldCollectTestBase
     public void fieldMetricsHasTheCorrectKind() throws ParseException
     {
         // When
-        Iterable<PackageMetrics> aMetrics = collect(createFieldDeclarationInsideType(createFieldName()));
+        JavaMetrics aMetrics = collect(createFieldDeclarationInsideType(createFieldName()));
 
         // Then
         assertEquals(getFieldKind(), getFirstField(aMetrics).getKind());
@@ -81,7 +81,7 @@ abstract public class FieldCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstField(aMetrics).getComments();
@@ -109,7 +109,7 @@ abstract public class FieldCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstField(aMetrics).getComments();
@@ -136,7 +136,7 @@ abstract public class FieldCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstField(aMetrics).getComments();
@@ -164,7 +164,7 @@ abstract public class FieldCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstField(aMetrics).getComments();
@@ -189,7 +189,7 @@ abstract public class FieldCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstField(aMetrics).getComments();
@@ -215,7 +215,7 @@ abstract public class FieldCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstField(aMetrics).getComments();
@@ -247,7 +247,7 @@ abstract public class FieldCollectTestBase
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstField(aMetrics).getComments();

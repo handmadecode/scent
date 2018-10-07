@@ -67,7 +67,7 @@ package org.myire.scent;
 
 
     /*
-     * Block comment for the inner interface.
+     * Block comment for the inner annotation.
      */
     @interface InnerAnnotation
     {

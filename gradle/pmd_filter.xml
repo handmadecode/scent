@@ -1,4 +1,6 @@
 <rule-violation-filters>
+    <rule-violation-filter files=".*/Collectors.java"
+                           rules="CompareObjectsWithEquals|NPathComplexity" />
     <rule-violation-filter files=".*/MethodMetricsCollector.java"
                            rules="ExcessiveImports" />
     <rule-violation-filter files=".*/TypeMetricsCollector.java"

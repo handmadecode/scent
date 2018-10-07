@@ -3,7 +3,8 @@
  */
 
 apply plugin: 'java'
-apply plugin: 'org.myire.quill.all'
+apply plugin: 'org.myire.quill.core'
+apply plugin: 'org.myire.quill.moduleinfo'
 
 
 buildscript
@@ -17,7 +18,7 @@ buildscript
   // This script uses the Quill plugins.
   dependencies 
   {
-    classpath 'org.myire:quill:1.4'
+    classpath 'org.myire:quill:1.5'
   }
 }
 
@@ -36,6 +37,12 @@ apply from: 'dependencies.gradle'
 repositories.mavenCentral()
 
 
+// The project must be compiled with at least Java 9 to create a modular jar file, but the regular
+// Java classes should target Java 8.
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+
 // Configure all Jar tasks to add a build info section to the manifest.
 tasks.withType(Jar)
 {
@@ -43,14 +50,18 @@ tasks.withType(Jar)
 }
 
 
-// Configure the main jar to include static meta data from file, to add a classpath attribute, and
-// to add a package section to the manifest.
+// Configure the main jar to to add a main-class attribute and a classpath attribute, and to add a
+// package section to the manifest.
 jar.manifest
 {
-    from file('meta/manifest.mf')
+    addMainClassAttribute()
     addClassPathAttribute sourceSets.main
     addPackageSection()
 }
+
+
+// Specify the JavaDoc html version to avoid warnings (only valid when building with JDK > 9).
+javadoc.options.addBooleanOption('html4', true)
 
 
 // Add static data from the pom template and remove test dependencies when the pom file is created.

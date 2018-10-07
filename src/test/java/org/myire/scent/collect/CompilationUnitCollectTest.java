@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -11,23 +11,26 @@ import java.util.Iterator;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.CompilationUnitMetrics;
 import org.myire.scent.metrics.FieldMetrics;
+import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.metrics.PackageMetrics;
 import org.myire.scent.metrics.TypeMetrics;
 
-import static org.myire.scent.collect.CollectTestUtil.collect;
-import static org.myire.scent.collect.CollectTestUtil.getFirstCompilationUnit;
-import static org.myire.scent.collect.CollectTestUtil.getFirstInnerType;
-import static org.myire.scent.collect.CollectTestUtil.getFirstMethod;
-import static org.myire.scent.collect.CollectTestUtil.getFirstPackage;
-import static org.myire.scent.collect.CollectTestUtil.getFirstType;
+import static org.myire.scent.util.CollectTestUtil.collect;
+import static org.myire.scent.util.CollectTestUtil.getFirstCompilationUnit;
+import static org.myire.scent.util.CollectTestUtil.getFirstInnerType;
+import static org.myire.scent.util.CollectTestUtil.getFirstMethod;
+import static org.myire.scent.util.CollectTestUtil.getFirstPackage;
+import static org.myire.scent.util.CollectTestUtil.getFirstType;
 
 
 /**
- * Unit tests for parsing a compilation unit and collecting the source code metrics related it.
+ * Unit tests for parsing an ordinary compilation unit and collecting the source code metrics
+ * related it.
  *
  * @author <a href="mailto:peter@myire.org">Peter Franzen</a>
  */
@@ -46,7 +49,7 @@ public class CompilationUnitCollectTest
         String aName = "Test.java";
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aName, "class Test {}");
+        JavaMetrics aMetrics = collect(aName, "class Test {}");
 
         // Then
         assertEquals(aName, getFirstCompilationUnit(aMetrics).getName());
@@ -69,9 +72,9 @@ public class CompilationUnitCollectTest
         JavaMetricsCollector aParser = new JavaMetricsCollector();
 
         // When
-        collect(aName1, "class What {}", aParser);
-        collect(aName2, "class Who {}", aParser);
-        collect(aName3, "class Why {}", aParser);
+        aParser.collect(aName1, "class What {}");
+        aParser.collect(aName2, "class Who {}");
+        aParser.collect(aName3, "class Why {}");
 
         // Then
         PackageMetrics aPackage = getFirstPackage(aParser.getCollectedMetrics());
@@ -98,11 +101,12 @@ public class CompilationUnitCollectTest
                 "/*",
                 " * Copyright (c) 2016",
                 " */",
-                "package x.y.z;"
+                "package x.y.z;",
+                "class X{}"
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstCompilationUnit(aMetrics).getComments();
@@ -123,11 +127,12 @@ public class CompilationUnitCollectTest
         // Given
         String[] aSourceLines = {
                 "// Copyright (c) 2016",
-                "package x.y.z;"
+                "package x.y.z;",
+                "interface Z {}"
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstCompilationUnit(aMetrics).getComments();
@@ -149,11 +154,12 @@ public class CompilationUnitCollectTest
                 "// Copyright (c)",
                 "// All rights etc",
                 "",
-                "package x.y.z;"
+                "package x.y.z;",
+                "enum Q {}"
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstCompilationUnit(aMetrics).getComments();
@@ -180,7 +186,7 @@ public class CompilationUnitCollectTest
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstCompilationUnit(aMetrics).getComments();
@@ -205,7 +211,7 @@ public class CompilationUnitCollectTest
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstCompilationUnit(aMetrics).getComments();
@@ -231,7 +237,7 @@ public class CompilationUnitCollectTest
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstCompilationUnit(aMetrics).getComments();
@@ -257,11 +263,45 @@ public class CompilationUnitCollectTest
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CommentMetrics aComments = getFirstCompilationUnit(aMetrics).getComments();
         assertEquals(1, aComments.getNumLineComments());
+    }
+
+
+    /**
+     * A compilation unit containing only comments and a package declaration should be collected in
+     * the {@code CommentMetrics} associated with the package, not the compilation unit.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void commentsInEmptyCompilationUnitAreCollectedForPackage() throws ParseException
+    {
+        // Given
+        String[] aSourceLines = {
+            "// Line comment for package",
+            "/**",
+            " * Package JavaDoc.",
+            " */",
+            "package x.y.z;",
+        };
+
+        // When
+        JavaMetrics aMetrics = collect(aSourceLines);
+
+        // Then
+        PackageMetrics aPackageMetrics = getFirstPackage(aMetrics);
+        CommentMetrics aComments = aPackageMetrics.getComments();
+        assertEquals(1, aComments.getNumLineComments());
+        assertEquals(24, aComments.getLineCommentsLength());
+        assertEquals(1, aComments.getNumJavaDocComments());
+        assertEquals(3, aComments.getNumJavaDocLines());
+        assertEquals(16, aComments.getJavaDocCommentsLength());
+        aComments = getFirstCompilationUnit(aPackageMetrics).getComments();
+        assertTrue(aComments.isEmpty());
     }
 
 
@@ -313,7 +353,7 @@ public class CompilationUnitCollectTest
         };
 
         // When
-        Iterable<PackageMetrics> aMetrics = collect(aSourceLines);
+        JavaMetrics aMetrics = collect(aSourceLines);
 
         // Then
         CompilationUnitMetrics aCompilationUnit = getFirstCompilationUnit(aMetrics);
