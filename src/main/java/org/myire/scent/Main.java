@@ -16,7 +16,6 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import static java.util.Objects.requireNonNull;
 
 import javax.annotation.CheckForNull;
@@ -140,7 +139,7 @@ public final class Main
         try (OutputStream aOutputStream = pOutputStreamSupplier.get())
         {
             MetricsReportWriter aWriter = pReportWriterCreator.apply(aOutputStream);
-            String aVersion = Main.class.getPackage().getImplementationVersion();
+            String aVersion = Version.getVersionString();
             LocalDateTime aTimestamp = LocalDateTime.now().withNano(0);
             aWriter.writeReport(pMetrics, new MetricsReportMetaData(aTimestamp, aVersion));
         }

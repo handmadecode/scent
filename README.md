@@ -29,6 +29,10 @@ metrics for source code up to and including language level 11.
 
 ## Release Notes
 
+### version 2.0.1
+
+* The version number is included in reports when running from the module path.
+
 ### version 2.0
 
 * Support for language levels 9, 10, and 11.
