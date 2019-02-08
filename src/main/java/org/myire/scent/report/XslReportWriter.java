@@ -145,16 +145,29 @@ public class XslReportWriter implements MetricsReportWriter
     static private Transformer createTransformer(@Nonnull String pXslResource)
         throws IOException, TransformerConfigurationException
     {
-        try (InputStream aResourceStream =
-                 XslReportWriter.class.getResourceAsStream(pXslResource))
+        try (InputStream aResourceStream = getResourceAsStream(pXslResource))
         {
-            // Try to load the resource.
-            if (aResourceStream != null)
-                // Resource loaded, create a transformer from it.
-                return cFactory.newTransformer(new StreamSource(aResourceStream));
-            else
-                // Resource not found.
-                throw new IOException("Resource not found: " + pXslResource);
+            return cFactory.newTransformer(new StreamSource(aResourceStream));
         }
+    }
+
+
+    /**
+     * Get an {@code InputStream} for a classpath resource.
+     *
+     * @param pResource The name of the resource.
+     *
+     * @return  An open {@code InputStream}, it is the caller's responsibility to close it.
+     *
+     * @throws IOException  if the resource does not exist.
+     */
+    @Nonnull
+    static private InputStream getResourceAsStream(@Nonnull String pResource) throws IOException
+    {
+        InputStream aResourceStream = XslReportWriter.class.getResourceAsStream(pResource);
+        if (aResourceStream != null)
+            return aResourceStream;
+        else
+            throw new IOException("Resource not found: " + pResource);
     }
 }

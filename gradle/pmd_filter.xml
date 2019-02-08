@@ -5,4 +5,7 @@
                            rules="ExcessiveImports" />
     <rule-violation-filter files=".*/TypeMetricsCollector.java"
                            rules="CompareObjectsWithEquals" />
+    <rule-violation-filter files=".*/Version.java"
+                           rules="AvoidCatchingGenericException"
+                           lines="45,116" />
 </rule-violation-filters>
