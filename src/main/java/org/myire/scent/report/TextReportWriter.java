@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Peter Franzen. All rights reserved.
+ * Copyright 2018-2019 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -153,11 +153,11 @@ public class TextReportWriter extends OutputStreamReportWriter
         // Write the module declaration's comments and statement counts as an indented section.
         increaseIndentationLevel();
         write(pMetrics.getComments());
-        writeIndentedLine(pMetrics.getNumRequiresStatements(), " requires");
-        writeIndentedLine(pMetrics.getNumExportsStatements(), " exports");
-        writeIndentedLine(pMetrics.getNumProvidesStatements(), " provides");
-        writeIndentedLine(pMetrics.getNumUsesStatements(), " uses");
-        writeIndentedLine(pMetrics.getNumOpensStatements(), " opens");
+        writeIndentedLine(pMetrics.getNumRequiresDirectives(), " requires");
+        writeIndentedLine(pMetrics.getNumExportsDirectives(), " exports");
+        writeIndentedLine(pMetrics.getNumProvidesDirectives(), " provides");
+        writeIndentedLine(pMetrics.getNumUsesDirectives(), " uses");
+        writeIndentedLine(pMetrics.getNumOpensDirectives(), " opens");
         decreaseIndentationLevel();
     }
 

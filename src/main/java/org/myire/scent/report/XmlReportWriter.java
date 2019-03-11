@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Peter Franzen. All rights reserved.
+ * Copyright 2018-2019 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -247,11 +247,11 @@ public class XmlReportWriter extends OutputStreamReportWriter
     {
         writeNameAttribute(pMetrics.getName());
         writeAttribute("open", pMetrics.isOpen() ? "true" : "false");
-        writeAttributeIfPositive("requires", pMetrics.getNumRequiresStatements());
-        writeAttributeIfPositive("exports", pMetrics.getNumExportsStatements());
-        writeAttributeIfPositive("provides", pMetrics.getNumProvidesStatements());
-        writeAttributeIfPositive("uses", pMetrics.getNumUsesStatements());
-        writeAttributeIfPositive("opens", pMetrics.getNumOpensStatements());
+        writeAttributeIfPositive("requires", pMetrics.getNumRequiresDirectives());
+        writeAttributeIfPositive("exports", pMetrics.getNumExportsDirectives());
+        writeAttributeIfPositive("provides", pMetrics.getNumProvidesDirectives());
+        writeAttributeIfPositive("uses", pMetrics.getNumUsesDirectives());
+        writeAttributeIfPositive("opens", pMetrics.getNumOpensDirectives());
     }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018-2019 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -152,7 +152,7 @@ class FieldMetricsCollector
     {
         // Fields in interfaces and annotations are implicitly static.
         boolean aIsStatic =
-                pField.getModifiers().contains(Modifier.STATIC)
+                pField.hasModifier(Modifier.Keyword.STATIC)
                 ||
                 Collectors.isInterface(pField.getParentNode().orElse(null))
                 ||
