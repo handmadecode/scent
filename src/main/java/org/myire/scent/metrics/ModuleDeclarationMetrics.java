@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Peter Franzen. All rights reserved.
+ * Copyright 2018-2019 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -10,11 +10,11 @@ import static java.util.Objects.requireNonNull;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
 
-import com.github.javaparser.ast.modules.ModuleExportsStmt;
-import com.github.javaparser.ast.modules.ModuleOpensStmt;
-import com.github.javaparser.ast.modules.ModuleProvidesStmt;
-import com.github.javaparser.ast.modules.ModuleRequiresStmt;
-import com.github.javaparser.ast.modules.ModuleUsesStmt;
+import com.github.javaparser.ast.modules.ModuleExportsDirective;
+import com.github.javaparser.ast.modules.ModuleOpensDirective;
+import com.github.javaparser.ast.modules.ModuleProvidesDirective;
+import com.github.javaparser.ast.modules.ModuleRequiresDirective;
+import com.github.javaparser.ast.modules.ModuleUsesDirective;
 
 
 /**
@@ -30,11 +30,11 @@ public class ModuleDeclarationMetrics extends CodeElementMetrics
 {
     private final boolean fIsOpen;
 
-    private int fNumRequiresStatements;
-    private int fNumExportsStatements;
-    private int fNumProvidesStatements;
-    private int fNumUsesStatements;
-    private int fNumOpensStatements;
+    private int fNumRequiresDirectives;
+    private int fNumExportsDirectives;
+    private int fNumProvidesDirectives;
+    private int fNumUsesDirectives;
+    private int fNumOpensDirectives;
 
 
     /**
@@ -64,126 +64,126 @@ public class ModuleDeclarationMetrics extends CodeElementMetrics
 
 
     /**
-     * Get the number of {@code requires} statements added to this instance.
+     * Get the number of {@code requires} directives added to this instance.
      *
-     * @return  The number of {@code requires} statements.
+     * @return  The number of {@code requires} directives.
      */
-    public int getNumRequiresStatements()
+    public int getNumRequiresDirectives()
     {
-        return fNumRequiresStatements;
+        return fNumRequiresDirectives;
     }
 
 
     /**
-     * Get the number of {@code exports} statements added to this instance.
+     * Get the number of {@code exports} directives added to this instance.
      *
-     * @return  The number of {@code exports} statements.
+     * @return  The number of {@code exports} directives.
      */
-    public int getNumExportsStatements()
+    public int getNumExportsDirectives()
     {
-        return fNumExportsStatements;
+        return fNumExportsDirectives;
     }
 
 
     /**
-     * Get the number of {@code provides} statements added to this instance.
+     * Get the number of {@code provides} directives added to this instance.
      *
-     * @return  The number of {@code provides} statements.
+     * @return  The number of {@code provides} directives.
      */
-    public int getNumProvidesStatements()
+    public int getNumProvidesDirectives()
     {
-        return fNumProvidesStatements;
+        return fNumProvidesDirectives;
     }
 
 
     /**
-     * Get the number of {@code uses} statements added to this instance.
+     * Get the number of {@code uses} directives added to this instance.
      *
-     * @return  The number of {@code uses} statements.
+     * @return  The number of {@code uses} directives.
      */
-    public int getNumUsesStatements()
+    public int getNumUsesDirectives()
     {
-        return fNumUsesStatements;
+        return fNumUsesDirectives;
     }
 
 
     /**
-     * Get the number of {@code opens} statements added to this instance.
+     * Get the number of {@code opens} directives added to this instance.
      *
-     * @return  The number of {@code opens} statements.
+     * @return  The number of {@code opens} directives.
      */
-    public int getNumOpensStatements()
+    public int getNumOpensDirectives()
     {
-        return fNumOpensStatements;
+        return fNumOpensDirectives;
     }
 
 
     /**
-     * Add metrics of a {@code requires} statement.
+     * Add metrics of a {@code requires} directive.
      *
-     * @param pStatement    The statement.
+     * @param pDirective    The directive.
      *
-     * @throws NullPointerException if {@code pStatement} is null.
+     * @throws NullPointerException if {@code pDirective} is null.
      */
-    public void add(@Nonnull ModuleRequiresStmt pStatement)
+    public void add(@Nonnull ModuleRequiresDirective pDirective)
     {
-        requireNonNull(pStatement);
-        fNumRequiresStatements++;
+        requireNonNull(pDirective);
+        fNumRequiresDirectives++;
     }
 
 
     /**
-     * Add metrics of an {@code exports} statement.
+     * Add metrics of an {@code exports} directive.
      *
-     * @param pStatement    The statement.
+     * @param pDirective    The directive.
      *
-     * @throws NullPointerException if {@code pStatement} is null.
+     * @throws NullPointerException if {@code pDirective} is null.
      */
-    public void add(@Nonnull ModuleExportsStmt pStatement)
+    public void add(@Nonnull ModuleExportsDirective pDirective)
     {
-        requireNonNull(pStatement);
-        fNumExportsStatements++;
+        requireNonNull(pDirective);
+        fNumExportsDirectives++;
     }
 
 
     /**
-     * Add metrics of a {@code provides} statement.
+     * Add metrics of a {@code provides} directive.
      *
-     * @param pStatement    The statement.
+     * @param pDirective    The directive.
      *
-     * @throws NullPointerException if {@code pStatement} is null.
+     * @throws NullPointerException if {@code pDirective} is null.
      */
-    public void add(@Nonnull ModuleProvidesStmt pStatement)
+    public void add(@Nonnull ModuleProvidesDirective pDirective)
     {
-        requireNonNull(pStatement);
-        fNumProvidesStatements++;
+        requireNonNull(pDirective);
+        fNumProvidesDirectives++;
     }
 
 
     /**
-     * Add metrics of a {@code uses} statement.
+     * Add metrics of a {@code uses} directive.
      *
-     * @param pStatement    The statement.
+     * @param pDirective    The directive.
      *
-     * @throws NullPointerException if {@code pStatement} is null.
+     * @throws NullPointerException if {@code pDirective} is null.
      */
-    public void add(@Nonnull ModuleUsesStmt pStatement)
+    public void add(@Nonnull ModuleUsesDirective pDirective)
     {
-        requireNonNull(pStatement);
-        fNumUsesStatements++;
+        requireNonNull(pDirective);
+        fNumUsesDirectives++;
     }
 
 
     /**
-     * Add metrics of an {@code opens} statement.
+     * Add metrics of an {@code opens} directive.
      *
-     * @param pStatement    The statement.
+     * @param pDirective    The directive.
      *
-     * @throws NullPointerException if {@code pStatement} is null.
+     * @throws NullPointerException if {@code pDirective} is null.
      */
-    public void add(@Nonnull ModuleOpensStmt pStatement)
+    public void add(@Nonnull ModuleOpensDirective pDirective)
     {
-        requireNonNull(pStatement);
-        fNumOpensStatements++;
+        requireNonNull(pDirective);
+        fNumOpensDirectives++;
     }
 }

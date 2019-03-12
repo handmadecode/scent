@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018-2019 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -77,7 +77,7 @@ public class JavaMetricsCollectorTest
 
     /**
      * A {@code JavaMetricsCollector} for language level 8 should throw a {@code ParseException}
-     * in  {@code collect(String)} when passed a syntactically invalid source code for the Java 8
+     * in {@code collect(String)} when passed syntactically invalid source code for the Java 8
      * language level.
      *
      * @throws ParseException   always.
@@ -95,7 +95,7 @@ public class JavaMetricsCollectorTest
 
     /**
      * A {@code JavaMetricsCollector} for language level 9 should throw a {@code ParseException}
-     * in  {@code collect(String)} when passed a syntactically invalid source code for the Java 9
+     * in {@code collect(String)} when passed syntactically invalid source code for the Java 9
      * language level.
      *
      * @throws ParseException   always.
@@ -113,7 +113,7 @@ public class JavaMetricsCollectorTest
 
     /**
      * A {@code JavaMetricsCollector} for language level 10 should throw a {@code ParseException}
-     * in  {@code collect(String)} when passed a syntactically invalid source code for the Java 10
+     * in {@code collect(String)} when passed syntactically invalid source code for the Java 10
      * language level.
      *
      * @throws ParseException   always.
@@ -126,6 +126,24 @@ public class JavaMetricsCollectorTest
 
         // When
         new JavaMetricsCollector(JavaMetricsCollector.LanguageLevel.JAVA_10).collect("src", aSrc);
+    }
+
+
+    /**
+     * A {@code JavaMetricsCollector} for language level 11 should throw a {@code ParseException}
+     * in {@code collect(String)} when passed syntactically invalid source code for the Java 11
+     * language level.
+     *
+     * @throws ParseException   always.
+     */
+    @Test(expected=ParseException.class)
+    public void collectThrowsForInvalidJava11Construct() throws ParseException
+    {
+        // Given (switch expressions require language level 12)
+        String aSrc = "class X { int x(int p) { return switch (p) { case 1 -> 17; case 2 -> 4711; default -> 666; }; } }";
+
+        // When
+        new JavaMetricsCollector(JavaMetricsCollector.LanguageLevel.JAVA_11).collect("src", aSrc);
     }
 
 

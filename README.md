@@ -16,7 +16,7 @@ metrics. See the [Differences with JavaNCSS](#differences-with-javancss) section
 how Scent and JavaNCSS differ.
 
 Scent must compiled with at least Java 9, but can still be run with Java 8. It parses and collects
-metrics for source code up to and including language level 11.
+metrics for source code up to and including language level 12.
 
 
 ## Contents
@@ -28,6 +28,12 @@ metrics for source code up to and including language level 11.
 
 
 ## Release Notes
+
+### version 2.1
+
+* Support for language level 12.
+* API breaking change: The attributes in `ModuleDeclarationMetrics` are called _directives_, not
+  _statements_, e.g. `getNumExportsDirectives()` instead of `getNumExportsStatements()`.
 
 ### version 2.0.1
 
@@ -619,8 +625,8 @@ If the aggregation shouldn't contain the metrics from the type but only from its
 Scent uses the terrific [JavaParser](http://javaparser.org) to parse Java source code. The jar file
 `javaparser-core` is the only runtime dependency that Scent has.
 
-The current version of Scent is compiled and tested with version 3.6.24 of `javaparser-core`. Any
-version >= 3.6.18, where support for Java 11 was finalized, will most likely work equally well.
+The current version of Scent is compiled and tested with version 3.13.3 of `javaparser-core`. Any
+version >= 3.13.2, where support for Java 12 was finalized, will most likely work equally well.
 
 
 ## Differences with JavaNCSS

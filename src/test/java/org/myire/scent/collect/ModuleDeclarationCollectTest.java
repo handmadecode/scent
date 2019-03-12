@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Peter Franzen. All rights reserved.
+ * Copyright 2018-2019 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -134,11 +134,11 @@ public class ModuleDeclarationCollectTest
 
         // Then
         ModuleDeclarationMetrics aModule = getFirstModuleDeclaration(aMetrics);
-        assertEquals(aModule.getNumRequiresStatements(), 5);
-        assertEquals(aModule.getNumExportsStatements(), 4);
-        assertEquals(aModule.getNumUsesStatements(), 3);
-        assertEquals(aModule.getNumProvidesStatements(), 2);
-        assertEquals(aModule.getNumOpensStatements(), 1);
+        assertEquals(aModule.getNumRequiresDirectives(), 5);
+        assertEquals(aModule.getNumExportsDirectives(), 4);
+        assertEquals(aModule.getNumUsesDirectives(), 3);
+        assertEquals(aModule.getNumProvidesDirectives(), 2);
+        assertEquals(aModule.getNumOpensDirectives(), 1);
     }
 
 
@@ -171,11 +171,11 @@ public class ModuleDeclarationCollectTest
         ModuleDeclarationMetrics aModule = aModularCompilationUnit.getModule();
         assertEquals("org.an.iz", aModule.getName());
         assertFalse(aModule.isOpen());
-        assertEquals(2, aModule.getNumRequiresStatements());
-        assertEquals(3, aModule.getNumExportsStatements());
-        assertEquals(0, aModule.getNumUsesStatements());
-        assertEquals(1, aModule.getNumProvidesStatements());
-        assertEquals(0, aModule.getNumOpensStatements());
+        assertEquals(2, aModule.getNumRequiresDirectives());
+        assertEquals(3, aModule.getNumExportsDirectives());
+        assertEquals(0, aModule.getNumUsesDirectives());
+        assertEquals(1, aModule.getNumProvidesDirectives());
+        assertEquals(0, aModule.getNumOpensDirectives());
 
         aComments = aModule.getComments();
         assertEquals(3, aComments.getNumLineComments());

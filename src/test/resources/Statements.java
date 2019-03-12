@@ -75,8 +75,19 @@ public class Statements
 
         var s = "inferred";                                     // 1 statement
 
+        int sw = switch (x)                                     // 1 statement
+        {
+            case 2, 3 -> 17;                                    // 2 labels + 1 statement
+            case 4, 5, x%3 -> 4711;                             // 3 labels + 1 statement
+            default ->                                          // 1 label
+            {
+                int tmp = x / 3;                                // 1 statement
+                int result = s.hashCode() - tmp;                // 1 statement
+                break result;                                   // 1 statement
+            }
+        };
+
         return 17;                                              // 1 statement
     }
-
-                                                                // Total 39 statements
+                                                                // Total 51 statements
 }

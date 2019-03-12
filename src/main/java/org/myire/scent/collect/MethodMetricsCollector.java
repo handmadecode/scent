@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018-2019 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -11,6 +11,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
@@ -22,15 +23,16 @@ import com.github.javaparser.ast.stmt.AssertStmt;
 import com.github.javaparser.ast.stmt.BreakStmt;
 import com.github.javaparser.ast.stmt.ContinueStmt;
 import com.github.javaparser.ast.stmt.DoStmt;
+import com.github.javaparser.ast.stmt.EmptyStmt;
 import com.github.javaparser.ast.stmt.ExplicitConstructorInvocationStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
-import com.github.javaparser.ast.stmt.ForeachStmt;
+import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
-import com.github.javaparser.ast.stmt.SwitchEntryStmt;
+import com.github.javaparser.ast.stmt.SwitchEntry;
 import com.github.javaparser.ast.stmt.SwitchStmt;
 import com.github.javaparser.ast.stmt.SynchronizedStmt;
 import com.github.javaparser.ast.stmt.ThrowStmt;
@@ -39,6 +41,7 @@ import com.github.javaparser.ast.stmt.WhileStmt;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import org.myire.scent.metrics.MethodMetrics;
+import org.myire.scent.metrics.StatementMetrics;
 import static org.myire.scent.collect.Collectors.collectAdjacentParentOrphanComments;
 import static org.myire.scent.collect.Collectors.collectChildComments;
 import static org.myire.scent.collect.Collectors.collectExpression;
@@ -158,11 +161,11 @@ class MethodMetricsCollector
     {
         if (pMethod.isDefault())
             return MethodMetrics.Kind.DEFAULT_METHOD;
-        else if (pMethod.getModifiers().contains(Modifier.STATIC))
+        else if (pMethod.hasModifier(Modifier.Keyword.STATIC))
             return MethodMetrics.Kind.STATIC_METHOD;
-        else if (pMethod.getModifiers().contains(Modifier.ABSTRACT))
+        else if (pMethod.hasModifier(Modifier.Keyword.ABSTRACT))
             return MethodMetrics.Kind.ABSTRACT_METHOD;
-        else if (pMethod.getModifiers().contains(Modifier.NATIVE))
+        else if (pMethod.hasModifier(Modifier.Keyword.NATIVE))
             return MethodMetrics.Kind.NATIVE_METHOD;
         else if (Collectors.isInterface(pMethod.getParentNode().orElse(null)) && !pMethod.getBody().isPresent())
             // Only interface methods without a body are abstract.
@@ -231,7 +234,7 @@ class MethodMetricsCollector
         }
 
         @Override
-        public void visit(@Nonnull ForeachStmt pStatement, @Nonnull MethodMetrics pMetrics)
+        public void visit(@Nonnull ForEachStmt pStatement, @Nonnull MethodMetrics pMetrics)
         {
             collectStatement(pStatement, pMetrics);
             super.visit(pStatement, pMetrics);
@@ -269,10 +272,19 @@ class MethodMetricsCollector
         }
 
         @Override
-        public void visit(@Nonnull SwitchEntryStmt pStatement, @Nonnull MethodMetrics pMetrics)
+        public void visit(@Nonnull SwitchEntry pSwitchEntry, @Nonnull MethodMetrics pMetrics)
         {
-            collectStatement(pStatement, pMetrics);
-            super.visit(pStatement, pMetrics);
+            StatementMetrics aStatementMetrics = pMetrics.getStatements();
+            NodeList<Expression> aLabelExpressions = pSwitchEntry.getLabels();
+            if (aLabelExpressions.isEmpty())
+                // No label expressions, this is the default case, collect it as an empty statement.
+                aStatementMetrics.add(new EmptyStmt());
+            else
+                // Each label expression is collected as an expression statement.
+                aLabelExpressions.forEach(e -> collectExpression(e, aStatementMetrics));
+
+            // Collect the entry's statements.
+            super.visit(pSwitchEntry, pMetrics);
         }
 
         @Override

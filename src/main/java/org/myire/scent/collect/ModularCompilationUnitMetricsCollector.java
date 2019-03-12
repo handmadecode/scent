@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Peter Franzen. All rights reserved.
+ * Copyright 2018-2019 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -14,11 +14,11 @@ import javax.annotation.concurrent.NotThreadSafe;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.modules.ModuleDeclaration;
-import com.github.javaparser.ast.modules.ModuleExportsStmt;
-import com.github.javaparser.ast.modules.ModuleOpensStmt;
-import com.github.javaparser.ast.modules.ModuleProvidesStmt;
-import com.github.javaparser.ast.modules.ModuleRequiresStmt;
-import com.github.javaparser.ast.modules.ModuleUsesStmt;
+import com.github.javaparser.ast.modules.ModuleExportsDirective;
+import com.github.javaparser.ast.modules.ModuleOpensDirective;
+import com.github.javaparser.ast.modules.ModuleProvidesDirective;
+import com.github.javaparser.ast.modules.ModuleRequiresDirective;
+import com.github.javaparser.ast.modules.ModuleUsesDirective;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import org.myire.scent.metrics.ModularCompilationUnitMetrics;
@@ -134,56 +134,56 @@ class ModularCompilationUnitMetricsCollector
 
         @Override
         public void visit(
-            @Nonnull ModuleRequiresStmt pRequiresStatement,
+            @Nonnull ModuleRequiresDirective pRequiresDirective,
             @Nonnull ModuleDeclarationMetrics pMetrics)
         {
-            pMetrics.add(pRequiresStatement);
-            collectNodeComments(pRequiresStatement, pMetrics.getComments());
-            super.visit(pRequiresStatement, pMetrics);
+            pMetrics.add(pRequiresDirective);
+            collectNodeComments(pRequiresDirective, pMetrics.getComments());
+            super.visit(pRequiresDirective, pMetrics);
         }
 
 
         @Override
         public void visit(
-            @Nonnull ModuleExportsStmt pExportsStatement,
+            @Nonnull ModuleExportsDirective pExportsDirective,
             @Nonnull ModuleDeclarationMetrics pMetrics)
         {
-            pMetrics.add(pExportsStatement);
-            collectNodeComments(pExportsStatement, pMetrics.getComments());
-            super.visit(pExportsStatement, pMetrics);
+            pMetrics.add(pExportsDirective);
+            collectNodeComments(pExportsDirective, pMetrics.getComments());
+            super.visit(pExportsDirective, pMetrics);
         }
 
 
         @Override
         public void visit(
-            @Nonnull ModuleProvidesStmt pProvidesStatement,
+            @Nonnull ModuleProvidesDirective pProvidesDirective,
             @Nonnull ModuleDeclarationMetrics pMetrics)
         {
-            pMetrics.add(pProvidesStatement);
-            collectNodeComments(pProvidesStatement, pMetrics.getComments());
-            super.visit(pProvidesStatement, pMetrics);
+            pMetrics.add(pProvidesDirective);
+            collectNodeComments(pProvidesDirective, pMetrics.getComments());
+            super.visit(pProvidesDirective, pMetrics);
         }
 
 
         @Override
         public void visit(
-            @Nonnull ModuleUsesStmt pUsesStatement,
+            @Nonnull ModuleUsesDirective pUsesDirective,
             @Nonnull ModuleDeclarationMetrics pMetrics)
         {
-            pMetrics.add(pUsesStatement);
-            collectNodeComments(pUsesStatement, pMetrics.getComments());
-            super.visit(pUsesStatement, pMetrics);
+            pMetrics.add(pUsesDirective);
+            collectNodeComments(pUsesDirective, pMetrics.getComments());
+            super.visit(pUsesDirective, pMetrics);
         }
 
 
         @Override
         public void visit(
-            @Nonnull ModuleOpensStmt pOpensStatement,
+            @Nonnull ModuleOpensDirective pOpensDirective,
             @Nonnull ModuleDeclarationMetrics pMetrics)
         {
-            pMetrics.add(pOpensStatement);
-            collectNodeComments(pOpensStatement, pMetrics.getComments());
-            super.visit(pOpensStatement, pMetrics);
+            pMetrics.add(pOpensDirective);
+            collectNodeComments(pOpensDirective, pMetrics.getComments());
+            super.visit(pOpensDirective, pMetrics);
         }
     }
 }

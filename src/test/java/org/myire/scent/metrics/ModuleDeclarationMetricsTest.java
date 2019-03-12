@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Peter Franzen. All rights reserved.
+ * Copyright 2018-2019 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -10,11 +10,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.github.javaparser.ast.modules.ModuleExportsStmt;
-import com.github.javaparser.ast.modules.ModuleOpensStmt;
-import com.github.javaparser.ast.modules.ModuleProvidesStmt;
-import com.github.javaparser.ast.modules.ModuleRequiresStmt;
-import com.github.javaparser.ast.modules.ModuleUsesStmt;
+import com.github.javaparser.ast.modules.ModuleExportsDirective;
+import com.github.javaparser.ast.modules.ModuleOpensDirective;
+import com.github.javaparser.ast.modules.ModuleProvidesDirective;
+import com.github.javaparser.ast.modules.ModuleRequiresDirective;
+import com.github.javaparser.ast.modules.ModuleUsesDirective;
 
 
 /**
@@ -54,11 +54,11 @@ public class ModuleDeclarationMetricsTest extends CodeElementMetricsTest
         ModuleDeclarationMetrics aMetrics = new ModuleDeclarationMetrics("m.o.d", false);
 
         // Then
-        assertEquals(0, aMetrics.getNumRequiresStatements());
-        assertEquals(0, aMetrics.getNumExportsStatements());
-        assertEquals(0, aMetrics.getNumUsesStatements());
-        assertEquals(0, aMetrics.getNumProvidesStatements());
-        assertEquals(0, aMetrics.getNumOpensStatements());
+        assertEquals(0, aMetrics.getNumRequiresDirectives());
+        assertEquals(0, aMetrics.getNumExportsDirectives());
+        assertEquals(0, aMetrics.getNumUsesDirectives());
+        assertEquals(0, aMetrics.getNumProvidesDirectives());
+        assertEquals(0, aMetrics.getNumOpensDirectives());
     }
 
 
@@ -72,14 +72,14 @@ public class ModuleDeclarationMetricsTest extends CodeElementMetricsTest
         ModuleDeclarationMetrics aMetrics = new ModuleDeclarationMetrics("se.u.l8r", false);
 
         // When
-        aMetrics.add(new ModuleRequiresStmt());
+        aMetrics.add(new ModuleRequiresDirective());
 
         // Then
-        assertEquals(1, aMetrics.getNumRequiresStatements());
-        assertEquals(0, aMetrics.getNumExportsStatements());
-        assertEquals(0, aMetrics.getNumUsesStatements());
-        assertEquals(0, aMetrics.getNumProvidesStatements());
-        assertEquals(0, aMetrics.getNumOpensStatements());
+        assertEquals(1, aMetrics.getNumRequiresDirectives());
+        assertEquals(0, aMetrics.getNumExportsDirectives());
+        assertEquals(0, aMetrics.getNumUsesDirectives());
+        assertEquals(0, aMetrics.getNumProvidesDirectives());
+        assertEquals(0, aMetrics.getNumOpensDirectives());
     }
 
 
@@ -93,14 +93,14 @@ public class ModuleDeclarationMetricsTest extends CodeElementMetricsTest
         ModuleDeclarationMetrics aMetrics = new ModuleDeclarationMetrics("zzz", false);
 
         // When
-        aMetrics.add(new ModuleExportsStmt());
+        aMetrics.add(new ModuleExportsDirective());
 
         // Then
-        assertEquals(0, aMetrics.getNumRequiresStatements());
-        assertEquals(1, aMetrics.getNumExportsStatements());
-        assertEquals(0, aMetrics.getNumUsesStatements());
-        assertEquals(0, aMetrics.getNumProvidesStatements());
-        assertEquals(0, aMetrics.getNumOpensStatements());
+        assertEquals(0, aMetrics.getNumRequiresDirectives());
+        assertEquals(1, aMetrics.getNumExportsDirectives());
+        assertEquals(0, aMetrics.getNumUsesDirectives());
+        assertEquals(0, aMetrics.getNumProvidesDirectives());
+        assertEquals(0, aMetrics.getNumOpensDirectives());
     }
 
 
@@ -114,14 +114,14 @@ public class ModuleDeclarationMetricsTest extends CodeElementMetricsTest
         ModuleDeclarationMetrics aMetrics = new ModuleDeclarationMetrics("mod", true);
 
         // When
-        aMetrics.add(new ModuleUsesStmt());
+        aMetrics.add(new ModuleUsesDirective());
 
         // Then
-        assertEquals(0, aMetrics.getNumRequiresStatements());
-        assertEquals(0, aMetrics.getNumExportsStatements());
-        assertEquals(1, aMetrics.getNumUsesStatements());
-        assertEquals(0, aMetrics.getNumProvidesStatements());
-        assertEquals(0, aMetrics.getNumOpensStatements());
+        assertEquals(0, aMetrics.getNumRequiresDirectives());
+        assertEquals(0, aMetrics.getNumExportsDirectives());
+        assertEquals(1, aMetrics.getNumUsesDirectives());
+        assertEquals(0, aMetrics.getNumProvidesDirectives());
+        assertEquals(0, aMetrics.getNumOpensDirectives());
     }
 
 
@@ -135,14 +135,14 @@ public class ModuleDeclarationMetricsTest extends CodeElementMetricsTest
         ModuleDeclarationMetrics aMetrics = new ModuleDeclarationMetrics("my-mod", true);
 
         // When
-        aMetrics.add(new ModuleProvidesStmt());
+        aMetrics.add(new ModuleProvidesDirective());
 
         // Then
-        assertEquals(0, aMetrics.getNumRequiresStatements());
-        assertEquals(0, aMetrics.getNumExportsStatements());
-        assertEquals(0, aMetrics.getNumUsesStatements());
-        assertEquals(1, aMetrics.getNumProvidesStatements());
-        assertEquals(0, aMetrics.getNumOpensStatements());
+        assertEquals(0, aMetrics.getNumRequiresDirectives());
+        assertEquals(0, aMetrics.getNumExportsDirectives());
+        assertEquals(0, aMetrics.getNumUsesDirectives());
+        assertEquals(1, aMetrics.getNumProvidesDirectives());
+        assertEquals(0, aMetrics.getNumOpensDirectives());
     }
 
 
@@ -156,14 +156,14 @@ public class ModuleDeclarationMetricsTest extends CodeElementMetricsTest
         ModuleDeclarationMetrics aMetrics = new ModuleDeclarationMetrics("mm", false);
 
         // When
-        aMetrics.add(new ModuleOpensStmt());
+        aMetrics.add(new ModuleOpensDirective());
 
         // Then
-        assertEquals(0, aMetrics.getNumRequiresStatements());
-        assertEquals(0, aMetrics.getNumExportsStatements());
-        assertEquals(0, aMetrics.getNumUsesStatements());
-        assertEquals(0, aMetrics.getNumProvidesStatements());
-        assertEquals(1, aMetrics.getNumOpensStatements());
+        assertEquals(0, aMetrics.getNumRequiresDirectives());
+        assertEquals(0, aMetrics.getNumExportsDirectives());
+        assertEquals(0, aMetrics.getNumUsesDirectives());
+        assertEquals(0, aMetrics.getNumProvidesDirectives());
+        assertEquals(1, aMetrics.getNumOpensDirectives());
     }
 
 
