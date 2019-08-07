@@ -1,11 +1,10 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2019 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
 package org.myire.scent.file;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -77,7 +76,7 @@ public class JavaFileMetricsCollector extends SimpleFileVisitor<Path>
         if (!isJavaFile(pFile))
             return FileVisitResult.CONTINUE;
 
-        try (FileInputStream aStream = new FileInputStream(pFile.toFile()))
+        try (InputStream aStream = Files.newInputStream(pFile))
         {
             // Use only the file name part of the path as name for the compilation unit.
             Path aFileName = pFile.getFileName();

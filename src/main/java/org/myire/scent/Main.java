@@ -1,13 +1,11 @@
 /*
- * Copyright 2016, 2018 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018-2019 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
 package org.myire.scent;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -277,15 +275,15 @@ public final class Main
 
             try
             {
-                return new FileOutputStream(fOutputFilePath);
+                return Files.newOutputStream(Paths.get(fOutputFilePath));
             }
-            catch (FileNotFoundException fnfe)
+            catch (IOException ioe)
             {
                 fErrStream.println(
                     "Error: cannot write report to '" +
                         fOutputFilePath +
                         "': " +
-                        fnfe.getMessage());
+                        ioe.getMessage());
 
                 return null;
             }

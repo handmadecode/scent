@@ -561,7 +561,7 @@ public class XmlReportWriter extends OutputStreamReportWriter
             // consumers passed as parameters.
             increaseIndentationLevel();
             pChildren.forEach(
-                c -> writeElement(pChildElementName, pChildAttributeWriter, c, pChildBodyWriter, c));
+                _c -> writeElement(pChildElementName, pChildAttributeWriter, _c, pChildBodyWriter, _c));
             decreaseIndentationLevel();
 
             // Write the closing root element tag.

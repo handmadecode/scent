@@ -281,7 +281,7 @@ class MethodMetricsCollector
                 aStatementMetrics.add(new EmptyStmt());
             else
                 // Each label expression is collected as an expression statement.
-                aLabelExpressions.forEach(e -> collectExpression(e, aStatementMetrics));
+                aLabelExpressions.forEach(_e -> collectExpression(_e, aStatementMetrics));
 
             // Collect the entry's statements.
             super.visit(pSwitchEntry, pMetrics);
@@ -320,7 +320,7 @@ class MethodMetricsCollector
                 if (aResource.isVariableDeclarationExpr())
                 {
                     for (VariableDeclarator aDeclarator : aResource.asVariableDeclarationExpr().getVariables())
-                        aDeclarator.getInitializer().ifPresent(i -> collectExpression(i, pMetrics.getStatements()));
+                        aDeclarator.getInitializer().ifPresent(_i -> collectExpression(_i, pMetrics.getStatements()));
                 }
             }
 
