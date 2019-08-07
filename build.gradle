@@ -2,25 +2,24 @@
  * Gradle script for the Scent project
  */
 
-apply plugin: 'java'
-apply plugin: 'org.myire.quill.core'
-apply plugin: 'org.myire.quill.moduleinfo'
-
-
 buildscript
 {
-  // Use Maven central for plugins.
-  repositories
-  {
-    mavenCentral()
-  }
+    // Use Maven central for plugins.
+    repositories
+    {
+        mavenCentral()
+    }
 
-  // This script uses the Quill plugins.
-  dependencies 
-  {
-    classpath 'org.myire:quill:1.5'
-  }
+    // This script uses the Quill plugins.
+    dependencies
+    {
+        classpath 'org.myire:quill:2.0'
+    }
 }
+
+plugins { id "com.github.spotbugs" version "2.0.0" }
+apply plugin: 'org.myire.quill.core'
+apply plugin: 'org.myire.quill.moduleinfo'
 
 
 // Load project meta data and version from the files in the meta data directory, and set the
@@ -60,23 +59,19 @@ jar.manifest
 }
 
 
-// Specify the JavaDoc html version to avoid warnings (only valid when building with JDK > 9).
-javadoc.options.addBooleanOption('html4', true)
+// Specify the JavaDoc html version to avoid warnings when building with JDK 9 or 10.
+javadoc.options.addBooleanOption('html5', true)
 
 
 // Add static data from the pom template and remove test dependencies when the pom file is created.
 createPom.from(file('meta/pom-template.xml')).withoutScope('test')
 
 
-// Make the compile dependencies known to Cobertura
-coberturaTest.auxClassPath = sourceSets.main.compileClasspath
-
-
 // Configure project specific exclusion/suppressions/filter files for the static analysis tasks.
-findbugs.excludeFilter = file('gradle/findbugs_excludes.xml')
+spotbugs.excludeFilter = file('gradle/spotbugs_excludes.xml')
 checkstyle.configProperties.put('suppressions.file', file('gradle/checkstyle_suppressions.xml'))
 pmdMain.filter.file = 'gradle/pmd_filter.xml'
 
 
 // Disable code quality analysis of the test sources.
-[findbugs, checkstyle, pmd, jdepend]*.disableTestChecks()
+[spotbugs, checkstyle, pmd]*.disableTestChecks()
