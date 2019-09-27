@@ -38,6 +38,7 @@ import com.github.javaparser.ast.stmt.SynchronizedStmt;
 import com.github.javaparser.ast.stmt.ThrowStmt;
 import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.ast.stmt.WhileStmt;
+import com.github.javaparser.ast.stmt.YieldStmt;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import org.myire.scent.metrics.MethodMetrics;
@@ -329,6 +330,13 @@ class MethodMetricsCollector
 
         @Override
         public void visit(@Nonnull WhileStmt pStatement, @Nonnull MethodMetrics pMetrics)
+        {
+            collectStatement(pStatement, pMetrics);
+            super.visit(pStatement, pMetrics);
+        }
+
+        @Override
+        public void visit(@Nonnull YieldStmt pStatement, @Nonnull MethodMetrics pMetrics)
         {
             collectStatement(pStatement, pMetrics);
             super.visit(pStatement, pMetrics);

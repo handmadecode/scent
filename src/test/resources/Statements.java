@@ -83,11 +83,18 @@ public class Statements
             {
                 int tmp = x / 3;                                // 1 statement
                 int result = s.hashCode() - tmp;                // 1 statement
-                break result;                                   // 1 statement
+                yield result;                                   // 1 statement
             }
         };
 
+                                                                // 1 statement
+        String textblock = """
+        all
+        those
+        lines
+        """;
+
         return 17;                                              // 1 statement
     }
-                                                                // Total 51 statements
+                                                                // Total 52 statements
 }

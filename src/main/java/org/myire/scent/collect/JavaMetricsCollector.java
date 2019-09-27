@@ -227,6 +227,10 @@ public class JavaMetricsCollector
                 aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_12);
                 break;
 
+            case JAVA_13:
+                aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_13);
+                break;
+
             default:
                 break;
         }
@@ -285,7 +289,10 @@ public class JavaMetricsCollector
         JAVA_11,
 
         /** Java 12 (introducing switch expressions (JEP 325)). */
-        JAVA_12
+        JAVA_12,
+
+        /** Java 13 (introducing text blocks (JEP 355), refining switch expressions (JEP 354)). */
+        JAVA_13
         ;
 
         /**
@@ -296,7 +303,7 @@ public class JavaMetricsCollector
         @Nonnull
         static public LanguageLevel getDefault()
         {
-            return JAVA_12;
+            return JAVA_13;
         }
     }
 }
