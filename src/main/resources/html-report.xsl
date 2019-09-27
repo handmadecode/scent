@@ -59,7 +59,7 @@
                 <tr>
                     <td class="label">Modules:</td>
                     <xsl:call-template name="output-value-cell">
-                        <xsl:with-param name="value" select="@modules"/>
+                        <xsl:with-param name="value" select="@modular-compilation-units"/>
                     </xsl:call-template>
                     <td/>
                     <td class="label">Types:</td>
@@ -139,6 +139,24 @@
     </xsl:template>
 
 
+    <!-- Template for the modular-compilation-units element, outputs a table with metrics for each
+         module -->
+    <xsl:template match="modular-compilation-units">
+        <div class="level1section">
+            <div class="level1header">Modules</div>
+            <table class="level1sectionitem" width="100%" cellpadding="2" cellspacing="0" border="0">
+                <!-- Table header with column names -->
+                <xsl:call-template name="output-module-name-and-summary-table-header"/>
+                <!-- One table row per module, sorted by name -->
+                <xsl:for-each select="modular-compilation-unit/module">
+                    <xsl:sort select="@name"/>
+                    <xsl:call-template name="output-module-name-and-summary-table-row"/>
+                </xsl:for-each>
+            </table>
+        </div>
+    </xsl:template>
+
+
     <!-- Template for the packages element, outputs a table with metrics for each package -->
     <xsl:template match="packages">
         <div class="level1section">
@@ -212,23 +230,19 @@
         <xsl:param name="name-header" select="'Name'"/>
         <colgroup>
             <col width="16%"/>
+            <col width="7%"/><col width="7%"/><col width="7%"/> <col width="7%"/>
+            <col width="7%" class="groupedcol"/>
+            <col width="7%" class="groupedcol"/>
             <col width="7%"/><col width="7%"/><col width="7%"/>
-            <col width="7%"/><col width="7%"/><col width="7%"/>
-            <col width="7%"/><col width="7%"/><col width="7%"/>
-            <col width="7%"/><col width="7%"/><col width="7%"/>
+            <col width="7%" class="groupedcol"/>
+            <col width="7%" class="groupedcol"/>
+            <col width="7%" class="groupedcol"/>
         </colgroup>
         <tr>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td class="colheader" align="right" colspan="2">Line comments</td>
-            <td/>
-            <td class="colheader" align="right">JavaDocs</td>
-            <td/>
-            <td class="colheader" align="right" colspan="2">Block comments</td>
-            <td/>
+            <td colspan="5"/>
+            <td class="colheader" align="center" colspan="2">Line comments</td>
+            <td class="colheader" align="center" colspan="3">JavaDocs</td>
+            <td class="colheader" align="center" colspan="3">Block comments</td>
         </tr>
         <tr>
             <td class="colheader"><xsl:value-of select="$name-header"/></td>
@@ -291,6 +305,101 @@
             </xsl:call-template>
             <xsl:call-template name="output-value-cell">
                 <xsl:with-param name="value" select="summary/@block-comments-length"/>
+            </xsl:call-template>
+        </tr>
+    </xsl:template>
+
+
+    <!-- Output a table header for a 'module' element's attributes and child element attributes -->
+    <xsl:template name="output-module-name-and-summary-table-header">
+        <xsl:param name="name-header" select="'Name'"/>
+        <colgroup>
+            <col width="16%"/>
+            <col width="6%"/><col width="6%"/><col width="6%"/>
+            <col width="6%"/><col width="6%"/><col width="6%"/>
+            <col width="6%" class="groupedcol"/>
+            <col width="6%" class="groupedcol"/>
+            <col width="6%"/><col width="6%"/><col width="6%"/>
+            <col width="6%" class="groupedcol"/>
+            <col width="6%" class="groupedcol"/>
+            <col width="6%" class="groupedcol"/>
+
+        </colgroup>
+        <tr>
+            <td colspan="7"/>
+            <td class="colheader" align="center" colspan="2">Line comments</td>
+            <td class="colheader" align="center" colspan="3">JavaDocs</td>
+            <td class="colheader" align="center" colspan="3">Block comments</td>
+        </tr>
+        <tr>
+            <td class="colheader"><xsl:value-of select="$name-header"/></td>
+            <td class="colheader" align="right">Open</td>
+            <td class="colheader" align="right">Requires</td>
+            <td class="colheader" align="right">Exports</td>
+            <td class="colheader" align="right">Provides</td>
+            <td class="colheader" align="right">Uses</td>
+            <td class="colheader" align="right">Opens</td>
+            <td class="colheader" align="right">count</td>
+            <td class="colheader" align="right">length</td>
+            <td class="colheader" align="right">count</td>
+            <td class="colheader" align="right">lines</td>
+            <td class="colheader" align="right">length</td>
+            <td class="colheader" align="right">count</td>
+            <td class="colheader" align="right">lines</td>
+            <td class="colheader" align="right">length</td>
+        </tr>
+    </xsl:template>
+
+
+    <!-- Output a table row with a module element's attributes and child element's attributes -->
+    <xsl:template name="output-module-name-and-summary-table-row">
+        <tr>
+            <!-- Use alternate row characteristics every other row -->
+            <xsl:if test="position() mod 2 = 0">
+                <xsl:attribute name="class">altrow</xsl:attribute>
+            </xsl:if>
+            <td class="data"><xsl:value-of select="@name"/></td>
+            <xsl:call-template name="output-value-cell">
+                <xsl:with-param name="value" select="@open"/>
+            </xsl:call-template>
+            <xsl:call-template name="output-value-cell">
+                <xsl:with-param name="value" select="@requires"/>
+            </xsl:call-template>
+            <xsl:call-template name="output-value-cell">
+                <xsl:with-param name="value" select="exports"/>
+            </xsl:call-template>
+            <xsl:call-template name="output-value-cell">
+                <xsl:with-param name="value" select="provides"/>
+            </xsl:call-template>
+            <xsl:call-template name="output-value-cell">
+                <xsl:with-param name="value" select="uses"/>
+            </xsl:call-template>
+            <xsl:call-template name="output-value-cell">
+                <xsl:with-param name="value" select="opens"/>
+            </xsl:call-template>
+            <xsl:call-template name="output-value-cell">
+                <xsl:with-param name="value" select="comments/@line-comments"/>
+            </xsl:call-template>
+            <xsl:call-template name="output-value-cell">
+                <xsl:with-param name="value" select="comments/@line-comments-length"/>
+            </xsl:call-template>
+            <xsl:call-template name="output-value-cell">
+                <xsl:with-param name="value" select="comments/@javadocs"/>
+            </xsl:call-template>
+            <xsl:call-template name="output-value-cell">
+                <xsl:with-param name="value" select="comments/@javadoc-lines"/>
+            </xsl:call-template>
+            <xsl:call-template name="output-value-cell">
+                <xsl:with-param name="value" select="comments/@javadocs-length"/>
+            </xsl:call-template>
+            <xsl:call-template name="output-value-cell">
+                <xsl:with-param name="value" select="comments/@block-comments"/>
+            </xsl:call-template>
+            <xsl:call-template name="output-value-cell">
+                <xsl:with-param name="value" select="comments/@block-comments-lines"/>
+            </xsl:call-template>
+            <xsl:call-template name="output-value-cell">
+                <xsl:with-param name="value" select="comments/@block-comments-length"/>
             </xsl:call-template>
         </tr>
     </xsl:template>
@@ -390,6 +499,9 @@
 
             .altrow
             { background-color:#eeeeee }
+
+            .groupedcol
+            { background-color:#ffffee }
         </style>
     </xsl:template>
 
