@@ -7,9 +7,6 @@
 <suppressions>
     <suppress files="Collectors.java"
               checks="NPathComplexityCheck"/>
-    <suppress files="MethodMetricsCollector.java"
+    <suppress files="(MethodMetricsCollector|XmlReportWriter).java$"
               checks="ClassFanOutComplexityCheck"/>
-    <suppress files="Version.java"
-              checks="IllegalCatchCheck"
-              lines="45,116"/>
 </suppressions>

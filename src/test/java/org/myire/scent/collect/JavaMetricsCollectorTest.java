@@ -148,6 +148,24 @@ public class JavaMetricsCollectorTest
 
 
     /**
+     * A {@code JavaMetricsCollector} for language level 12 should throw a {@code ParseException}
+     * in {@code collect(String)} when passed syntactically invalid source code for the Java 12
+     * language level.
+     *
+     * @throws ParseException   always.
+     */
+    @Test(expected=ParseException.class)
+    public void collectThrowsForInvalidJava12Construct() throws ParseException
+    {
+        // Given (returning from switch expressions with 'yield' requires language level 13)
+        String aSrc = "class X { int y;int x(int p) { return switch (p) { case 1 -> {y++; yield 17;} default -> {y--; yield 666;} }; } }";
+
+        // When
+        new JavaMetricsCollector(JavaMetricsCollector.LanguageLevel.JAVA_12).collect("src", aSrc);
+    }
+
+
+    /**
      * The method {@code getCollectedMetrics} should return an empty {@code Iterable} if no source
      * has been parsed.
      */

@@ -5,7 +5,7 @@ dependencies
 {
     compileOnly 'com.google.code.findbugs:jsr305:3.0.1'
 
-    compile 'com.github.javaparser:javaparser-core:3.13.3'
+    compile 'com.github.javaparser:javaparser-core:3.14.14'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:2.19.0'

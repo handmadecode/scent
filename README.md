@@ -16,7 +16,7 @@ metrics. See the [Differences with JavaNCSS](#differences-with-javancss) section
 how Scent and JavaNCSS differ.
 
 Scent must compiled with at least Java 9, but can still be run with Java 8. It parses and collects
-metrics for source code up to and including language level 12.
+metrics for source code up to and including language level 13.
 
 
 ## Contents
@@ -28,6 +28,11 @@ metrics for source code up to and including language level 12.
 
 
 ## Release Notes
+
+### version 2.2
+
+* Support for language level 13.
+* Modular compilation units are included in the built-in HTML report
 
 ### version 2.1
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018-2019 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -94,18 +94,17 @@ final class Collectors
         // To avoid collecting those comments multiple times a comment is only collected if it
         // refers back to the node that has it as comment.
         pNode.getComment().ifPresent(
-            c ->
+            _c ->
             {
-                if (pNode == c.getCommentedNode().orElse(pNode))
+                if (pNode == _c.getCommentedNode().orElse(pNode))
                 {
                     // The commented node is the one for which the comment is being collected.
-                    c.accept(CommentVisitor.SINGLETON, pMetrics);
+                    _c.accept(CommentVisitor.SINGLETON, pMetrics);
                     pNode.setComment(null);
                 }
             }
         );
     }
-
 
 
     /**

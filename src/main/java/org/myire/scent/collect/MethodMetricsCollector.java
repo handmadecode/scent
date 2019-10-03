@@ -38,6 +38,7 @@ import com.github.javaparser.ast.stmt.SynchronizedStmt;
 import com.github.javaparser.ast.stmt.ThrowStmt;
 import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.ast.stmt.WhileStmt;
+import com.github.javaparser.ast.stmt.YieldStmt;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import org.myire.scent.metrics.MethodMetrics;
@@ -281,7 +282,7 @@ class MethodMetricsCollector
                 aStatementMetrics.add(new EmptyStmt());
             else
                 // Each label expression is collected as an expression statement.
-                aLabelExpressions.forEach(e -> collectExpression(e, aStatementMetrics));
+                aLabelExpressions.forEach(_e -> collectExpression(_e, aStatementMetrics));
 
             // Collect the entry's statements.
             super.visit(pSwitchEntry, pMetrics);
@@ -320,7 +321,7 @@ class MethodMetricsCollector
                 if (aResource.isVariableDeclarationExpr())
                 {
                     for (VariableDeclarator aDeclarator : aResource.asVariableDeclarationExpr().getVariables())
-                        aDeclarator.getInitializer().ifPresent(i -> collectExpression(i, pMetrics.getStatements()));
+                        aDeclarator.getInitializer().ifPresent(_i -> collectExpression(_i, pMetrics.getStatements()));
                 }
             }
 
@@ -329,6 +330,13 @@ class MethodMetricsCollector
 
         @Override
         public void visit(@Nonnull WhileStmt pStatement, @Nonnull MethodMetrics pMetrics)
+        {
+            collectStatement(pStatement, pMetrics);
+            super.visit(pStatement, pMetrics);
+        }
+
+        @Override
+        public void visit(@Nonnull YieldStmt pStatement, @Nonnull MethodMetrics pMetrics)
         {
             collectStatement(pStatement, pMetrics);
             super.visit(pStatement, pMetrics);

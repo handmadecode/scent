@@ -605,6 +605,63 @@ public class StatementCollectTest
 
 
     /**
+     * A Java 13 switch expression statement with a 'yield' return should be collected in the
+     * method's {@code StatementMetrics}.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void switchExpressionStatementWithYieldIsCollected() throws ParseException
+    {
+        // Given
+        String[] aSourceLines = {
+            VOID_METHOD_PARAM_PREFIX,
+            "int value = switch (pParam.hashCode()) {",
+            "case 1, x%3 -> {yield 17;}",
+            "case 2, 4, 7 -> {yield 4711;}",
+            "case 100 -> {yield 0;}",
+            "default -> { int tmp = x / 3; int result = tmp * pParam.hashCode(); yield result; }",
+            "};",
+            ANY_METHOD_SUFFIX
+        };
+
+        // When
+        StatementMetrics aStatements = collectStatementMetrics(aSourceLines);
+
+        // Then
+        assertEquals(14, aStatements.getNumStatements());
+    }
+
+
+    /**
+     * An assignment statement with a Java 13 text block as its right hand side expression should be
+     * collected in the method's {@code StatementMetrics}.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void textBlockAssignmentIsCollected() throws ParseException
+    {
+        // Given
+        String[] aSourceLines = {
+            VOID_METHOD_PREFIX,
+            "String s = \"\"\"",
+            "text block",
+            "spanning",
+            "several lines",
+            "\"\"\";",
+            ANY_METHOD_SUFFIX
+        };
+
+        // When
+        StatementMetrics aStatements = collectStatementMetrics(aSourceLines);
+
+        // Then
+        assertEquals(1, aStatements.getNumStatements());
+    }
+
+
+    /**
      * An annotation with all kinds of members should have the corresponding code element metrics
      * collected.
      *
@@ -621,7 +678,7 @@ public class StatementCollectTest
 
         // Then
         StatementMetrics aStatements = getFirstMethod(aMetrics).getStatements();
-        assertEquals(51, aStatements.getNumStatements());
+        assertEquals(52, aStatements.getNumStatements());
     }
 
 

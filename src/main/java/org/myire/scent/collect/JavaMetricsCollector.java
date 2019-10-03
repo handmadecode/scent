@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018-2019 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -141,7 +141,7 @@ public class JavaMetricsCollector
         ParseResult<CompilationUnit> aResult =
                 fJavaParser.parse(ParseStart.COMPILATION_UNIT, pJavaSource);
         if (aResult.isSuccessful())
-            aResult.getResult().ifPresent(cu -> collectMetrics(cu, pName));
+            aResult.getResult().ifPresent(_cu -> collectMetrics(_cu, pName));
         else
             throw createParseException(aResult);
     }
@@ -227,6 +227,10 @@ public class JavaMetricsCollector
                 aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_12);
                 break;
 
+            case JAVA_13:
+                aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_13);
+                break;
+
             default:
                 break;
         }
@@ -257,7 +261,7 @@ public class JavaMetricsCollector
             aPosition =
                     aProblems.get(i)
                             .getLocation()
-                            .map(l -> l.getBegin().getRange().map(r -> r.begin.line).orElse(0))
+                            .map(_l -> _l.getBegin().getRange().map(_r -> _r.begin.line).orElse(0))
                             .orElse(0);
         }
 
@@ -285,7 +289,10 @@ public class JavaMetricsCollector
         JAVA_11,
 
         /** Java 12 (introducing switch expressions (JEP 325)). */
-        JAVA_12
+        JAVA_12,
+
+        /** Java 13 (introducing text blocks (JEP 355), refining switch expressions (JEP 354)). */
+        JAVA_13
         ;
 
         /**
@@ -296,7 +303,7 @@ public class JavaMetricsCollector
         @Nonnull
         static public LanguageLevel getDefault()
         {
-            return JAVA_12;
+            return JAVA_13;
         }
     }
 }

@@ -42,7 +42,7 @@ final class Version
             Class<?> aModuleDescriptorClass = Class.forName("java.lang.module.ModuleDescriptor");
             aRawVersionMethod = aModuleDescriptorClass.getMethod("rawVersion");
         }
-        catch (Exception ignore)
+        catch (ReflectiveOperationException | RuntimeException ignore)
         {
             // Exceptions expected on Java versions < 9.
         }
@@ -113,7 +113,7 @@ final class Version
             else
                 return null;
         }
-        catch (Exception ignore)
+        catch (ReflectiveOperationException | RuntimeException ignore)
         {
             return null;
         }
