@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018-2019 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018-2020 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -139,7 +139,7 @@ public class JavaMetricsCollectorTest
     @Test(expected=ParseException.class)
     public void collectThrowsForInvalidJava11Construct() throws ParseException
     {
-        // Given (switch expressions require language level 12)
+        // Given (switch expressions (preview) require language level 12)
         String aSrc = "class X { int x(int p) { return switch (p) { case 1 -> 17; case 2 -> 4711; default -> 666; }; } }";
 
         // When
@@ -162,6 +162,24 @@ public class JavaMetricsCollectorTest
 
         // When
         new JavaMetricsCollector(JavaMetricsCollector.LanguageLevel.JAVA_12).collect("src", aSrc);
+    }
+
+
+    /**
+     * A {@code JavaMetricsCollector} for language level 13 should throw a {@code ParseException}
+     * in {@code collect(String)} when passed syntactically invalid source code for the Java 13
+     * language level.
+     *
+     * @throws ParseException   always.
+     */
+    @Test(expected=ParseException.class)
+    public void collectThrowsForInvalidJava13Construct() throws ParseException
+    {
+        // Given (Pattern matching for instanceof requires language level 14)
+        String aSrc = "class X { int m(Object o) { if (o instanceof String s) return s.length(); else return 0; } }";
+
+        // When
+        new JavaMetricsCollector(JavaMetricsCollector.LanguageLevel.JAVA_13).collect("src", aSrc);
     }
 
 

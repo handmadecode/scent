@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018-2019 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018-2020 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -231,6 +231,10 @@ public class JavaMetricsCollector
                 aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_13);
                 break;
 
+            case JAVA_14:
+                aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_14);
+                break;
+
             default:
                 break;
         }
@@ -288,11 +292,28 @@ public class JavaMetricsCollector
         /** Java 11 (introducing local variable syntax for lambda parameters (JEP 323)). */
         JAVA_11,
 
-        /** Java 12 (introducing switch expressions (JEP 325)). */
+        /** Java 12 (introducing switch expressions preview (JEP 325)). */
         JAVA_12,
 
-        /** Java 13 (introducing text blocks (JEP 355), refining switch expressions (JEP 354)). */
-        JAVA_13
+        /**
+         * Java 13.
+         *<ul>
+         * <li>text blocks preview (JEP 355)</li>
+         * <li>switch expressions second preview (JEP 354))</li>
+         *</ul>
+         */
+        JAVA_13,
+
+        /**
+         * Java 14.
+         *<ul>
+         * <li>switch expressions (JEP 361)</li>
+         * <li>pattern matching for instanceof preview (JEP 305)</li>
+         * <li>records preview (JEP 359)</li>
+         * <li>text blocks second preview (JEP 368)</li>
+         *</ul>
+         */
+        JAVA_14
         ;
 
         /**
@@ -303,7 +324,7 @@ public class JavaMetricsCollector
         @Nonnull
         static public LanguageLevel getDefault()
         {
-            return JAVA_13;
+            return JAVA_14;
         }
     }
 }
