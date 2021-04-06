@@ -1,26 +1,12 @@
 /*
  * Gradle script for the Scent project
  */
-
-buildscript
+plugins
 {
-    // Use Maven central for plugins.
-    repositories
-    {
-        mavenCentral()
-    }
-
-    // This script uses the Quill plugins.
-    dependencies
-    {
-        classpath 'org.myire:quill:2.0'
-    }
+    id 'com.github.spotbugs' version '4.7.0'
+    id 'org.myire.quill.core' version '2.4'
+    id 'org.myire.quill.moduleinfo' version '2.4'
 }
-
-plugins { id "com.github.spotbugs" version "2.0.0" }
-apply plugin: 'org.myire.quill.core'
-apply plugin: 'org.myire.quill.moduleinfo'
-
 
 // Load project meta data and version from the files in the meta data directory, and set the
 // group and version from the loaded values.
@@ -63,8 +49,8 @@ jar.manifest
 javadoc.options.addBooleanOption('html5', true)
 
 
-// Add static data from the pom template and remove test dependencies when the pom file is created.
-createPom.from(file('meta/pom-template.xml')).withoutScope('test')
+// Add static data from the pom template when the pom file is created.
+createPom.from(file('meta/pom-template.xml'))
 
 
 // Configure project specific exclusion/suppressions/filter files for the static analysis tasks.
