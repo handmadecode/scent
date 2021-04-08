@@ -20,7 +20,7 @@ import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import org.myire.scent.file.FileTestBase;
 
@@ -76,7 +76,7 @@ public class MainTest extends FileTestBase
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getValue().contains("1"));
-        verifyZeroInteractions(fMockedSystemErr);
+        verifyNoInteractions(fMockedSystemErr);
     }
 
 
@@ -101,7 +101,7 @@ public class MainTest extends FileTestBase
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getAllValues().get(0).contains(aDirectory));
-        verifyZeroInteractions(fMockedSystemErr);
+        verifyNoInteractions(fMockedSystemErr);
     }
 
 
@@ -124,7 +124,7 @@ public class MainTest extends FileTestBase
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fMockedSystemOut).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getValue().contains("0"));
-        verifyZeroInteractions(fMockedSystemErr);
+        verifyNoInteractions(fMockedSystemErr);
     }
 
 
@@ -280,7 +280,7 @@ public class MainTest extends FileTestBase
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getAllValues().get(0).contains("Warning: missing xsl file"));
-        verifyZeroInteractions(fMockedSystemErr);
+        verifyNoInteractions(fMockedSystemErr);
     }
 
 
@@ -324,7 +324,7 @@ public class MainTest extends FileTestBase
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getAllValues().get(0).contains("Warning: missing output file"));
-        verifyZeroInteractions(fMockedSystemErr);
+        verifyNoInteractions(fMockedSystemErr);
     }
 
 
