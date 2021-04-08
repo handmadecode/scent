@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018-2020 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018-2021 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -58,7 +58,8 @@ public class JavaMetricsCollector
 
 
     /**
-     * Create a new {@code JavaMetricsCollector} for a specific language level.
+     * Create a new {@code JavaMetricsCollector} for a specific language level. Language feature
+     * previews will not be enabled.
      *
      * @param pLanguageLevel    The language level.
      *
@@ -66,7 +67,22 @@ public class JavaMetricsCollector
      */
     public JavaMetricsCollector(@Nonnull LanguageLevel pLanguageLevel)
     {
-        fJavaParser = new JavaParser(createParserConfiguration(pLanguageLevel));
+        this(pLanguageLevel, false);
+    }
+
+
+    /**
+     * Create a new {@code JavaMetricsCollector} for a specific language level, optionally enabling
+     * language feature previews.
+     *
+     * @param pLanguageLevel    The language level.
+     * @param pEnablePreviews   If true, language feature previews will be enabled.
+     *
+     * @throws NullPointerException if {@code pLanguageLevel} is null.
+     */
+    public JavaMetricsCollector(@Nonnull LanguageLevel pLanguageLevel, boolean pEnablePreviews)
+    {
+        fJavaParser = new JavaParser(createParserConfiguration(pLanguageLevel, pEnablePreviews));
     }
 
 
@@ -195,49 +211,24 @@ public class JavaMetricsCollector
      * Create a {@code ParserConfiguration} for a specific language level.
      *
      * @param pLanguageLevel    The language level.
+     * @param pEnablePreviews   If true, language feature previews will be enabled.
      *
      * @return  A new  {@code ParserConfiguration}, never null.
      *
      * @throws NullPointerException if {@code pLanguageLevel} is null.
      */
     @Nonnull
-    static private ParserConfiguration createParserConfiguration(@Nonnull LanguageLevel pLanguageLevel)
+    static private ParserConfiguration createParserConfiguration(
+        @Nonnull LanguageLevel pLanguageLevel,
+        boolean pEnablePreviews)
     {
+        ParserConfiguration.LanguageLevel aParserLanguageLevel =
+            pEnablePreviews ?
+                pLanguageLevel.getParserPreviewLanguageLevel() :
+                pLanguageLevel.getParserLanguageLevel();
+
         ParserConfiguration aConfiguration = new ParserConfiguration();
-
-        switch (pLanguageLevel)
-        {
-            case JAVA_8:
-                aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_8);
-                break;
-
-            case JAVA_9:
-                aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_9);
-                break;
-
-            case JAVA_10:
-                aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_10);
-                break;
-
-            case JAVA_11:
-                aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_11);
-                break;
-
-            case JAVA_12:
-                aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_12);
-                break;
-
-            case JAVA_13:
-                aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_13);
-                break;
-
-            case JAVA_14:
-                aConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_14);
-                break;
-
-            default:
-                break;
-        }
+        aConfiguration.setLanguageLevel(aParserLanguageLevel);
 
         return aConfiguration;
     }
@@ -280,41 +271,142 @@ public class JavaMetricsCollector
      */
     public enum LanguageLevel
     {
-        /** Java 8 (introducing lambdas and type annotations). */
-        JAVA_8,
+        /**
+         * Java 8.
+         *<p>
+         * New language features:
+         *<ul>
+         * <li>lambdas</li>
+         * <li>type annotations</li>
+         *</ul>
+         */
+        JAVA_8(ParserConfiguration.LanguageLevel.JAVA_8, ParserConfiguration.LanguageLevel.JAVA_8),
 
-        /** Java 9 (introducing modules and private interface methods). */
-        JAVA_9,
+        /**
+         * Java 9.
+         *<p>
+         * New language features:
+         *<ul>
+         * <li>modules</li>
+         * <li>private interface methods</li>
+         *</ul>
+         */
+        JAVA_9(ParserConfiguration.LanguageLevel.JAVA_9, ParserConfiguration.LanguageLevel.JAVA_9),
 
-        /** Java 10 (introducing local variable type inference). */
-        JAVA_10,
+        /**
+         * Java 10.
+         *<p>
+         * New language features:
+         *<ul>
+         * <li>local variable type inference (JEP 286)</li>
+         *</ul>
+         */
+        JAVA_10(ParserConfiguration.LanguageLevel.JAVA_10, ParserConfiguration.LanguageLevel.JAVA_10_PREVIEW),
 
-        /** Java 11 (introducing local variable syntax for lambda parameters (JEP 323)). */
-        JAVA_11,
+        /**
+         * Java 11.
+         *<p>
+         * New language features:
+         *<ul>
+         * <li>local variable syntax for lambda parameters (JEP 323)</li>
+         *</ul>
+         */
+        JAVA_11(ParserConfiguration.LanguageLevel.JAVA_11, ParserConfiguration.LanguageLevel.JAVA_11_PREVIEW),
 
-        /** Java 12 (introducing switch expressions preview (JEP 325)). */
-        JAVA_12,
+        /**
+         * Java 12.
+         *<p>
+         * New language feature previews:
+         *<ul>
+         * <li>switch expressions preview (JEP 325)</li>
+         *</ul>
+         */
+        JAVA_12(ParserConfiguration.LanguageLevel.JAVA_12, ParserConfiguration.LanguageLevel.JAVA_12_PREVIEW),
 
         /**
          * Java 13.
+         *<p>
+         * New language feature previews:
          *<ul>
          * <li>text blocks preview (JEP 355)</li>
          * <li>switch expressions second preview (JEP 354))</li>
          *</ul>
          */
-        JAVA_13,
+        JAVA_13(ParserConfiguration.LanguageLevel.JAVA_13, ParserConfiguration.LanguageLevel.JAVA_13_PREVIEW),
 
         /**
          * Java 14.
+         *<p>
+         * New language features:
          *<ul>
          * <li>switch expressions (JEP 361)</li>
+         *</ul>
+         *<p>
+         * New language feature previews:
+         *<ul>
          * <li>pattern matching for instanceof preview (JEP 305)</li>
          * <li>records preview (JEP 359)</li>
          * <li>text blocks second preview (JEP 368)</li>
          *</ul>
          */
-        JAVA_14
+        JAVA_14(ParserConfiguration.LanguageLevel.JAVA_14, ParserConfiguration.LanguageLevel.JAVA_14_PREVIEW),
+
+        /**
+         * Java 15.
+         *<p>
+         * New language features:
+         *<ul>
+         * <li>text blocks (JEP 378)</li>
+         *</ul>
+         *<p>
+         * New language feature previews:
+         *<ul>
+         * <li>sealed classes preview (JEP 360)</li>
+         * <li>pattern matching for instanceof second preview (JEP 375)</li>
+         * <li>records second preview (JEP 384)</li>
+         *</ul>
+         */
+        JAVA_15(ParserConfiguration.LanguageLevel.JAVA_15, ParserConfiguration.LanguageLevel.JAVA_15_PREVIEW),
         ;
+
+        private final ParserConfiguration.LanguageLevel fParserLanguageLevel;
+        private final ParserConfiguration.LanguageLevel fParserPreviewLanguageLevel;
+
+
+        LanguageLevel(
+            @Nonnull ParserConfiguration.LanguageLevel pParserLanguageLevel,
+            @Nonnull ParserConfiguration.LanguageLevel pParserPreviewLanguageLevel)
+        {
+            fParserLanguageLevel = pParserLanguageLevel;
+            fParserPreviewLanguageLevel = pParserPreviewLanguageLevel;
+        }
+
+
+        /**
+         * Get the {@code ParserConfiguration.LanguageLevel} instance corresponding to this language
+         * level.
+         *
+         * @return  The corresponding {@code ParserConfiguration.LanguageLevel}, never null.
+         */
+        @Nonnull
+        ParserConfiguration.LanguageLevel getParserLanguageLevel()
+        {
+            return fParserLanguageLevel;
+        }
+
+
+        /**
+         * Get the {@code ParserConfiguration.LanguageLevel} instance corresponding to this language
+         * level when previews are enabled.
+         *
+         * @return  The corresponding preview {@code ParserConfiguration.LanguageLevel}, never null.
+         */
+        @Nonnull
+        ParserConfiguration.LanguageLevel getParserPreviewLanguageLevel()
+        {
+            return fParserPreviewLanguageLevel;
+        }
+
 
         /**
          * Get the default language level for Java metrics collecting.
@@ -324,7 +416,7 @@ public class JavaMetricsCollector
         @Nonnull
         static public LanguageLevel getDefault()
         {
-            return JAVA_14;
+            return JAVA_15;
         }
     }
 }
