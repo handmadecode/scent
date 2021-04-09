@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018-2019 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018-2021 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -63,6 +63,21 @@ public class JavaMetricsCollectorTest
 
 
     /**
+     * The method {@code getCollectedMetrics} should return an empty {@code Iterable} if no source
+     * has been parsed.
+     */
+    @Test
+    public void collectMetricsReturnsEmptyMetricsWhenParseHasNotBeenCalled()
+    {
+        // When
+        JavaMetrics aMetrics = new JavaMetricsCollector().getCollectedMetrics();
+
+        // Then
+        assertFalse(aMetrics.getPackages().iterator().hasNext());
+    }
+
+
+    /**
      * The method {@code collect(String)} should throw a {@code ParseException} when passed a
      * syntactically invalid argument.
      *
@@ -76,106 +91,121 @@ public class JavaMetricsCollectorTest
 
 
     /**
-     * A {@code JavaMetricsCollector} for language level 8 should throw a {@code ParseException}
-     * in {@code collect(String)} when passed syntactically invalid source code for the Java 8
-     * language level.
-     *
-     * @throws ParseException   always.
-     */
-    @Test(expected=ParseException.class)
-    public void collectThrowsForInvalidJava8Construct() throws ParseException
-    {
-        // Given (private interface method requires language level 9)
-        String aSrc = "interface X { private void m() {} }";
-
-        // When
-        new JavaMetricsCollector(JavaMetricsCollector.LanguageLevel.JAVA_8).collect("src", aSrc);
-    }
-
-
-    /**
-     * A {@code JavaMetricsCollector} for language level 9 should throw a {@code ParseException}
-     * in {@code collect(String)} when passed syntactically invalid source code for the Java 9
-     * language level.
-     *
-     * @throws ParseException   always.
-     */
-    @Test(expected=ParseException.class)
-    public void collectThrowsForInvalidJava9Construct() throws ParseException
-    {
-        // Given (underscore variable name not allowed in language levels >= 9)
-        String aSrc = "class X {int _;}";
-
-        // When
-        new JavaMetricsCollector(JavaMetricsCollector.LanguageLevel.JAVA_9).collect("src", aSrc);
-    }
-
-
-    /**
-     * A {@code JavaMetricsCollector} for language level 10 should throw a {@code ParseException}
-     * in {@code collect(String)} when passed syntactically invalid source code for the Java 10
-     * language level.
-     *
-     * @throws ParseException   always.
-     */
-    @Test(expected=ParseException.class)
-    public void collectThrowsForInvalidJava10Construct() throws ParseException
-    {
-        // Given (local variable syntax for lambda parameters requires language level 11)
-        String aSrc = "class X { void x(Map m) { m.forEach((var x, var y) -> System.out.println(x==y)); } }";
-
-        // When
-        new JavaMetricsCollector(JavaMetricsCollector.LanguageLevel.JAVA_10).collect("src", aSrc);
-    }
-
-
-    /**
-     * A {@code JavaMetricsCollector} for language level 11 should throw a {@code ParseException}
-     * in {@code collect(String)} when passed syntactically invalid source code for the Java 11
-     * language level.
-     *
-     * @throws ParseException   always.
-     */
-    @Test(expected=ParseException.class)
-    public void collectThrowsForInvalidJava11Construct() throws ParseException
-    {
-        // Given (switch expressions require language level 12)
-        String aSrc = "class X { int x(int p) { return switch (p) { case 1 -> 17; case 2 -> 4711; default -> 666; }; } }";
-
-        // When
-        new JavaMetricsCollector(JavaMetricsCollector.LanguageLevel.JAVA_11).collect("src", aSrc);
-    }
-
-
-    /**
-     * A {@code JavaMetricsCollector} for language level 12 should throw a {@code ParseException}
-     * in {@code collect(String)} when passed syntactically invalid source code for the Java 12
-     * language level.
-     *
-     * @throws ParseException   always.
-     */
-    @Test(expected=ParseException.class)
-    public void collectThrowsForInvalidJava12Construct() throws ParseException
-    {
-        // Given (returning from switch expressions with 'yield' requires language level 13)
-        String aSrc = "class X { int y;int x(int p) { return switch (p) { case 1 -> {y++; yield 17;} default -> {y--; yield 666;} }; } }";
-
-        // When
-        new JavaMetricsCollector(JavaMetricsCollector.LanguageLevel.JAVA_12).collect("src", aSrc);
-    }
-
-
-    /**
-     * The method {@code getCollectedMetrics} should return an empty {@code Iterable} if no source
-     * has been parsed.
+     * A {@code JavaMetricsCollector} for language level 8 should produce the expected result for
+     * all test fixtures.
      */
     @Test
-    public void collectMetricsReturnsEmptyMetricsWhenParseHasNotBeenCalled()
+    public void collectProducesTheExpectedResultForJava8LanguageLevel()
     {
-        // When
-        JavaMetrics aMetrics = new JavaMetricsCollector().getCollectedMetrics();
+        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_8, false);
 
-        // Then
-        assertFalse(aMetrics.getPackages().iterator().hasNext());
+        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_8, true);
+    }
+
+
+    /**
+     * A {@code JavaMetricsCollector} for language level 9 should produce the expected result for
+     * all test fixtures.
+     */
+    @Test
+    public void collectProducesTheExpectedResultForJava9LanguageLevel()
+    {
+        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_9, false);
+
+        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_9, true);
+    }
+
+
+    /**
+     * A {@code JavaMetricsCollector} for language level 10 should produce the expected result for
+     * all test fixtures.
+     */
+    @Test
+    public void collectProducesTheExpectedResultForJava10LanguageLevel()
+    {
+        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_10, false);
+
+        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_10, true);
+    }
+
+
+    /**
+     * A {@code JavaMetricsCollector} for language level 11 should produce the expected result for
+     * all test fixtures.
+     */
+    @Test
+    public void collectProducesTheExpectedResultForJava11LanguageLevel()
+    {
+        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_11, false);
+
+        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_11, true);
+    }
+
+
+    /**
+     * A {@code JavaMetricsCollector} for language level 12 should produce the expected result for
+     * all test fixtures.
+     */
+    @Test
+    public void collectProducesTheExpectedResultForJava12LanguageLevel()
+    {
+        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_12, false);
+
+        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_12, true);
+    }
+
+
+    /**
+     * A {@code JavaMetricsCollector} for language level 13 should produce the expected result for
+     * all test fixtures.
+     */
+    @Test
+    public void collectProducesTheExpectedResultForJava13LanguageLevel()
+    {
+        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_13, false);
+
+        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_13, true);
+    }
+
+
+    /**
+     * A {@code JavaMetricsCollector} for language level 14 should produce the expected result for
+     * all test fixtures.
+     */
+    @Test
+    public void collectProducesTheExpectedResultForJava14LanguageLevel()
+    {
+        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_14, false);
+
+        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_14, true);
+    }
+
+
+    /**
+     * A {@code JavaMetricsCollector} for language level 15 should produce the expected result for
+     * all test fixtures.
+     */
+    @Test
+    public void collectProducesTheExpectedResultForJava15LanguageLevel()
+    {
+        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_15, false);
+
+        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_15, true);
     }
 }

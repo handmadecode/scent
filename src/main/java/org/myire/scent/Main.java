@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018-2019 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018-2019, 2021 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -51,7 +51,7 @@ public final class Main
      *<p>
      * The synopsis for the arguments to this method are:
      *<pre>
-     *  [-text] [-xml] [-html] [-xsl xsl-file] [-o output-file] path ...
+     *  [-text] [-xml] [-html] [-xsl xsl-file] [-o output-file] [-ep] path ...
      *</pre>
      * where the options are
      *<ul>
@@ -61,6 +61,7 @@ public final class Main
      * <li>{@code -xsl xsl-file}: report the collected metrics by applying the specified XSL file to
      *      an intermediate xml report</li>
      * <li>{@code -o output-file}: write the report to the specified file</li>
+     * <li>{@code -ep}: enable language feature previews</li>
      *</ul>
      * If no format is specified, the text format will be used. If multiple formats are specified,
      * the last will take precedence. If no output file is specified, the report will be written to
@@ -76,7 +77,9 @@ public final class Main
         MainOptions aMainOptions = new MainOptions(System.out);
         int aFirstPathIndex = aMainOptions.extract(pArgs);
 
-        JavaMetricsCollector aCollector = new JavaMetricsCollector();
+        JavaMetricsCollector aCollector =
+            new JavaMetricsCollector(JavaMetricsCollector.LanguageLevel.getDefault(),
+                                     aMainOptions.isPreviewEnabled());
         collectMetrics(aCollector, pArgs, aFirstPathIndex);
 
         JavaMetrics aMetrics = aCollector.getCollectedMetrics();
@@ -194,6 +197,7 @@ public final class Main
         private String fOutputFilePath;
         private String fXslFilePath;
         private Function<OutputStream, MetricsReportWriter> fReportWriterCreator = TextReportWriter::new;
+        private boolean fEnablePreview;
 
         /**
          * Create a new {@code MainOptions}.
@@ -247,6 +251,9 @@ public final class Main
                         else
                             fErrStream.println("Warning: missing output file path, writing to System.out");
                         break;
+                    case "-ep":
+                        fEnablePreview = true;
+                        break;
                     default:
                         if (pArgs[i].charAt(0) == '-')
                             fErrStream.println("Warning: ignoring unknown option '" + pArgs[i] + '\'');
@@ -258,6 +265,17 @@ public final class Main
             }
 
             return pArgs.length;
+        }
+
+
+        /**
+         * Return whether or not the {@code -ep} option was specified.
+         *
+         * @return  True if the {@code -ep} was present, false if not.
+         */
+        boolean isPreviewEnabled()
+        {
+            return fEnablePreview;
         }
 
         /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018, 2021 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -20,7 +20,7 @@ import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import org.myire.scent.file.FileTestBase;
 
@@ -76,7 +76,7 @@ public class MainTest extends FileTestBase
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getValue().contains("1"));
-        verifyZeroInteractions(fMockedSystemErr);
+        verifyNoInteractions(fMockedSystemErr);
     }
 
 
@@ -101,7 +101,7 @@ public class MainTest extends FileTestBase
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getAllValues().get(0).contains(aDirectory));
-        verifyZeroInteractions(fMockedSystemErr);
+        verifyNoInteractions(fMockedSystemErr);
     }
 
 
@@ -124,7 +124,7 @@ public class MainTest extends FileTestBase
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fMockedSystemOut).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getValue().contains("0"));
-        verifyZeroInteractions(fMockedSystemErr);
+        verifyNoInteractions(fMockedSystemErr);
     }
 
 
@@ -280,7 +280,7 @@ public class MainTest extends FileTestBase
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getAllValues().get(0).contains("Warning: missing xsl file"));
-        verifyZeroInteractions(fMockedSystemErr);
+        verifyNoInteractions(fMockedSystemErr);
     }
 
 
@@ -324,7 +324,7 @@ public class MainTest extends FileTestBase
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getAllValues().get(0).contains("Warning: missing output file"));
-        verifyZeroInteractions(fMockedSystemErr);
+        verifyNoInteractions(fMockedSystemErr);
     }
 
 
@@ -346,6 +346,56 @@ public class MainTest extends FileTestBase
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getAllValues().get(1).contains("Error: cannot write report to"));
+    }
+
+
+    /**
+     * Collecting metrics from a Java file containing language feature previews should succeed if
+     * the {@code -ep} option is passed to {@code main}.
+     *
+     * @throws IOException  if creating the test Java file fails.
+     */
+    @Test
+    public void metricsForLanguagePreviewAreCollectedWhenPreviewsAreEnabled() throws IOException
+    {
+        // Given
+        mockSystemStreams();
+        Path aJavaFile = createTestFileFromJavaResource("Previews.java");
+
+        // When
+        Main.main("-ep", aJavaFile.toString());
+
+        // Then
+        ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
+        verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
+        assertTrue(aPrintlnArg.getValue().contains("1"));
+        verifyNoInteractions(fMockedSystemErr);
+    }
+
+
+    /**
+     * Collecting metrics from a Java file containing language feature previews should fail if the
+     * {@code -ep} option is not passed to {@code main}.
+     *
+     * @throws IOException  if creating the test Java file fails.
+     */
+    @Test
+    public void metricsForLanguagePreviewFailWhenPreviewsAreNotEnabled() throws IOException
+    {
+        // Given
+        mockSystemStreams();
+        String aFileName = "Previews.java";
+        Path aJavaFile = createTestFileFromJavaResource(aFileName);
+
+        // When
+        Main.main(aJavaFile.toString());
+
+        // Then
+        ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
+        verify(fMockedSystemOut).println(aPrintlnArg.capture());
+        assertTrue(aPrintlnArg.getValue().contains("0"));
+        verify(fMockedSystemErr).println(aPrintlnArg.capture());
+        assertTrue(aPrintlnArg.getValue().contains(aFileName));
     }
 
 

@@ -22,7 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import org.myire.scent.collect.JavaMetricsCollector;
 
@@ -119,7 +119,7 @@ public class JavaFileMetricsCollectorTest extends FileTestBase
         fCollector.visitFile(aPath, null);
 
         // Then
-        verifyZeroInteractions(fDelegate);
+        verifyNoInteractions(fDelegate);
     }
 
 
@@ -155,7 +155,7 @@ public class JavaFileMetricsCollectorTest extends FileTestBase
         fCollector.visitFile(aTestFile, null);
 
         // Then
-        verifyZeroInteractions(fDelegate);
+        verifyNoInteractions(fDelegate);
     }
 
 
@@ -169,7 +169,7 @@ public class JavaFileMetricsCollectorTest extends FileTestBase
         fCollector.visitFile(new File("").toPath(), null);
 
         // Then
-        verifyZeroInteractions(fDelegate);
+        verifyNoInteractions(fDelegate);
     }
 
 

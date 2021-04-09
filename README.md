@@ -29,6 +29,13 @@ metrics for source code up to and including language level 13.
 
 ## Release Notes
 
+### version 2.3
+
+* Support for language levels 14 and 15.
+* Language feature previews are allowed only if the `-ep` command line option is specified, or if
+  the corresponding `JavaMetricsCollector` constructor parameter is true.
+* Records previews (JEPs 359 and 384) and sealed classes preview (JEP 360) are not supported yet.
+
 ### version 2.2
 
 * Support for language level 13.
@@ -152,7 +159,7 @@ arguments to the `Main` class.
 
 The synopsis for the arguments to `Main` are:
 
-    [-text | -xml | -html | -xsl xsl-file] [-o output-file] <paths>
+    [-text | -xml | -html | -xsl xsl-file] [-o output-file] [-ep] <paths>
 
 where the options are
 
@@ -162,6 +169,7 @@ where the options are
 * `-xsl xsl-file`: report the collected metrics by applying the specified xsl file to an
 intermediate xml report
 * `-o output-file`: write the report to the specified file
+* `-ep`: enable previews, allow language features that still are in the preview stage.
 
 If no format is specified, the plain text format will be used. If multiple formats are specified,
 the last will take precedence. If no output file is specified, the report will be written to the
@@ -630,8 +638,8 @@ If the aggregation shouldn't contain the metrics from the type but only from its
 Scent uses the terrific [JavaParser](http://javaparser.org) to parse Java source code. The jar file
 `javaparser-core` is the only runtime dependency that Scent has.
 
-The current version of Scent is compiled and tested with version 3.13.3 of `javaparser-core`. Any
-version >= 3.13.2, where support for Java 12 was finalized, will most likely work equally well.
+The current version of Scent is compiled and tested with version 3.20.2 of `javaparser-core`. Any
+version >= 3.20.2, will most likely work equally well.
 
 
 ## Differences with JavaNCSS

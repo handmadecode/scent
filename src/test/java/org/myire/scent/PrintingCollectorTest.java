@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import org.myire.scent.collect.JavaMetricsCollector;
 import org.myire.scent.file.FileTestBase;
@@ -54,7 +54,7 @@ public class PrintingCollectorTest extends FileTestBase
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fOutStream).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getValue().contains(aDirectoryName));
-        verifyZeroInteractions(fErrStream);
+        verifyNoInteractions(fErrStream);
     }
 
 
@@ -76,7 +76,7 @@ public class PrintingCollectorTest extends FileTestBase
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fErrStream).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getValue().contains(aFileName));
-        verifyZeroInteractions(fOutStream);
+        verifyNoInteractions(fOutStream);
     }
 
 
@@ -103,7 +103,7 @@ public class PrintingCollectorTest extends FileTestBase
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fErrStream).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getValue().contains(aFileName));
-        verifyZeroInteractions(fOutStream);
+        verifyNoInteractions(fOutStream);
     }
 
 
@@ -123,7 +123,7 @@ public class PrintingCollectorTest extends FileTestBase
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fErrStream).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getValue().contains(aFileName));
-        verifyZeroInteractions(fOutStream);
+        verifyNoInteractions(fOutStream);
     }
 
 
@@ -144,7 +144,7 @@ public class PrintingCollectorTest extends FileTestBase
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fErrStream).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getValue().contains(aDirectoryName));
-        verifyZeroInteractions(fOutStream);
+        verifyNoInteractions(fOutStream);
     }
 
 
@@ -159,7 +159,7 @@ public class PrintingCollectorTest extends FileTestBase
         fCollector.postVisitDirectory(Paths.get("anyDirectory"), null);
 
         // Then
-        verifyZeroInteractions(fOutStream);
-        verifyZeroInteractions(fErrStream);
+        verifyNoInteractions(fOutStream);
+        verifyNoInteractions(fErrStream);
     }
 }
