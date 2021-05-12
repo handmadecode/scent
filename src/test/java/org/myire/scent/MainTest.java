@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018, 2021 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018, 2021-2022 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -100,7 +100,7 @@ public class MainTest extends FileTestBase
         // Then
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
-        assertTrue(aPrintlnArg.getAllValues().get(0).contains(aDirectory));
+        assertTrue(aPrintlnArg.getAllValues().get(1).contains(aDirectory));
         verifyNoInteractions(fMockedSystemErr);
     }
 
@@ -122,7 +122,7 @@ public class MainTest extends FileTestBase
 
         // Then
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
-        verify(fMockedSystemOut).println(aPrintlnArg.capture());
+        verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getValue().contains("0"));
         verifyNoInteractions(fMockedSystemErr);
     }
@@ -144,7 +144,7 @@ public class MainTest extends FileTestBase
 
         // Then
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
-        verify(fMockedSystemOut).println(aPrintlnArg.capture());
+        verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getValue().contains("0"));
         verify(fMockedSystemErr).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getValue().contains(aFileName));
@@ -170,7 +170,7 @@ public class MainTest extends FileTestBase
 
         // Then
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
-        verify(fMockedSystemOut).println(aPrintlnArg.capture());
+        verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getValue().contains("0"));
         verify(fMockedSystemErr).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getValue().contains(aFileName));
@@ -345,7 +345,7 @@ public class MainTest extends FileTestBase
         // Then
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
         verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
-        assertTrue(aPrintlnArg.getAllValues().get(1).contains("Error: cannot write report to"));
+        assertTrue(aPrintlnArg.getAllValues().get(2).contains("Error: cannot write report to"));
     }
 
 
@@ -363,7 +363,7 @@ public class MainTest extends FileTestBase
         Path aJavaFile = createTestFileFromJavaResource("Previews.java");
 
         // When
-        Main.main("-ep", aJavaFile.toString());
+        Main.main("-l", "15", "-ep", aJavaFile.toString());
 
         // Then
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
@@ -388,14 +388,77 @@ public class MainTest extends FileTestBase
         Path aJavaFile = createTestFileFromJavaResource(aFileName);
 
         // When
-        Main.main(aJavaFile.toString());
+        Main.main("-l", "15", aJavaFile.toString());
 
         // Then
         ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
-        verify(fMockedSystemOut).println(aPrintlnArg.capture());
+        verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getValue().contains("0"));
         verify(fMockedSystemErr).println(aPrintlnArg.capture());
         assertTrue(aPrintlnArg.getValue().contains(aFileName));
+    }
+
+
+    /**
+     * Specifying the {@code -l} option without a level value should result in a warning being
+     * printed.
+     */
+    @Test
+    public void languageLevelOptionWithoutValuePrintsWarning()
+    {
+        // Given
+        mockSystemStreams();
+
+        // When
+        Main.main("-l");
+
+        // Then
+        ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
+        verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
+        assertTrue(aPrintlnArg.getAllValues().get(0).contains("missing language level"));
+        verifyNoInteractions(fMockedSystemErr);
+    }
+
+
+    /**
+     * Specifying the {@code -l} option with a non-numeric level value should result in a warning
+     * being printed.
+     */
+    @Test
+    public void languageLevelOptionWithNonNumericValuePrintsWarning()
+    {
+        // Given
+        mockSystemStreams();
+
+        // When
+        Main.main("-l", "seven");
+
+        // Then
+        ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
+        verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
+        assertTrue(aPrintlnArg.getAllValues().get(0).contains("ignoring invalid language level"));
+        verifyNoInteractions(fMockedSystemErr);
+    }
+
+
+    /**
+     * Specifying the {@code -l} option with a numeric level value not representing a valid Java
+     * language level should result in a warning being printed.
+     */
+    @Test
+    public void languageLevelOptionWithInvalidNumericValuePrintsWarning()
+    {
+        // Given
+        mockSystemStreams();
+
+        // When
+        Main.main("-l", "4711");
+
+        // Then
+        ArgumentCaptor<String> aPrintlnArg = ArgumentCaptor.forClass(String.class);
+        verify(fMockedSystemOut, atLeastOnce()).println(aPrintlnArg.capture());
+        assertTrue(aPrintlnArg.getAllValues().get(0).contains("ignoring invalid language level"));
+        verifyNoInteractions(fMockedSystemErr);
     }
 
 

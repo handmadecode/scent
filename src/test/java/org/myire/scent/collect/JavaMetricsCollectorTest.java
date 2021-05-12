@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018-2021 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018-2022 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -10,7 +10,9 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import org.myire.scent.metrics.JavaMetrics;
@@ -23,6 +25,52 @@ import org.myire.scent.metrics.JavaMetrics;
  */
 public class JavaMetricsCollectorTest
 {
+    /**
+     * {@code getLanguageLevel()} should return the value passed to the constructor.
+     */
+    @Test
+    public void getLanguageLevelReturnsValuePassedToConstructor()
+    {
+        // Given
+        JavaLanguageLevel aLevel = JavaLanguageLevel.JAVA_14;
+
+        // When
+        JavaMetricsCollector aCollector = new JavaMetricsCollector(aLevel);
+
+        // Then
+        assertEquals(aLevel, aCollector.getLanguageLevel());
+    }
+
+
+    /**
+     * {@code hasPreviewsEnabled()} should return the value passed to the constructor.
+     */
+    @Test
+    public void hasPreviewsEnabledReturnsValuePassedToConstructor()
+    {
+        // When
+        JavaMetricsCollector aCollector = new JavaMetricsCollector(JavaLanguageLevel.JAVA_12, true);
+
+        // Then
+        assertTrue(aCollector.hasPreviewsEnabled());
+    }
+
+
+    /**
+     * {@code hasPreviewsEnabled()} should return the default value if the no-args constructor is
+     * used.
+     */
+    @Test
+    public void hasPreviewsEnabledReturnsDefaultValue()
+    {
+        // When
+        JavaMetricsCollector aCollector = new JavaMetricsCollector();
+
+        // Then
+        assertFalse(aCollector.hasPreviewsEnabled());
+    }
+
+
     /**
      * The method {@code collect} should throw a {@code NullPointerException} when passed a null
      * compilation unit name argument.
@@ -98,10 +146,10 @@ public class JavaMetricsCollectorTest
     public void collectProducesTheExpectedResultForJava8LanguageLevel()
     {
         for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_8, false);
+            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_8, false);
 
         for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_8, true);
+            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_8, true);
     }
 
 
@@ -113,10 +161,10 @@ public class JavaMetricsCollectorTest
     public void collectProducesTheExpectedResultForJava9LanguageLevel()
     {
         for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_9, false);
+            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_9, false);
 
         for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_9, true);
+            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_9, true);
     }
 
 
@@ -128,10 +176,10 @@ public class JavaMetricsCollectorTest
     public void collectProducesTheExpectedResultForJava10LanguageLevel()
     {
         for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_10, false);
+            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_10, false);
 
         for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_10, true);
+            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_10, true);
     }
 
 
@@ -143,10 +191,10 @@ public class JavaMetricsCollectorTest
     public void collectProducesTheExpectedResultForJava11LanguageLevel()
     {
         for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_11, false);
+            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_11, false);
 
         for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_11, true);
+            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_11, true);
     }
 
 
@@ -158,10 +206,10 @@ public class JavaMetricsCollectorTest
     public void collectProducesTheExpectedResultForJava12LanguageLevel()
     {
         for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_12, false);
+            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_12, false);
 
         for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_12, true);
+            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_12, true);
     }
 
 
@@ -173,10 +221,10 @@ public class JavaMetricsCollectorTest
     public void collectProducesTheExpectedResultForJava13LanguageLevel()
     {
         for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_13, false);
+            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_13, false);
 
         for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_13, true);
+            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_13, true);
     }
 
 
@@ -188,10 +236,10 @@ public class JavaMetricsCollectorTest
     public void collectProducesTheExpectedResultForJava14LanguageLevel()
     {
         for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_14, false);
+            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_14, false);
 
         for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_14, true);
+            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_14, true);
     }
 
 
@@ -203,9 +251,9 @@ public class JavaMetricsCollectorTest
     public void collectProducesTheExpectedResultForJava15LanguageLevel()
     {
         for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_15, false);
+            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_15, false);
 
         for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaMetricsCollector.LanguageLevel.JAVA_15, true);
+            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_15, true);
     }
 }

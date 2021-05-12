@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018-2019, 2021 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018-2019, 2021-2022 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -20,6 +20,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.myire.scent.collect.JavaLanguageLevel;
 import org.myire.scent.collect.JavaMetricsCollector;
 import org.myire.scent.metrics.JavaMetrics;
 import org.myire.scent.report.MetricsReportMetaData;
@@ -51,7 +52,7 @@ public final class Main
      *<p>
      * The synopsis for the arguments to this method are:
      *<pre>
-     *  [-text] [-xml] [-html] [-xsl xsl-file] [-o output-file] [-ep] path ...
+     *  [-text] [-xml] [-html] [-xsl xsl-file] [-o output-file] [-l language-level] [-ep] path ...
      *</pre>
      * where the options are
      *<ul>
@@ -61,6 +62,7 @@ public final class Main
      * <li>{@code -xsl xsl-file}: report the collected metrics by applying the specified XSL file to
      *      an intermediate xml report</li>
      * <li>{@code -o output-file}: write the report to the specified file</li>
+     * <li>{@code -l language-level}: the language level to parse the files with (8,9,...) </li>
      * <li>{@code -ep}: enable language feature previews</li>
      *</ul>
      * If no format is specified, the text format will be used. If multiple formats are specified,
@@ -77,9 +79,7 @@ public final class Main
         MainOptions aMainOptions = new MainOptions(System.out);
         int aFirstPathIndex = aMainOptions.extract(pArgs);
 
-        JavaMetricsCollector aCollector =
-            new JavaMetricsCollector(JavaMetricsCollector.LanguageLevel.getDefault(),
-                                     aMainOptions.isPreviewEnabled());
+        JavaMetricsCollector aCollector = aMainOptions.createJavaMetricsCollector();
         collectMetrics(aCollector, pArgs, aFirstPathIndex);
 
         JavaMetrics aMetrics = aCollector.getCollectedMetrics();
@@ -104,6 +104,14 @@ public final class Main
         @Nonnull String[] pPaths,
         int pFromIndex)
     {
+        printInfo(
+            "Parsing sources using Java language level " +
+            pCollector.getLanguageLevel().getNumericValue() +
+            (pCollector.hasPreviewsEnabled() ?
+                " with language preview features" :
+                " without language preview features")
+        );
+
         PrintingCollector aCollector = new PrintingCollector(pCollector, System.out, System.err);
         for (int i=pFromIndex; i<pPaths.length; i++)
         {
@@ -197,6 +205,7 @@ public final class Main
         private String fOutputFilePath;
         private String fXslFilePath;
         private Function<OutputStream, MetricsReportWriter> fReportWriterCreator = TextReportWriter::new;
+        private String fLanguageLevel;
         private boolean fEnablePreview;
 
         /**
@@ -251,6 +260,12 @@ public final class Main
                         else
                             fErrStream.println("Warning: missing output file path, writing to System.out");
                         break;
+                    case "-l":
+                        if (i < pArgs.length - 1)
+                            fLanguageLevel = pArgs[++i];
+                        else
+                            fErrStream.println("Warning: missing language level, using the default");
+                        break;
                     case "-ep":
                         fEnablePreview = true;
                         break;
@@ -267,15 +282,41 @@ public final class Main
             return pArgs.length;
         }
 
-
         /**
-         * Return whether or not the {@code -ep} option was specified.
+         * Create a {@code JavaMetricsCollector} from the &quot;-l&quot; and &quot;-ep&quot;
+         * options.
          *
-         * @return  True if the {@code -ep} was present, false if not.
+         * @return  A new {@code JavaMetricsCollector}, never null.
          */
-        boolean isPreviewEnabled()
+        @Nonnull
+        JavaMetricsCollector createJavaMetricsCollector()
         {
-            return fEnablePreview;
+            JavaLanguageLevel aLanguageLevel = null;
+            if (fLanguageLevel != null)
+            {
+                // Language level specified, parse it.
+                try
+                {
+                    aLanguageLevel = JavaLanguageLevel.forNumericValue(Integer.parseInt(fLanguageLevel));
+                }
+                catch (NumberFormatException nfe)
+                {
+                    // Invalid numeric value, a warning will be printed below.
+                }
+
+                if (aLanguageLevel == null)
+                {
+                    fErrStream.println(
+                        "Warning: ignoring invalid language level '" +
+                            fLanguageLevel +
+                            '\'');
+                }
+            }
+
+            if (aLanguageLevel == null)
+                aLanguageLevel = JavaLanguageLevel.getDefault();
+
+            return new JavaMetricsCollector(aLanguageLevel, fEnablePreview);
         }
 
         /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018-2021 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018-2022 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -44,16 +44,18 @@ import org.myire.scent.metrics.PackageMetrics;
 public class JavaMetricsCollector
 {
     private final JavaParser fJavaParser;
+    private final JavaLanguageLevel fLanguageLevel;
+    private final boolean fPreviewsEnabled;
     private final JavaMetrics fCollectedMetrics = new JavaMetrics();
 
 
     /**
      * Create a new {@code JavaMetricsCollector} for the default language level as specified by
-     * {@link LanguageLevel#getDefault()}.
+     * {@link JavaLanguageLevel#getDefault()}.
      */
     public JavaMetricsCollector()
     {
-        this(LanguageLevel.getDefault());
+        this(JavaLanguageLevel.getDefault());
     }
 
 
@@ -65,7 +67,7 @@ public class JavaMetricsCollector
      *
      * @throws NullPointerException if {@code pLanguageLevel} is null.
      */
-    public JavaMetricsCollector(@Nonnull LanguageLevel pLanguageLevel)
+    public JavaMetricsCollector(@Nonnull JavaLanguageLevel pLanguageLevel)
     {
         this(pLanguageLevel, false);
     }
@@ -80,9 +82,35 @@ public class JavaMetricsCollector
      *
      * @throws NullPointerException if {@code pLanguageLevel} is null.
      */
-    public JavaMetricsCollector(@Nonnull LanguageLevel pLanguageLevel, boolean pEnablePreviews)
+    public JavaMetricsCollector(@Nonnull JavaLanguageLevel pLanguageLevel, boolean pEnablePreviews)
     {
         fJavaParser = new JavaParser(createParserConfiguration(pLanguageLevel, pEnablePreviews));
+        fLanguageLevel = pLanguageLevel;
+        fPreviewsEnabled = pEnablePreviews;
+    }
+
+
+    /**
+     * Get the language level used to parse the sources for which metrics are collected.
+     *
+     * @return  The language level, never null.
+     */
+    @Nonnull
+    public JavaLanguageLevel getLanguageLevel()
+    {
+        return fLanguageLevel;
+    }
+
+
+    /**
+     * Get whether language feature previews are enabled for the language level returned by
+     * {@link #getLanguageLevel()}.
+     *
+     * @return  True if language feature previews are enabled, false if not.
+     */
+    public boolean hasPreviewsEnabled()
+    {
+        return fPreviewsEnabled;
     }
 
 
@@ -219,7 +247,7 @@ public class JavaMetricsCollector
      */
     @Nonnull
     static private ParserConfiguration createParserConfiguration(
-        @Nonnull LanguageLevel pLanguageLevel,
+        @Nonnull JavaLanguageLevel pLanguageLevel,
         boolean pEnablePreviews)
     {
         ParserConfiguration.LanguageLevel aParserLanguageLevel =
@@ -263,160 +291,5 @@ public class JavaMetricsCollector
         ParseException aParseException = new ParseException(aCause.getMessage(), aPosition);
         aParseException.initCause(aCause);
         return aParseException;
-    }
-
-
-    /**
-     * The supported Java language levels.
-     */
-    public enum LanguageLevel
-    {
-        /**
-         * Java 8.
-         *<p>
-         * New language features:
-         *<ul>
-         * <li>lambdas</li>
-         * <li>type annotations</li>
-         *</ul>
-         */
-        JAVA_8(ParserConfiguration.LanguageLevel.JAVA_8, ParserConfiguration.LanguageLevel.JAVA_8),
-
-        /**
-         * Java 9.
-         *<p>
-         * New language features:
-         *<ul>
-         * <li>modules</li>
-         * <li>private interface methods</li>
-         *</ul>
-         */
-        JAVA_9(ParserConfiguration.LanguageLevel.JAVA_9, ParserConfiguration.LanguageLevel.JAVA_9),
-
-        /**
-         * Java 10.
-         *<p>
-         * New language features:
-         *<ul>
-         * <li>local variable type inference (JEP 286)</li>
-         *</ul>
-         */
-        JAVA_10(ParserConfiguration.LanguageLevel.JAVA_10, ParserConfiguration.LanguageLevel.JAVA_10_PREVIEW),
-
-        /**
-         * Java 11.
-         *<p>
-         * New language features:
-         *<ul>
-         * <li>local variable syntax for lambda parameters (JEP 323)</li>
-         *</ul>
-         */
-        JAVA_11(ParserConfiguration.LanguageLevel.JAVA_11, ParserConfiguration.LanguageLevel.JAVA_11_PREVIEW),
-
-        /**
-         * Java 12.
-         *<p>
-         * New language feature previews:
-         *<ul>
-         * <li>switch expressions preview (JEP 325)</li>
-         *</ul>
-         */
-        JAVA_12(ParserConfiguration.LanguageLevel.JAVA_12, ParserConfiguration.LanguageLevel.JAVA_12_PREVIEW),
-
-        /**
-         * Java 13.
-         *<p>
-         * New language feature previews:
-         *<ul>
-         * <li>text blocks preview (JEP 355)</li>
-         * <li>switch expressions second preview (JEP 354))</li>
-         *</ul>
-         */
-        JAVA_13(ParserConfiguration.LanguageLevel.JAVA_13, ParserConfiguration.LanguageLevel.JAVA_13_PREVIEW),
-
-        /**
-         * Java 14.
-         *<p>
-         * New language features:
-         *<ul>
-         * <li>switch expressions (JEP 361)</li>
-         *</ul>
-         *<p>
-         * New language feature previews:
-         *<ul>
-         * <li>pattern matching for instanceof preview (JEP 305)</li>
-         * <li>records preview (JEP 359)</li>
-         * <li>text blocks second preview (JEP 368)</li>
-         *</ul>
-         */
-        JAVA_14(ParserConfiguration.LanguageLevel.JAVA_14, ParserConfiguration.LanguageLevel.JAVA_14_PREVIEW),
-
-        /**
-         * Java 15.
-         *<p>
-         * New language features:
-         *<ul>
-         * <li>text blocks (JEP 378)</li>
-         *</ul>
-         *<p>
-         * New language feature previews:
-         *<ul>
-         * <li>sealed classes preview (JEP 360)</li>
-         * <li>pattern matching for instanceof second preview (JEP 375)</li>
-         * <li>records second preview (JEP 384)</li>
-         *</ul>
-         */
-        JAVA_15(ParserConfiguration.LanguageLevel.JAVA_15, ParserConfiguration.LanguageLevel.JAVA_15_PREVIEW),
-        ;
-
-        private final ParserConfiguration.LanguageLevel fParserLanguageLevel;
-        private final ParserConfiguration.LanguageLevel fParserPreviewLanguageLevel;
-
-
-        LanguageLevel(
-            @Nonnull ParserConfiguration.LanguageLevel pParserLanguageLevel,
-            @Nonnull ParserConfiguration.LanguageLevel pParserPreviewLanguageLevel)
-        {
-            fParserLanguageLevel = pParserLanguageLevel;
-            fParserPreviewLanguageLevel = pParserPreviewLanguageLevel;
-        }
-
-
-        /**
-         * Get the {@code ParserConfiguration.LanguageLevel} instance corresponding to this language
-         * level.
-         *
-         * @return  The corresponding {@code ParserConfiguration.LanguageLevel}, never null.
-         */
-        @Nonnull
-        ParserConfiguration.LanguageLevel getParserLanguageLevel()
-        {
-            return fParserLanguageLevel;
-        }
-
-
-        /**
-         * Get the {@code ParserConfiguration.LanguageLevel} instance corresponding to this language
-         * level when previews are enabled.
-         *
-         * @return  The corresponding preview {@code ParserConfiguration.LanguageLevel}, never null.
-         */
-        @Nonnull
-        ParserConfiguration.LanguageLevel getParserPreviewLanguageLevel()
-        {
-            return fParserPreviewLanguageLevel;
-        }
-
-
-        /**
-         * Get the default language level for Java metrics collecting.
-         *
-         * @return  The default language level, never null.
-         */
-        @Nonnull
-        static public LanguageLevel getDefault()
-        {
-            return JAVA_15;
-        }
     }
 }
