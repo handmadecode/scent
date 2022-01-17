@@ -139,121 +139,19 @@ public class JavaMetricsCollectorTest
 
 
     /**
-     * A {@code JavaMetricsCollector} for language level 8 should produce the expected result for
-     * all test fixtures.
+     * A {@code JavaMetricsCollector} should produce the expected result for all test fixtures and
+     * all language levels.
      */
     @Test
-    public void collectProducesTheExpectedResultForJava8LanguageLevel()
+    public void collectProducesTheExpectedResultForAllLanguageLevels()
     {
-        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_8, false);
+        for (JavaLanguageLevel aLanguageLevel : JavaLanguageLevel.values())
+        {
+            for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+                aFixture.assertCollectWithLanguageLevel(aLanguageLevel, false);
 
-        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_8, true);
-    }
-
-
-    /**
-     * A {@code JavaMetricsCollector} for language level 9 should produce the expected result for
-     * all test fixtures.
-     */
-    @Test
-    public void collectProducesTheExpectedResultForJava9LanguageLevel()
-    {
-        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_9, false);
-
-        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_9, true);
-    }
-
-
-    /**
-     * A {@code JavaMetricsCollector} for language level 10 should produce the expected result for
-     * all test fixtures.
-     */
-    @Test
-    public void collectProducesTheExpectedResultForJava10LanguageLevel()
-    {
-        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_10, false);
-
-        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_10, true);
-    }
-
-
-    /**
-     * A {@code JavaMetricsCollector} for language level 11 should produce the expected result for
-     * all test fixtures.
-     */
-    @Test
-    public void collectProducesTheExpectedResultForJava11LanguageLevel()
-    {
-        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_11, false);
-
-        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_11, true);
-    }
-
-
-    /**
-     * A {@code JavaMetricsCollector} for language level 12 should produce the expected result for
-     * all test fixtures.
-     */
-    @Test
-    public void collectProducesTheExpectedResultForJava12LanguageLevel()
-    {
-        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_12, false);
-
-        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_12, true);
-    }
-
-
-    /**
-     * A {@code JavaMetricsCollector} for language level 13 should produce the expected result for
-     * all test fixtures.
-     */
-    @Test
-    public void collectProducesTheExpectedResultForJava13LanguageLevel()
-    {
-        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_13, false);
-
-        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_13, true);
-    }
-
-
-    /**
-     * A {@code JavaMetricsCollector} for language level 14 should produce the expected result for
-     * all test fixtures.
-     */
-    @Test
-    public void collectProducesTheExpectedResultForJava14LanguageLevel()
-    {
-        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_14, false);
-
-        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_14, true);
-    }
-
-
-    /**
-     * A {@code JavaMetricsCollector} for language level 15 should produce the expected result for
-     * all test fixtures.
-     */
-    @Test
-    public void collectProducesTheExpectedResultForJava15LanguageLevel()
-    {
-        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_15, false);
-
-        for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
-            aFixture.assertCollectWithLanguageLevel(JavaLanguageLevel.JAVA_15, true);
+            for (LanguageLevelFixture aFixture : LanguageLevelFixture.FIXTURES)
+                aFixture.assertCollectWithLanguageLevel(aLanguageLevel, true);
+        }
     }
 }

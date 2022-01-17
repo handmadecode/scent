@@ -27,7 +27,7 @@ final class LanguageLevelFixture
     static private final EnumSet<JavaLanguageLevel> ALL_LANGUAGE_LEVELS =
         EnumSet.allOf(JavaLanguageLevel.class);
 
-    static private final JavaLanguageLevel HIGHEST_LANGUAGE_LEVEL = JavaLanguageLevel.JAVA_16;
+    static private final JavaLanguageLevel HIGHEST_LANGUAGE_LEVEL = JavaLanguageLevel.JAVA_17;
 
     static final LanguageLevelFixture[] FIXTURES = {
 

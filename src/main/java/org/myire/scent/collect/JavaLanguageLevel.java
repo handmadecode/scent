@@ -124,6 +124,15 @@ public enum JavaLanguageLevel
      *</ul>
      */
     JAVA_16(16, ParserConfiguration.LanguageLevel.JAVA_16, ParserConfiguration.LanguageLevel.JAVA_16_PREVIEW),
+
+    /**
+     * Java 17.
+     *<ul>
+     * <li>Sealed classes (JEP 409)</li>
+     * <li>pattern matching for switch preview (JEP 406)</li>
+     *</ul>
+     */
+    JAVA_17(17, ParserConfiguration.LanguageLevel.JAVA_17, ParserConfiguration.LanguageLevel.JAVA_17_PREVIEW),
     ;
 
     // Array where element n holds the instance with numeric value n.
@@ -200,7 +209,7 @@ public enum JavaLanguageLevel
     @Nonnull
     static public JavaLanguageLevel getDefault()
     {
-        return JAVA_16;
+        return JAVA_17;
     }
 
 
