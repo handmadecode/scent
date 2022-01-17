@@ -38,7 +38,7 @@ public class CommentMetrics
 
 
     /**
-     * Is this instance empty?
+     * Check if this instance is empty.
      *
      * @return  True if all comment counts are zero, false if at least one of them is non-zero.
      */

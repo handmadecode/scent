@@ -84,7 +84,7 @@ public final class Main
 
         JavaMetrics aMetrics = aCollector.getCollectedMetrics();
         if (!aMetrics.isEmpty())
-           writeReport(aMetrics, aMainOptions::createOutputStream, aMainOptions::createReportWriter);
+            writeReport(aMetrics, aMainOptions::createOutputStream, aMainOptions::createReportWriter);
     }
 
 
