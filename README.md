@@ -15,8 +15,8 @@ Note that Scent is not a drop-in replacement for JavaNCSS, nor does it produce e
 metrics. See the [Differences with JavaNCSS](#differences-with-javancss) section for more details on
 how Scent and JavaNCSS differ.
 
-Scent must compiled with at least Java 9, but can still be run with Java 8. It parses and collects
-metrics for source code up to and including language level 13.
+Scent must be compiled with at least Java 9, but can still be run with Java 8. It parses and
+collects metrics for source code up to and including language level 16.
 
 
 ## Contents
@@ -28,6 +28,12 @@ metrics for source code up to and including language level 13.
 
 
 ## Release Notes
+
+### version 2.4
+
+* Support for language level 16: pattern matching for instanceof (JEP 394) and records (JEP 395).
+* Language level 17 is recognized, but sealed classes (JEP 409) and pattern matching for switch
+  preview (JEP 406) are not supported yet.
 
 ### version 2.3
 
@@ -243,7 +249,8 @@ Type metrics also hold information about the type's kind, which is one of
 * enum
 * enum constant with a class body, which effectively is a subclass of the enclosing enum
 * annotation
-* anonymous class          
+* anonymous class
+* record
 
 ### Method
 
