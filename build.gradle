@@ -4,8 +4,8 @@
 plugins
 {
     id 'com.github.spotbugs' version '4.7.0'
-    id 'org.myire.quill.core' version '2.4'
-    id 'org.myire.quill.moduleinfo' version '2.4'
+    id 'org.myire.quill.core' version '3.1'
+    id 'org.myire.quill.moduleinfo' version '3.1'
 }
 
 // Load project meta data and version from the files in the meta data directory, and set the

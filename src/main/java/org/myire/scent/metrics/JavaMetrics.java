@@ -39,7 +39,7 @@ public class JavaMetrics
 
 
     /**
-     * Is this instance empty?
+     * Check if this instance is empty.
      *
      * @return  True iff no package metrics or modular compilation unit metrics have been added to
      *          this instance.

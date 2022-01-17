@@ -115,4 +115,6 @@ enum FullEnum
     {
         double factor();
     }
+
+    record InnerRecord(int recordField) {}
 }

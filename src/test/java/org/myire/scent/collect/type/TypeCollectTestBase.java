@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018, 2022 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -165,6 +165,30 @@ abstract public class TypeCollectTestBase
 
 
     /**
+     * An inner record should be collected as a {@code TypeMetrics}.
+     *
+     * @throws ParseException   if the test fails unexpectedly.
+     */
+    @Test
+    public void innerRecordIsCollected() throws ParseException
+    {
+        // Given
+        String aName = "InnerRecord";
+        String aSrc = createTypeDeclarationWithMembers("record " + aName + "(){}");
+
+        // When
+        JavaMetrics aMetrics = collect(aSrc);
+
+        // Then
+        TypeMetrics aType = getFirstType(aMetrics);
+        assertEquals(1, aType.getNumInnerTypes());
+        TypeMetrics aInnerType = getFirstInnerType(aType);
+        assertEquals(aName, aInnerType.getName());
+        assertEquals(TypeMetrics.Kind.RECORD, aInnerType.getKind());
+    }
+
+
+    /**
      * Parsing multiple inner types should result in the same number of {@code TypeMetrics}.
      *
      * @throws ParseException   if the test fails unexpectedly.
@@ -177,18 +201,23 @@ abstract public class TypeCollectTestBase
         String aInterfaceName = "InnerInterface";
         String aEnumName = "InnerEnum";
         String aAnnotationName = "InnerAnnotation";
+        //String aRecordName = "InnerRecord";
         String aSrc =
                 createTypeDeclarationWithMembers(
                         "class " + aClassName + "{}",
                         "interface " + aInterfaceName + "{}",
                         "enum " + aEnumName + "{}",
                         "@interface " + aAnnotationName + "{}");
+                        // Pending "https://github.com/javaparser/javaparser/issues/3260"
+                        //"record " + aRecordName + "(){}");
 
         // When
         JavaMetrics aMetrics = collect(aSrc);
 
         // Then
         TypeMetrics aType = getFirstType(aMetrics);
+        // Pending "https://github.com/javaparser/javaparser/issues/3260"
+        // assertEquals(5, aType.getNumInnerTypes());
         assertEquals(4, aType.getNumInnerTypes());
         Iterator<TypeMetrics> aIterator = aType.getInnerTypes().iterator();
 
@@ -207,6 +236,13 @@ abstract public class TypeCollectTestBase
         aInnerType = aIterator.next();
         assertEquals(aAnnotationName, aInnerType.getName());
         assertEquals(TypeMetrics.Kind.ANNOTATION, aInnerType.getKind());
+
+        // Pending "https://github.com/javaparser/javaparser/issues/3260"
+        /*
+        aInnerType = aIterator.next();
+        assertEquals(aRecordName, aInnerType.getName());
+        assertEquals(TypeMetrics.Kind.RECORD, aInnerType.getKind());
+        */
 
         assertFalse(aIterator.hasNext());
     }

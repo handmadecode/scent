@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018, 2022 Peter Franzen. All rights reserved.
+ * Copyright 2022 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -8,9 +8,10 @@ package org.myire.scent.collect.type;
 import java.text.ParseException;
 import java.util.Iterator;
 
+import org.junit.Ignore;
 import org.junit.Test;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import org.myire.scent.metrics.CommentMetrics;
 import org.myire.scent.metrics.CompilationUnitMetrics;
@@ -24,29 +25,37 @@ import static org.myire.scent.util.CollectTestUtil.collect;
 import static org.myire.scent.util.CollectTestUtil.collectFromResource;
 import static org.myire.scent.util.CollectTestUtil.getFirstCompilationUnit;
 import static org.myire.scent.util.CollectTestUtil.getFirstField;
-import static org.myire.scent.util.CollectTestUtil.getFirstInnerType;
 import static org.myire.scent.util.CollectTestUtil.getFirstMethod;
 import static org.myire.scent.util.CollectTestUtil.getFirstPackage;
 import static org.myire.scent.util.CollectTestUtil.getFirstType;
 
 
 /**
- * Unit tests related to parsing and collecting metrics for enum classes.
+ * Unit tests related to parsing and collecting metrics for record classes.
  *
  * @author <a href="mailto:peter@myire.org">Peter Franzen</a>
  */
-public class EnumCollectTest extends ClassAndEnumCollectTestBase
+public class RecordCollectTest extends ClassTypeCollectTestBase
 {
+    @Test
+    @Ignore("https://github.com/javaparser/javaparser/issues/3260")
+    public void innerRecordIsCollected() throws ParseException
+    {
+        super.innerRecordIsCollected();
+    }
+
+
     /**
-     * A constructor should be collected as a {@code MethodMetrics} with the correct kind.
+     * A record's compact canonical constructor should be collected a method of the constructor
+     * kind.
      *
      * @throws ParseException   if the test fails unexpectedly.
      */
     @Test
-    public void constructorHasTheCorrectKind() throws ParseException
+    public void compactCanonicalConstructorIsCollected() throws ParseException
     {
         // Given
-        String aSrc = "enum X {; private X() {} }";
+        String aSrc = "record X(int f) { X {f++;} }";
 
         // When
         JavaMetrics aMetrics = collect(aSrc);
@@ -57,92 +66,77 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
 
 
     /**
-     * An enum constant without a class body should be collected as a {@code FieldMetrics}.
+     * A record field should be collected as a {@code FieldMetrics} with the correct name.
      *
      * @throws ParseException   if the test fails unexpectedly.
      */
     @Test
-    public void enumConstantWithoutBodyIsCollected() throws ParseException
+    public void recordFieldIsCollected() throws ParseException
     {
         // Given
-        String aName = "THINGY";
-        String aSrc = "enum X { " + aName + '}';
+        String aName = "f";
+        String aSrc = "record Rec(int " + aName + ") {}";
 
         // When
         JavaMetrics aMetrics = collect(aSrc);
 
         // Then
-        TypeMetrics aType = getFirstType(aMetrics);
-        assertEquals(1, aType.getNumFields());
-        assertEquals(aName, getFirstField(aType).getName());
+        FieldMetrics aFieldMetrics = getFirstField(aMetrics);
+        assertEquals(aName, aFieldMetrics.getName());
     }
 
 
     /**
-     * An enum constant without a class body should be collected as a {@code FieldMetrics} with the
-     * correct kind.
+     * All record fields should be collected as {@code FieldMetrics} with the correct names.
      *
      * @throws ParseException   if the test fails unexpectedly.
      */
     @Test
-    public void enumConstantWithoutBodyHasTheCorrectKind() throws ParseException
+    public void recordFieldsAreCollected() throws ParseException
     {
         // Given
-        String aSrc = "enum X {THINGY;}";
+        String[] aFieldNames = {"fldA", "fldB", "fldC"};
+        String aSrc =
+            "record Rec(int " + aFieldNames[0] +
+                ", String " + aFieldNames[1] +
+                ", float "+ aFieldNames[2] +
+                ") {}";
 
         // When
         JavaMetrics aMetrics = collect(aSrc);
 
         // Then
-        assertEquals(FieldMetrics.Kind.ENUM_CONSTANT, getFirstField(aMetrics).getKind());
+        TypeMetrics aTypeMetrics = getFirstType(aMetrics);
+        assertEquals(3, aTypeMetrics.getNumFields());
+        int i = 0;
+        for (FieldMetrics aFieldMetrics : aTypeMetrics.getFields())
+            assertEquals(aFieldNames[i++], aFieldMetrics.getName());
     }
 
 
     /**
-     * An enum constant with a class body should be collected as a {@code TypeMetrics}.
+     * An explicitly declared getter for a record field should be collected.
      *
      * @throws ParseException   if the test fails unexpectedly.
      */
     @Test
-    public void enumConstantWithBodyIsCollected() throws ParseException
+    public void explicitlyDeclaredGetterIsCollected() throws ParseException
     {
         // Given
-        String aName = "THINGY";
-        String aSrc = "public enum Things { " + aName + " {int bodyField; }; }";
+        String aGetter = "int getF()";
+        String aSrc = "record Rec(int f) {" + aGetter + " {return f;}}";
 
         // When
         JavaMetrics aMetrics = collect(aSrc);
 
         // Then
-        TypeMetrics aEnumMetrics = getFirstType(aMetrics);
-        assertEquals(1, aEnumMetrics.getNumInnerTypes());
-        TypeMetrics aEnumConstantMetrics = getFirstInnerType(aEnumMetrics);
-        assertEquals(aName, aEnumConstantMetrics.getName());
+        MethodMetrics aMethodMetrics = getFirstMethod(aMetrics);
+        assertEquals(aGetter, aMethodMetrics.getName());
     }
 
 
     /**
-     * An enum constant with a class body should be collected as a {@code TypeMetrics} with the
-     * correct kind.
-     *
-     * @throws ParseException   if the test fails unexpectedly.
-     */
-    @Test
-    public void enumConstantWithBodyHasTheCorrectKind() throws ParseException
-    {
-        // Given
-        String aSrc = "public enum Things { THANGY {int fField; } ; }";
-
-        // When
-        JavaMetrics aMetrics = collect(aSrc);
-
-        // Then
-        assertEquals(TypeMetrics.Kind.ENUM_CONSTANT, getFirstInnerType(aMetrics).getKind());
-    }
-
-
-    /**
-     * An enum with all kinds of members should have the corresponding code element metrics
+     * A record class with all kinds of members should have the corresponding code element metrics
      * collected.
      *
      * @throws ParseException   if the test fails unexpectedly.
@@ -151,8 +145,8 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
     public void fullExampleCollectsTheExpectedMetrics() throws ParseException
     {
         // Given
-        String aResourceName = "/FullEnum.java";
-        String aEnumName = "FullEnum";
+        String aResourceName = "/FullRecord.java";
+        String aClassName = "FullRecord";
 
         // When
         JavaMetrics aMetrics = collectFromResource(aResourceName);
@@ -161,44 +155,33 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
         PackageMetrics aPackage = getFirstPackage(aMetrics);
         assertEquals("org.myire.scent", aPackage.getName());
 
-        // Assert compilation unit name and file header block comments.
+        // Assert compilation unit name and file header block comment.
         CompilationUnitMetrics aCompilationUnit = getFirstCompilationUnit(aPackage);
         assertEquals(aResourceName, aCompilationUnit.getName());
         CommentMetrics aComments = aCompilationUnit.getComments();
-        assertEquals(2, aComments.getNumBlockComments());
-        assertEquals(2, aComments.getNumBlockCommentLines());
-        assertEquals(54, aComments.getBlockCommentsLength());
-
-        // Assert enum name and kind, and comment
-        TypeMetrics aClass = getFirstType(aCompilationUnit);
-        assertEquals(aEnumName, aClass.getName());
-        assertEquals(TypeMetrics.Kind.ENUM, aClass.getKind());
-        aComments = aClass.getComments();
         assertEquals(1, aComments.getNumLineComments());
-        assertEquals(32, aComments.getLineCommentsLength());
 
-        // Assert enum constant without body
-        Iterator<FieldMetrics> aFields = aClass.getFields().iterator();
-        FieldMetrics aField = aFields.next();
-        assertEquals("ENUM_CONSTANT_1", aField.getName());
-        assertEquals(FieldMetrics.Kind.ENUM_CONSTANT, aField.getKind());
-        aComments = aField.getComments();
-        assertEquals(1, aComments.getNumJavaDocComments());
-        assertEquals(1, aComments.getNumJavaDocLines());
-        assertEquals(23, aComments.getJavaDocCommentsLength());
-
-        // Assert enum constant with body
-        Iterator<TypeMetrics> aInnerTypes = aClass.getInnerTypes().iterator();
-        TypeMetrics aInnerType = aInnerTypes.next();
-        assertEquals("ENUM_CONSTANT_2", aInnerType.getName());
-        assertEquals(TypeMetrics.Kind.ENUM_CONSTANT, aInnerType.getKind());
-        aComments = aInnerType.getComments();
+        // Assert record class name and kind, and class JavaDoc
+        TypeMetrics aClass = getFirstType(aCompilationUnit);
+        assertEquals(aClassName, aClass.getName());
+        assertEquals(TypeMetrics.Kind.RECORD, aClass.getKind());
+        aComments = aClass.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
         assertEquals(3, aComments.getNumJavaDocLines());
-        assertEquals(56, aComments.getJavaDocCommentsLength());
-        MethodMetrics aMethod = getFirstMethod(aInnerType);
-        assertEquals("int instanceMethod()", aMethod.getName());
-        assertEquals(MethodMetrics.Kind.INSTANCE_METHOD, aMethod.getKind());
+        assertEquals(21, aComments.getJavaDocCommentsLength());
+
+        // Assert first instance field
+        Iterator<FieldMetrics> aFields = aClass.getFields().iterator();
+        FieldMetrics aField = aFields.next();
+        assertEquals("instanceField1", aField.getName());
+        assertEquals(FieldMetrics.Kind.INSTANCE_FIELD, aField.getKind());
+        assertEquals(0, aField.getStatements().getNumStatements());
+
+        // Assert second instance field
+        aField = aFields.next();
+        assertEquals("instanceField2", aField.getName());
+        assertEquals(FieldMetrics.Kind.INSTANCE_FIELD, aField.getKind());
+        assertEquals(0, aField.getStatements().getNumStatements());
 
         // Assert class field
         aField = aFields.next();
@@ -209,37 +192,37 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
         assertEquals(1, aComments.getNumLineComments());
         assertEquals(38, aComments.getLineCommentsLength());
 
-        // Assert instance field
-        aField = aFields.next();
-        assertEquals("instanceField", aField.getName());
-        assertEquals(FieldMetrics.Kind.INSTANCE_FIELD, aField.getKind());
-        assertEquals(0, aField.getStatements().getNumStatements());
-        aComments = aField.getComments();
-        assertEquals(1, aComments.getNumBlockComments());
-        assertEquals(1, aComments.getNumBlockCommentLines());
-        assertEquals(42, aComments.getBlockCommentsLength());
-
         // Assert class initializer
         Iterator<MethodMetrics> aMethods = aClass.getMethods().iterator();
-        aMethod = aMethods.next();
+        MethodMetrics aMethod = aMethods.next();
         assertEquals("clinit", aMethod.getName());
         assertEquals(MethodMetrics.Kind.STATIC_INITIALIZER, aMethod.getKind());
         assertEquals(1, aMethod.getStatements().getNumStatements());
 
-        // Assert instance initializer
+        // Assert compact canonical constructor
         aMethod = aMethods.next();
-        assertEquals("init", aMethod.getName());
-        assertEquals(MethodMetrics.Kind.INSTANCE_INITIALIZER, aMethod.getKind());
-        assertEquals(1, aMethod.getStatements().getNumStatements());
-
-        // Assert constructor
-        aMethod = aMethods.next();
-        assertEquals(aEnumName + "()", aMethod.getName());
+        assertEquals(aClassName + "()", aMethod.getName());
         assertEquals(MethodMetrics.Kind.CONSTRUCTOR, aMethod.getKind());
         assertEquals(1, aMethod.getStatements().getNumStatements());
         aComments = aMethod.getComments();
         assertEquals(1, aComments.getNumLineComments());
-        assertEquals(39, aComments.getLineCommentsLength());
+        assertEquals(29, aComments.getLineCommentsLength());
+
+        // Assert constructor
+        aMethod = aMethods.next();
+        assertEquals(aClassName + "()", aMethod.getName());
+        assertEquals(MethodMetrics.Kind.CONSTRUCTOR, aMethod.getKind());
+        assertEquals(1, aMethod.getStatements().getNumStatements());
+
+        // Assert overridden getter method
+        aMethod = aMethods.next();
+        assertEquals("String f2()", aMethod.getName());
+        assertEquals(MethodMetrics.Kind.INSTANCE_METHOD, aMethod.getKind());
+        assertEquals(2, aMethod.getStatements().getNumStatements());
+        aComments = aMethod.getComments();
+        assertEquals(1, aComments.getNumJavaDocComments());
+        assertEquals(4, aComments.getNumJavaDocLines());
+        assertEquals(39, aComments.getJavaDocCommentsLength());
 
         // Assert instance method
         aMethod = aMethods.next();
@@ -248,8 +231,8 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
         assertEquals(1, aMethod.getStatements().getNumStatements());
         aComments = aMethod.getComments();
         assertEquals(1, aComments.getNumJavaDocComments());
-        assertEquals(8, aComments.getNumJavaDocLines());
-        assertEquals(64, aComments.getJavaDocCommentsLength());
+        assertEquals(5, aComments.getNumJavaDocLines());
+        assertEquals(47, aComments.getJavaDocCommentsLength());
 
         // Assert class method
         aMethod = aMethods.next();
@@ -262,7 +245,8 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
         assertEquals(47, aComments.getJavaDocCommentsLength());
 
         // Assert inner interface
-        aInnerType = aInnerTypes.next();
+        Iterator<TypeMetrics> aInnerTypes = aClass.getInnerTypes().iterator();
+        TypeMetrics aInnerType = aInnerTypes.next();
         assertEquals("InnerInterface", aInnerType.getName());
         assertEquals(TypeMetrics.Kind.INTERFACE, aInnerType.getKind());
         aComments = aInnerType.getComments();
@@ -277,9 +261,6 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
         aInnerType = aInnerTypes.next();
         assertEquals("InnerClass", aInnerType.getName());
         assertEquals(TypeMetrics.Kind.CLASS, aInnerType.getKind());
-        aComments = aInnerType.getComments();
-        assertEquals(2, aComments.getNumLineComments());
-        assertEquals(43, aComments.getLineCommentsLength());
         aField = getFirstField(aInnerType);
         assertEquals("innerField", aField.getName());
         assertEquals(FieldMetrics.Kind.INSTANCE_FIELD, aField.getKind());
@@ -297,40 +278,40 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
         aInnerType = aInnerTypes.next();
         assertEquals("InnerEnum", aInnerType.getName());
         assertEquals(TypeMetrics.Kind.ENUM, aInnerType.getKind());
-        aComments = aInnerType.getComments();
-        assertEquals(1, aComments.getNumJavaDocComments());
-        assertEquals(7, aComments.getNumJavaDocLines());
-        assertEquals(52, aComments.getJavaDocCommentsLength());
         aFields = aInnerType.getFields().iterator();
         aField = aFields.next();
-        assertEquals("INNER_CONSTANT_1", aField.getName());
+        assertEquals("ENUM_CONSTANT_1", aField.getName());
         assertEquals(FieldMetrics.Kind.ENUM_CONSTANT, aField.getKind());
         aComments = aField.getComments();
         assertEquals(1, aComments.getNumLineComments());
         assertEquals(37, aComments.getLineCommentsLength());
         aField = aFields.next();
-        assertEquals("INNER_CONSTANT_2", aField.getName());
+        assertEquals("ENUM_CONSTANT_2", aField.getName());
         assertEquals(FieldMetrics.Kind.ENUM_CONSTANT, aField.getKind());
         aComments = aField.getComments();
-        assertEquals(1, aComments.getNumBlockComments());
-        assertEquals(1, aComments.getNumBlockCommentLines());
-        assertEquals(32, aComments.getBlockCommentsLength());
+        assertEquals(1, aComments.getNumJavaDocComments());
+        assertEquals(1, aComments.getNumJavaDocLines());
+        assertEquals(26, aComments.getJavaDocCommentsLength());
 
         // Assert inner annotation
         aInnerType = aInnerTypes.next();
         assertEquals("InnerAnnotation", aInnerType.getName());
         assertEquals(TypeMetrics.Kind.ANNOTATION, aInnerType.getKind());
         aField = getFirstField(aInnerType);
-        assertEquals("factor", aField.getName());
+        assertEquals("name", aField.getName());
         assertEquals(FieldMetrics.Kind.ANNOTATION_TYPE_ELEMENT, aField.getKind());
 
         // Assert inner record
+        // Pending "https://github.com/javaparser/javaparser/issues/3260"
+        /*
         aInnerType = aInnerTypes.next();
         assertEquals("InnerRecord", aInnerType.getName());
         assertEquals(TypeMetrics.Kind.RECORD, aInnerType.getKind());
-        aField = getFirstField(aInnerType);
+        aFields = aInnerType.getFields().iterator();
+        aField = aFields.next();
         assertEquals("recordField", aField.getName());
         assertEquals(FieldMetrics.Kind.INSTANCE_FIELD, aField.getKind());
+        */
 
         // Assert no more inner types
         assertFalse(aInnerTypes.hasNext());
@@ -340,13 +321,13 @@ public class EnumCollectTest extends ClassAndEnumCollectTestBase
     @Override
     protected TypeMetrics.Kind getTypeKind()
     {
-        return TypeMetrics.Kind.ENUM;
+        return TypeMetrics.Kind.RECORD;
     }
 
 
     @Override
     protected String createTypeDeclarationStart(String pName)
     {
-        return  "public enum " + pName + "{;";
+        return  "public record " + pName + "(){";
     }
 }

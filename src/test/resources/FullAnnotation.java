@@ -73,4 +73,7 @@ package org.myire.scent;
     {
         boolean flag();
     }
+
+//    Pending https://github.com/javaparser/javaparser/issues/3260
+//    record InnerRecord(int recordField) {}
 }

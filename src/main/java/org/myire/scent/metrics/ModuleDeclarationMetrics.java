@@ -53,7 +53,7 @@ public class ModuleDeclarationMetrics extends CodeElementMetrics
 
 
     /**
-     * Is the module declared as open?
+     * Check if the module is declared as open.
      *
      * @return  True if the module is open, false if not.
      */

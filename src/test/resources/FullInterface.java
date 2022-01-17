@@ -90,4 +90,15 @@ interface FullInterface
         // Single line comment for annotation field
         String name() default "X";
     }
+
+    // An inner record
+    // that has no fields
+    public record InnerRecord()
+    {
+        static private int cCount;
+        public int getCount()
+        {
+            return ++cCount;
+        }
+    }
 }

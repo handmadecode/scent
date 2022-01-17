@@ -1,10 +1,11 @@
 /*
- * Copyright 2016, 2018-2019 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018-2019, 2022 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
 package org.myire.scent.collect;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
@@ -69,7 +70,8 @@ final class Collectors
         }
 
         // Move any orphan comments.
-        for (Comment aOrphan : pSourceNode.getOrphanComments())
+        List<Comment> aOrphans = new ArrayList<>(pSourceNode.getOrphanComments());
+        for (Comment aOrphan : aOrphans)
         {
             pTargetNode.addOrphanComment(aOrphan);
             pSourceNode.removeOrphanComment(aOrphan);
@@ -123,7 +125,8 @@ final class Collectors
         collectNodeComment(pNode, pMetrics);
 
         // Collect and remove any orphan comments.
-        for (Comment aOrphan : pNode.getOrphanComments())
+        List<Comment> aOrphans = new ArrayList<>(pNode.getOrphanComments());
+        for (Comment aOrphan : aOrphans)
         {
             aOrphan.accept(CommentVisitor.SINGLETON, pMetrics);
             pNode.removeOrphanComment(aOrphan);
@@ -209,8 +212,9 @@ final class Collectors
         if (aComment != null)
             aBeginLine = aComment.getRange().orElse(aRange).begin.line;
 
-        // Get the parent's comments.
-        List<Comment> aParentComments = aParent.getOrphanComments();
+        // Get the parent's comments. Starting with version 3.23, the list returned by
+        // getOrphanComments() is unmodifiable and can't be sorted below.
+        List<Comment> aParentComments = new ArrayList<>(aParent.getOrphanComments());
         Comment aParentMainComment = pOrphansOnly ? null : aParent.getComment().orElse(null);
         if (aParentMainComment != null)
             aParentComments.add(aParentMainComment);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018, 2022 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -14,8 +14,8 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 
 /**
- * Source code metrics for a class, an interface, an enum, or an annotation. These metrics are a
- * container for the metrics of the type's fields, methods and inner types.
+ * Source code metrics for a class, an interface, an enum, an annotation, or a record. These metrics
+ * are a container for the metrics of the type's fields, methods and inner types.
  *
  * @author <a href="mailto:peter@myire.org">Peter Franzen</a>
  */
@@ -171,13 +171,13 @@ public class TypeMetrics extends CodeElementMetrics
      */
     public enum Kind
     {
-        /** A class. */
+        /** A normal class. */
         CLASS,
 
-        /** An interface. */
+        /** A normal interface. */
         INTERFACE,
 
-        /** An enum. */
+        /** An enum class. */
         ENUM,
 
         /**
@@ -186,10 +186,13 @@ public class TypeMetrics extends CodeElementMetrics
          */
         ENUM_CONSTANT,
 
-        /** An annotation. */
+        /** An annotation interface. */
         ANNOTATION,
 
         /** An anonymous class. */
-        ANONYMOUS_CLASS
+        ANONYMOUS_CLASS,
+
+        /** A record class. */
+        RECORD
     }
 }
