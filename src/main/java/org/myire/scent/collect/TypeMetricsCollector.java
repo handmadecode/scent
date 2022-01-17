@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018, 2022 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -15,16 +15,19 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.AnnotationMemberDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.CompactConstructorDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.EnumConstantDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.RecordDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
+import org.myire.scent.metrics.FieldMetrics;
 import org.myire.scent.metrics.TypeMetrics;
 import static org.myire.scent.collect.Collectors.collectAdjacentParentOrphanComments;
 import static org.myire.scent.collect.Collectors.collectNodeComments;
@@ -103,6 +106,21 @@ class TypeMetricsCollector
         fTypeNode = pAnnotation;
         fTypeName = pAnnotation.getName().getIdentifier();
         fTypeKind = TypeMetrics.Kind.ANNOTATION;
+    }
+
+
+    /**
+     * Create a new {@code TypeMetricsCollector} for a record class.
+     *
+     * @param pRecord   The record to collect metrics for.
+     *
+     * @throws NullPointerException if {@code pRecord} is null.
+     */
+    TypeMetricsCollector(@Nonnull RecordDeclaration pRecord)
+    {
+        fTypeNode = pRecord;
+        fTypeName = pRecord.getName().getIdentifier();
+        fTypeKind = TypeMetrics.Kind.RECORD;
     }
 
 
@@ -228,6 +246,35 @@ class TypeMetricsCollector
         }
 
         /**
+         * Collect metrics for a record class and its fields, methods, and inner types.
+         *
+         * @param pRecord   The record to collect metrics for.
+         * @param pMetrics  Where to add the collected metrics.
+         *
+         * @throws NullPointerException if any of the parameters is null.
+         */
+        @Override
+        public void visit(@Nonnull RecordDeclaration pRecord, @Nonnull TypeMetrics pMetrics)
+        {
+            if (isStartNode(pRecord))
+            {
+                // The start node, collect the record's fields from its declaration's parameters.
+                pRecord.getParameters().forEach(
+                    _p -> pMetrics.add(
+                        new FieldMetrics(_p.getName().getIdentifier(),
+                                         FieldMetrics.Kind.INSTANCE_FIELD)
+                    )
+                );
+
+                // Continue traversing the syntax tree.
+                super.visit(pRecord, pMetrics);
+            }
+            else
+                // Inner record, collect metrics.
+                pMetrics.add(new TypeMetricsCollector(pRecord).collect());
+        }
+
+        /**
          * Collect metrics for a static or instance initializer and its statements and comments.
          *
          * @param pInitializer  The initializer to collect metrics for.
@@ -251,6 +298,20 @@ class TypeMetricsCollector
          */
         @Override
         public void visit(@Nonnull ConstructorDeclaration pConstructor, @Nonnull TypeMetrics pMetrics)
+        {
+            pMetrics.add(new MethodMetricsCollector(pConstructor).collect());
+        }
+
+        /**
+         * Collect metrics for a compact canonical constructor and its statements and comments.
+         *
+         * @param pConstructor  The constructor to collect metrics for.
+         * @param pMetrics      Where to add the collected metrics.
+         *
+         * @throws NullPointerException if any of the parameters is null.
+         */
+        @Override
+        public void visit(@Nonnull CompactConstructorDeclaration pConstructor, @Nonnull TypeMetrics pMetrics)
         {
             pMetrics.add(new MethodMetricsCollector(pConstructor).collect());
         }

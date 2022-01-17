@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018-2019 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018-2019, 2022 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -13,6 +13,7 @@ import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.CompactConstructorDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -73,7 +74,6 @@ class MethodMetricsCollector
      *
      * @throws NullPointerException if {@code pInitializer} is null.
      */
-    @Nonnull
     MethodMetricsCollector(@Nonnull InitializerDeclaration pInitializer)
     {
         fMethodNode = pInitializer;
@@ -97,8 +97,22 @@ class MethodMetricsCollector
      *
      * @throws NullPointerException if {@code pConstructor} is null.
      */
-    @Nonnull
     MethodMetricsCollector(@Nonnull ConstructorDeclaration pConstructor)
+    {
+        fMethodNode = pConstructor;
+        fMethodName = pConstructor.getDeclarationAsString(false, false, false);
+        fMethodKind = MethodMetrics.Kind.CONSTRUCTOR;
+    }
+
+
+    /**
+     * Create a new {@code MethodMetricsCollector} for a compact canonical constructor.
+     *
+     * @param pConstructor  The constructor to collect metrics for.
+     *
+     * @throws NullPointerException if {@code pConstructor} is null.
+     */
+    MethodMetricsCollector(@Nonnull CompactConstructorDeclaration pConstructor)
     {
         fMethodNode = pConstructor;
         fMethodName = pConstructor.getDeclarationAsString(false, false, false);
@@ -113,7 +127,6 @@ class MethodMetricsCollector
      *
      * @throws NullPointerException if {@code pMethod} is null.
      */
-    @Nonnull
     MethodMetricsCollector(@Nonnull MethodDeclaration pMethod)
     {
         fMethodNode = pMethod;

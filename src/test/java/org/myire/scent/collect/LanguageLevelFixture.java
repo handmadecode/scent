@@ -24,6 +24,11 @@ import org.myire.scent.util.CollectTestUtil;
  */
 final class LanguageLevelFixture
 {
+    static private final EnumSet<JavaLanguageLevel> ALL_LANGUAGE_LEVELS =
+        EnumSet.allOf(JavaLanguageLevel.class);
+
+    static private final JavaLanguageLevel HIGHEST_LANGUAGE_LEVEL = JavaLanguageLevel.JAVA_16;
+
     static final LanguageLevelFixture[] FIXTURES = {
 
         // Underscore variable name is not allowed in language levels >= 9
@@ -38,8 +43,8 @@ final class LanguageLevelFixture
         new LanguageLevelFixture(
             "Private interface method",
             "interface X { private void m() {} }",
-            EnumSet.range(JavaLanguageLevel.JAVA_9, JavaLanguageLevel.JAVA_15),
-            EnumSet.range(JavaLanguageLevel.JAVA_9, JavaLanguageLevel.JAVA_15)
+            allLevelsExcept(JavaLanguageLevel.JAVA_8),
+            allLevelsExcept(JavaLanguageLevel.JAVA_8)
         ),
 
         // Local variable type inference was introduced in Java 10, but Java 8 and 9 don't recognize
@@ -47,8 +52,8 @@ final class LanguageLevelFixture
         new LanguageLevelFixture(
             "Local variable type inference",
             "class X { void f() { var l = new java.util.ArrayList<String>(); } }",
-            EnumSet.range(JavaLanguageLevel.JAVA_8, JavaLanguageLevel.JAVA_15),
-            EnumSet.range(JavaLanguageLevel.JAVA_8, JavaLanguageLevel.JAVA_15)
+            ALL_LANGUAGE_LEVELS,
+            ALL_LANGUAGE_LEVELS
         ),
 
         // Local variable syntax for lambda parameters were introduced in Java 11, but Java 8 and 9
@@ -66,8 +71,8 @@ final class LanguageLevelFixture
         new LanguageLevelFixture(
             "Switch expression",
             "class X { int x(int p) { return switch (p) { case 1 -> 17; case 2 -> 4711; default -> 666; }; } }",
-            EnumSet.of(JavaLanguageLevel.JAVA_14, JavaLanguageLevel.JAVA_15),
-            EnumSet.range(JavaLanguageLevel.JAVA_12, JavaLanguageLevel.JAVA_15)
+            allLevelsFrom(JavaLanguageLevel.JAVA_14),
+            allLevelsFrom(JavaLanguageLevel.JAVA_12)
         ),
 
         // Returning from switch expressions with 'yield' were introduced as a preview in Java 13
@@ -75,8 +80,8 @@ final class LanguageLevelFixture
         new LanguageLevelFixture(
             "Switch expression with yield",
             "class X { int y;int x(int p) { return switch (p) { case 1 -> {y++; yield 17;} default -> {y--; yield 666;} }; } }",
-            EnumSet.of(JavaLanguageLevel.JAVA_14, JavaLanguageLevel.JAVA_15),
-            EnumSet.range(JavaLanguageLevel.JAVA_13, JavaLanguageLevel.JAVA_15)
+            allLevelsFrom(JavaLanguageLevel.JAVA_14),
+            allLevelsFrom(JavaLanguageLevel.JAVA_13)
         ),
 
         // Text blocks were introduced as a preview in Java 13 and as a standard feature in Java 15.
@@ -93,8 +98,8 @@ final class LanguageLevelFixture
                     "}"
                 }
             ),
-            EnumSet.of(JavaLanguageLevel.JAVA_15),
-            EnumSet.range(JavaLanguageLevel.JAVA_13, JavaLanguageLevel.JAVA_15)
+            allLevelsFrom(JavaLanguageLevel.JAVA_15),
+            allLevelsFrom(JavaLanguageLevel.JAVA_13)
         ),
 
         // Pattern matching for instanceof was introduced as a preview in Java 14 and as a standard
@@ -102,8 +107,17 @@ final class LanguageLevelFixture
         new LanguageLevelFixture(
             "Pattern matching for instanceof",
             "class X { int m(Object o) { if (o instanceof String s) return s.length(); else return 0; } }",
-            EnumSet.of(JavaLanguageLevel.JAVA_16),
-            EnumSet.range(JavaLanguageLevel.JAVA_14, JavaLanguageLevel.JAVA_15)
+            allLevelsFrom(JavaLanguageLevel.JAVA_16),
+            allLevelsFrom(JavaLanguageLevel.JAVA_14)
+        ),
+
+        // Record classes were introduced as a preview in Java 14 and as a standard feature in
+        // Java 16.
+        new LanguageLevelFixture(
+            "Record classes",
+            "record X(int y) {}",
+            allLevelsFrom(JavaLanguageLevel.JAVA_16),
+            allLevelsFrom(JavaLanguageLevel.JAVA_14)
         ),
     };
 
@@ -185,6 +199,12 @@ final class LanguageLevelFixture
         {
             // Expected exception.
         }
+    }
+
+
+    static private EnumSet<JavaLanguageLevel> allLevelsFrom(JavaLanguageLevel pFirstLevel)
+    {
+        return EnumSet.range(pFirstLevel, HIGHEST_LANGUAGE_LEVEL);
     }
 
 

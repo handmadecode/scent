@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2022 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -116,7 +116,7 @@ public class TypeMetricsTest extends CodeElementMetricsTest
         MethodMetrics aMethod = null;
 
         // When
-        new TypeMetrics("e", TypeMetrics.Kind.ENUM).add(aMethod);
+        new TypeMetrics("e", TypeMetrics.Kind.RECORD).add(aMethod);
     }
 
 

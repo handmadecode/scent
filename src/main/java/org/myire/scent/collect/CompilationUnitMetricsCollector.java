@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018, 2022 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -18,6 +18,7 @@ import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
+import com.github.javaparser.ast.body.RecordDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
@@ -135,6 +136,12 @@ class CompilationUnitMetricsCollector
         public void visit(@Nonnull AnnotationDeclaration pAnnotation, @Nonnull CompilationUnitMetrics pMetrics)
         {
             pMetrics.add(new TypeMetricsCollector(pAnnotation).collect());
+        }
+
+        @Override
+        public void visit(@Nonnull RecordDeclaration pRecord,  @Nonnull CompilationUnitMetrics pMetrics)
+        {
+            pMetrics.add(new TypeMetricsCollector(pRecord).collect());
         }
     }
 }

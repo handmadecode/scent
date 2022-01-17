@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2018 Peter Franzen. All rights reserved.
+ * Copyright 2016, 2018, 2022 Peter Franzen. All rights reserved.
  *
  * Licensed under the Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.util.Iterator;
 
 import org.junit.Test;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
 
 import org.myire.scent.metrics.CommentMetrics;
@@ -29,7 +30,7 @@ import static org.myire.scent.util.CollectTestUtil.getFirstType;
 
 
 /**
- * Unit tests related to parsing and collecting metrics for classes.
+ * Unit tests related to parsing and collecting metrics for normal classes.
  *
  * @author <a href="mailto:peter@myire.org">Peter Franzen</a>
  */
@@ -281,6 +282,28 @@ public class ClassCollectTest extends ClassAndEnumCollectTestBase
         aField = getFirstField(aInnerType);
         assertEquals("value", aField.getName());
         assertEquals(FieldMetrics.Kind.ANNOTATION_TYPE_ELEMENT, aField.getKind());
+
+        // Assert inner record
+        aInnerType = aInnerTypes.next();
+        assertEquals("InnerRecord", aInnerType.getName());
+        assertEquals(TypeMetrics.Kind.RECORD, aInnerType.getKind());
+        aComments = aInnerType.getComments();
+        assertEquals(1, aComments.getNumLineComments());
+        aFields = aInnerType.getFields().iterator();
+        aField = aFields.next();
+        assertEquals("recordField1", aField.getName());
+        assertEquals(FieldMetrics.Kind.INSTANCE_FIELD, aField.getKind());
+        aField = aFields.next();
+        assertEquals("recordField2", aField.getName());
+        assertEquals(FieldMetrics.Kind.INSTANCE_FIELD, aField.getKind());
+        aMethods = aInnerType.getMethods().iterator();
+        aMethod = aMethods.next();
+        assertEquals("float getProduct()", aMethod.getName());
+        assertEquals(MethodMetrics.Kind.INSTANCE_METHOD, aMethod.getKind());
+        assertEquals(1, aMethod.getStatements().getNumStatements());
+
+        // Assert no more inner types
+        assertFalse(aInnerTypes.hasNext());
     }
 
 

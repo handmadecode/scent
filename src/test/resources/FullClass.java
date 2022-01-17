@@ -136,4 +136,13 @@ class FullClass
     {
         int value();
     }
+
+    // An inner record
+    public record InnerRecord(int recordField1, float recordField2)
+    {
+        public float getProduct()
+        {
+            return recordField1 * recordField2;
+        }
+    }
 }
